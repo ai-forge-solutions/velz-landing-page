@@ -57,10 +57,13 @@ const paraTi = ["Marca de 500K–5M €", "Shopify", "12+ meses de historial de 
 const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar la ejecución de ads"];
 
 const DS_NAMESPACE = "VeldDesignSystem_c12abb";
-const CTA_LINK = "mailto:hola@velz.ai?subject=Auditoria%20gratuita%20de%2024h";
-const EMAIL_LINK = "mailto:hola@velz.ai";
+const CTA_LINK = "#lead-form";
+const CONTACT_EMAIL = "hola@velz.io";
+const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
+const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || "";
+const FORMSPREE_ENDPOINT = FORMSPREE_FORM_ID ? `https://formspree.io/f/${FORMSPREE_FORM_ID}` : "";
 
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
@@ -99,6 +102,8 @@ function Reveal({ children, className }) {
 
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
+  const [leadStatus, setLeadStatus] = useState({ type: "idle", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -143,6 +148,57 @@ export default function App() {
   const DsButton = ds.Button;
   const DsLogo = ds.Logo;
 
+  const handleLeadSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!FORMSPREE_ENDPOINT) {
+      setLeadStatus({
+        type: "error",
+        message: "Falta configurar Formspree (VITE_FORMSPREE_FORM_ID).",
+      });
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      storeUrl: formData.get("storeUrl"),
+    };
+
+    try {
+      setIsSubmitting(true);
+      setLeadStatus({ type: "idle", message: "" });
+
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo enviar la solicitud.");
+      }
+
+      setLeadStatus({
+        type: "success",
+        message: "Solicitud enviada. Te responderé por email en menos de 24h.",
+      });
+      form.reset();
+    } catch {
+      setLeadStatus({
+        type: "error",
+        message: "Hubo un problema al enviar. Escríbeme a hola@velz.io.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const cardTransition = (index) => ({
     duration: 0.45,
     delay: index * 0.08,
@@ -178,13 +234,13 @@ export default function App() {
               Nadie los conecta en una decisión. Eso es lo que hago.
             </p>
             <motion.a
-              href="#cta"
+              href={CTA_LINK}
               className="btn"
               whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
               whileTap={reduceMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
-              Auditoría gratuita de 24h
+              Diagnóstico externo de 24h
             </motion.a>
             <p className="micro hero-micro">Entregable concreto. Sin llamada de venta previa.</p>
           </motion.div>
@@ -377,7 +433,7 @@ export default function App() {
           </h2>
           {DsButton ? (
             <DsButton variant="primary" size="md" onClick={() => window.location.assign(CTA_LINK)}>
-              Auditoría gratuita de 24h
+              Diagnóstico externo de 24h
             </DsButton>
           ) : (
             <motion.a
@@ -387,13 +443,33 @@ export default function App() {
               whileTap={reduceMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
-              Auditoría gratuita de 24h
+              Diagnóstico externo de 24h
             </motion.a>
           )}
           <span className="cta-mc">
-            <span className="tag">por definir</span> plazas al mes. Recibes un diagnóstico con decisiones
-            concretas para tu marca, te quedes o no.
+            5 plazas al mes. En 24h recibes un vídeo de 10 minutos con 3 hipótesis cuantificadas sobre tu
+            marca, te quedes o no.
           </span>
+          <form id="lead-form" className="lead-form" onSubmit={handleLeadSubmit}>
+            <label className="lead-field">
+              Nombre
+              <input type="text" name="name" autoComplete="name" required />
+            </label>
+            <label className="lead-field">
+              Email
+              <input type="email" name="email" autoComplete="email" required />
+            </label>
+            <label className="lead-field">
+              URL de la tienda
+              <input type="url" name="storeUrl" placeholder="https://tu-tienda.com" required />
+            </label>
+            <button type="submit" className="lead-submit" disabled={isSubmitting}>
+              {isSubmitting ? "Enviando..." : "Enviar solicitud"}
+            </button>
+            {leadStatus.type !== "idle" ? (
+              <p className={`lead-status ${leadStatus.type}`}>{leadStatus.message}</p>
+            ) : null}
+          </form>
         </Reveal>
       </section>
 
@@ -405,7 +481,7 @@ export default function App() {
         )}
         <div className="fr">
           <a href={EMAIL_LINK} className="fe">
-            hola@velz.ai
+            {CONTACT_EMAIL}
           </a>
           <a href={LEGAL_LINK} className="fl">
             Aviso legal
