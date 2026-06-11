@@ -356,7 +356,7 @@ export default function App() {
 
       <section id="cta">
         <Reveal>
-          <BrandSymbol className="cta-sym" width={48} />
+          <BrandSymbol className="cta-sym" width={72} />
           <h2>
             Empieza por ver tu negocio
             <br />
@@ -385,7 +385,11 @@ export default function App() {
       </section>
 
       <footer>
-        {DsLogo ? <DsLogo size={20} className="footer-logo" /> : <span className="wm footer-wm">velz</span>}
+        {DsLogo ? (
+          <DsLogo size={24} color="var(--ink-400)" className="footer-logo" />
+        ) : (
+          <span className="wm footer-wm">velz</span>
+        )}
         <div className="fr">
           <a href={EMAIL_LINK} className="fe">
             hola@velz.ai
