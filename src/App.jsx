@@ -1,6 +1,7 @@
 import * as ReactRuntime from "react";
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useForm, ValidationError } from "@formspree/react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 import miguelHeadshot from "../assets/miguel-headshot.webp";
@@ -58,12 +59,11 @@ const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar 
 
 const DS_NAMESPACE = "VeldDesignSystem_c12abb";
 const CTA_LINK = "#lead-form";
-const CONTACT_EMAIL = "hola@velz.io";
+const CONTACT_EMAIL = "miguel@velz.io";
 const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
-const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || "";
-const FORMSPREE_ENDPOINT = FORMSPREE_FORM_ID ? `https://formspree.io/f/${FORMSPREE_FORM_ID}` : "";
+const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
 
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
@@ -102,8 +102,7 @@ function Reveal({ children, className }) {
 
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
-  const [leadStatus, setLeadStatus] = useState({ type: "idle", message: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -147,57 +146,6 @@ export default function App() {
   const DsCard = ds.Card;
   const DsButton = ds.Button;
   const DsLogo = ds.Logo;
-
-  const handleLeadSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!FORMSPREE_ENDPOINT) {
-      setLeadStatus({
-        type: "error",
-        message: "Falta configurar Formspree (VITE_FORMSPREE_FORM_ID).",
-      });
-      return;
-    }
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const payload = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      storeUrl: formData.get("storeUrl"),
-    };
-
-    try {
-      setIsSubmitting(true);
-      setLeadStatus({ type: "idle", message: "" });
-
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo enviar la solicitud.");
-      }
-
-      setLeadStatus({
-        type: "success",
-        message: "Solicitud enviada. Te responderé por email en menos de 24h.",
-      });
-      form.reset();
-    } catch {
-      setLeadStatus({
-        type: "error",
-        message: "Hubo un problema al enviar. Escríbeme a hola@velz.io.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const cardTransition = (index) => ({
     duration: 0.45,
@@ -450,24 +398,28 @@ export default function App() {
             5 plazas al mes. En 24h recibes un vídeo de 10 minutos con 3 hipótesis cuantificadas sobre tu
             marca, te quedes o no.
           </span>
-          <form id="lead-form" className="lead-form" onSubmit={handleLeadSubmit}>
+          <form id="lead-form" className="lead-form" onSubmit={handleFormspreeSubmit}>
             <label className="lead-field">
               Nombre
               <input type="text" name="name" autoComplete="name" required />
+              <ValidationError className="lead-error" field="name" errors={formState.errors} />
             </label>
             <label className="lead-field">
               Email
               <input type="email" name="email" autoComplete="email" required />
+              <ValidationError className="lead-error" field="email" errors={formState.errors} />
             </label>
             <label className="lead-field">
               URL de la tienda
               <input type="url" name="storeUrl" placeholder="https://tu-tienda.com" required />
+              <ValidationError className="lead-error" field="storeUrl" errors={formState.errors} />
             </label>
-            <button type="submit" className="lead-submit" disabled={isSubmitting}>
-              {isSubmitting ? "Enviando..." : "Enviar solicitud"}
+            <button type="submit" className="lead-submit" disabled={formState.submitting}>
+              {formState.submitting ? "Enviando..." : "Enviar solicitud"}
             </button>
-            {leadStatus.type !== "idle" ? (
-              <p className={`lead-status ${leadStatus.type}`}>{leadStatus.message}</p>
+            <ValidationError className="lead-error" errors={formState.errors} />
+            {formState.succeeded ? (
+              <p className="lead-status success">Solicitud enviada. Te responderé por email en menos de 24h.</p>
             ) : null}
           </form>
         </Reveal>

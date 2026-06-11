@@ -525,6 +525,13 @@ h2 {
   cursor: not-allowed;
 }
 
+.lead-error {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #f3b4b4;
+  line-height: 1.4;
+}
+
 .lead-status {
   margin-top: 2px;
   font-size: 12px;
