@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
+import miguelHeadshot from "../assets/miguel-headshot.webp";
 
 const cardsProblema = [
   {
@@ -340,10 +341,18 @@ export default function App() {
             </p>
           </div>
           <div className="firma">
-            <div className="fph">M</div>
+            <img className="fph" src={miguelHeadshot} alt="Miguel Carmona" loading="lazy" decoding="async" />
             <div>
               <p className="fnm">Miguel Carmona</p>
               <p className="frl">Fundador, Velz · Ex–Senior Data Scientist, Dentsu (2022–2025)</p>
+              <a
+                className="flink"
+                href="https://www.linkedin.com/in/miguel-carmona-rodriguez/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn →
+              </a>
             </div>
           </div>
           <div className="brands">
