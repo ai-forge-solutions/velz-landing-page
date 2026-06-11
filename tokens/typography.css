@@ -1,0 +1,10 @@
+:root {
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Backward-compatible aliases used by the current landing styles. */
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
+}

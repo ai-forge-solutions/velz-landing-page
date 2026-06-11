@@ -1,0 +1,36 @@
+:root {
+  --surface-0: #ffffff;
+  --surface-50: #f7f7f5;
+  --surface-100: #f0f0ee;
+  --border-subtle: #e6e6e4;
+  --border-default: #d8d8d7;
+  --text-primary: #0f0f0f;
+  --text-strong: #1c1c1c;
+  --text-body: #2e2e2e;
+  --text-muted: #6b6b6b;
+  --text-subtle: #909090;
+  --brand-700: #0f5e34;
+  --brand-600: #14723f;
+  --brand-500: #1a8f54;
+  --brand-400: #2fb36b;
+  --brand-300: #79d3a3;
+
+  /* Backward-compatible aliases used by the current landing styles. */
+  --white: var(--surface-0);
+  --ink-50: var(--surface-50);
+  --ink-100: var(--surface-100);
+  --ink-150: var(--border-subtle);
+  --ink-200: var(--border-default);
+  --ink-300: #b8b8b8;
+  --ink-400: var(--text-subtle);
+  --ink-500: var(--text-muted);
+  --ink-600: #4a4a4a;
+  --ink-700: var(--text-body);
+  --ink-800: var(--text-strong);
+  --ink-900: var(--text-primary);
+  --g300: var(--brand-300);
+  --g400: var(--brand-400);
+  --g500: var(--brand-500);
+  --g600: var(--brand-600);
+  --g700: var(--brand-700);
+}

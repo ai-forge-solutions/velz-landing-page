@@ -1,0 +1,13 @@
+/* ============================================================
+   Velz Design System — global entry point.
+   Consumers link this single file. It is an import list only.
+   Fonts load from Google Fonts (no brand binaries were provided;
+   Newsreader / Hanken Grotesk / IBM Plex Mono were selected as
+   matches for the specified serif-display + neutral-sans pairing).
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import "tokens/colors.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/elevation.css";
+@import "src/styles.css";
