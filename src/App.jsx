@@ -1,6 +1,7 @@
 import * as ReactRuntime from "react";
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 
 const cardsProblema = [
@@ -156,35 +157,38 @@ export default function App() {
         </a>
       </nav>
 
-      <section id="hero">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-          animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <BrandSymbol className="h-sym" width={72} />
-          <h1>
-            Tu negocio,
-            <br />
-            visto desde arriba.
-          </h1>
-          <p className="hero-sub">
-            Tus ads, tu inventario y tu caja ya generan datos.
-            <br />
-            Nadie los conecta en una decisión. Eso es lo que hago.
-          </p>
-          <motion.a
-            href="#cta"
-            className="btn"
-            whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
-            whileTap={reduceMotion ? {} : { scale: 0.99 }}
-            transition={{ duration: 0.18 }}
+      <div className="dark">
+        <AuroraBackground className="h-auto" id="hero">
+          <motion.div
+            className="relative z-10"
+            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+            animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            Auditoría gratuita de 24h
-          </motion.a>
-          <p className="micro hero-micro">Entregable concreto. Sin llamada de venta previa.</p>
-        </motion.div>
-      </section>
+            <BrandSymbol className="h-sym" width={72} />
+            <h1>
+              Tu negocio,
+              <br />
+              visto desde arriba.
+            </h1>
+            <p className="hero-sub">
+              Tus ads, tu inventario y tu caja ya generan datos.
+              <br />
+              Nadie los conecta en una decisión. Eso es lo que hago.
+            </p>
+            <motion.a
+              href="#cta"
+              className="btn"
+              whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
+              whileTap={reduceMotion ? {} : { scale: 0.99 }}
+              transition={{ duration: 0.18 }}
+            >
+              Auditoría gratuita de 24h
+            </motion.a>
+            <p className="micro hero-micro">Entregable concreto. Sin llamada de venta previa.</p>
+          </motion.div>
+        </AuroraBackground>
+      </div>
 
       <section className="sec" id="problema">
         <Reveal className="wrap">
