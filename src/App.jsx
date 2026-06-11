@@ -149,8 +149,6 @@ export default function App() {
 
   return (
     <>
-      <div className="vbar">02 · Contraste — velz landing exploration</div>
-
       <nav>
         <span className="wm">velz</span>
         <a href="#cta" className="nav-a">
