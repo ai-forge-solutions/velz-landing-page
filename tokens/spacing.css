@@ -8,4 +8,12 @@
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+
+  --pad-card: 28px 22px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-full: 9999px;
+  --control-h-sm: 40px;
+  --control-h-md: 48px;
+  --control-h-lg: 52px;
 }

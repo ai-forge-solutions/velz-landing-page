@@ -1,3 +1,5 @@
+import * as ReactRuntime from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 
@@ -52,6 +54,12 @@ const steps = [
 const paraTi = ["Marca de 500K–5M €", "Shopify", "12+ meses de historial de ads", "Sin equipo de datos"];
 const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar la ejecución de ads"];
 
+const DS_NAMESPACE = "VeldDesignSystem_c12abb";
+const CTA_LINK = "mailto:hola@velz.ai?subject=Auditoria%20gratuita%20de%2024h";
+const EMAIL_LINK = "mailto:hola@velz.ai";
+const LEGAL_LINK = "/aviso-legal";
+const PRIVACY_LINK = "/privacidad";
+
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
   .replace('aria-label="velz symbol"', 'aria-hidden="true" focusable="false"');
@@ -88,7 +96,51 @@ function Reveal({ children, className }) {
 }
 
 export default function App() {
+  const [dsReady, setDsReady] = useState(false);
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadBundle = async () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      if (!window.React) {
+        window.React = ReactRuntime;
+      }
+
+      try {
+        await import("../_ds_bundle.js");
+      } catch {
+        // Keep fallback rendering if the optional bundle fails to load.
+      }
+
+      if (mounted) {
+        setDsReady(true);
+      }
+    };
+
+    loadBundle();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const ds = useMemo(() => {
+    if (typeof window === "undefined") {
+      return {};
+    }
+
+    return window[DS_NAMESPACE] || {};
+  }, [dsReady]);
+
+  const DsCard = ds.Card;
+  const DsButton = ds.Button;
+  const DsLogo = ds.Logo;
+
   const cardTransition = (index) => ({
     duration: 0.45,
     delay: index * 0.08,
@@ -143,14 +195,22 @@ export default function App() {
             {cardsProblema.map((card, index) => (
               <motion.div
                 key={card.title}
-                className="card"
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={cardTransition(index)}
               >
-                <p className="ct">{card.title}</p>
-                <p className="cb">{card.body}</p>
+                {DsCard ? (
+                  <DsCard className="card ds-card" padding="28px 22px" elevated>
+                    <p className="ct">{card.title}</p>
+                    <p className="cb">{card.body}</p>
+                  </DsCard>
+                ) : (
+                  <div className="card">
+                    <p className="ct">{card.title}</p>
+                    <p className="cb">{card.body}</p>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -177,14 +237,22 @@ export default function App() {
             {cardsVs.map((card, index) => (
               <motion.div
                 key={card.title}
-                className="card"
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={cardTransition(index)}
               >
-                <p className="ct">{card.title}</p>
-                <p className="cb">{card.body}</p>
+                {DsCard ? (
+                  <DsCard className="card ds-card" padding="28px 22px" elevated>
+                    <p className="ct">{card.title}</p>
+                    <p className="cb">{card.body}</p>
+                  </DsCard>
+                ) : (
+                  <div className="card">
+                    <p className="ct">{card.title}</p>
+                    <p className="cb">{card.body}</p>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -296,15 +364,21 @@ export default function App() {
             <br />
             desde arriba.
           </h2>
-          <motion.a
-            href="#"
-            className="btn"
-            whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
-            whileTap={reduceMotion ? {} : { scale: 0.99 }}
-            transition={{ duration: 0.18 }}
-          >
-            Auditoría gratuita de 24h
-          </motion.a>
+          {DsButton ? (
+            <DsButton variant="primary" size="md" onClick={() => window.location.assign(CTA_LINK)}>
+              Auditoría gratuita de 24h
+            </DsButton>
+          ) : (
+            <motion.a
+              href={CTA_LINK}
+              className="btn"
+              whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
+              whileTap={reduceMotion ? {} : { scale: 0.99 }}
+              transition={{ duration: 0.18 }}
+            >
+              Auditoría gratuita de 24h
+            </motion.a>
+          )}
           <span className="cta-mc">
             <span className="tag">por definir</span> plazas al mes. Recibes un diagnóstico con decisiones
             concretas para tu marca, te quedes o no.
@@ -313,15 +387,15 @@ export default function App() {
       </section>
 
       <footer>
-        <span className="wm footer-wm">velz</span>
+        {DsLogo ? <DsLogo size={20} className="footer-logo" /> : <span className="wm footer-wm">velz</span>}
         <div className="fr">
-          <a href="#" className="fe">
-            [email protected]
+          <a href={EMAIL_LINK} className="fe">
+            hola@velz.ai
           </a>
-          <a href="#" className="fl">
+          <a href={LEGAL_LINK} className="fl">
             Aviso legal
           </a>
-          <a href="#" className="fl">
+          <a href={PRIVACY_LINK} className="fl">
             Privacidad
           </a>
         </div>

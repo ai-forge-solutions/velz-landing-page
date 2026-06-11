@@ -2,6 +2,12 @@
   --font-serif: "Newsreader", Georgia, serif;
   --font-sans: "Hanken Grotesk", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --weight-medium: 500;
+  --text-body-s: 13px;
+  --text-body-m: 15px;
+  --text-body-l: 16px;
+  --text-caption: 12px;
+  --text-micro: 10px;
 
   /* Backward-compatible aliases used by the current landing styles. */
   --serif: var(--font-serif);

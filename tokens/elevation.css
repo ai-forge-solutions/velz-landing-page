@@ -1,3 +1,6 @@
 :root {
   --shadow-card: 0 2px 10px rgba(15, 15, 15, 0.05);
+  --shadow-sm: 0 2px 10px rgba(15, 15, 15, 0.05);
+  --dur-fast: 140ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 }

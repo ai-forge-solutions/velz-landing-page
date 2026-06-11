@@ -500,6 +500,10 @@ footer {
   color: var(--ink-400);
 }
 
+.footer-logo {
+  color: var(--ink-400);
+}
+
 @media (max-width: 900px) {
   nav,
   .sec,
