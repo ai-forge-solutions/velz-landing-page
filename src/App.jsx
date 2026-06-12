@@ -65,6 +65,119 @@ const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
 const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
 const revealViewport = { once: true, amount: 0.2 };
+const HOME_LINK = "/";
+
+const DEFAULT_META_DESCRIPTION =
+  "Conecto tus ads, tu inventario y tu caja en una decisión operativa quincenal. Para ecommerce de 500K–5M €.";
+
+const legalSections = [
+  {
+    title: "Titular del sitio",
+    paragraphs: [
+      "Titular: Miguel Carmona Rodríguez, responsable de la marca Velz.",
+      "NIF: 48118500Q.",
+      "Domicilio: A Coruña, España.",
+      "Email de contacto: miguel@velz.io.",
+    ],
+  },
+  {
+    title: "Objeto",
+    paragraphs: [
+      "La finalidad de este sitio es informar sobre los servicios de análisis y diagnóstico operativo ofrecidos por Velz para marcas ecommerce.",
+      "El acceso al sitio atribuye la condición de usuario e implica la aceptación de este aviso legal y del resto de textos legales publicados aquí.",
+    ],
+  },
+  {
+    title: "Propiedad intelectual",
+    paragraphs: [
+      "Los contenidos de este sitio, incluyendo textos, diseño, símbolo de marca, estructura visual y materiales gráficos, están protegidos por la normativa de propiedad intelectual e industrial.",
+      "No se permite su reproducción, distribución, transformación o comunicación pública sin autorización previa y por escrito del titular, salvo los usos permitidos por ley.",
+    ],
+  },
+  {
+    title: "Uso del sitio",
+    paragraphs: [
+      "El usuario se compromete a utilizar este sitio de forma lícita y a no realizar actuaciones que puedan dañar, sobrecargar o inutilizar la web o interferir con su funcionamiento normal.",
+      "Velz podrá modificar, suspender o actualizar los contenidos del sitio en cualquier momento y sin previo aviso.",
+    ],
+  },
+  {
+    title: "Responsabilidad",
+    paragraphs: [
+      "Velz no garantiza la disponibilidad permanente del sitio ni la ausencia absoluta de errores, aunque aplicará medidas razonables para mantenerlo actualizado y operativo.",
+      "La información publicada tiene carácter informativo y no constituye por sí sola asesoramiento jurídico, fiscal o financiero individualizado.",
+    ],
+  },
+  {
+    title: "Enlaces externos",
+    paragraphs: [
+      "Este sitio puede incluir enlaces a páginas de terceros. Velz no se responsabiliza de sus contenidos, políticas o prácticas una vez el usuario abandona esta web.",
+    ],
+  },
+  {
+    title: "Ley aplicable",
+    paragraphs: [
+      "Este aviso legal se interpreta conforme a la legislación española. Para cualquier controversia, las partes se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.",
+    ],
+  },
+];
+
+const privacySections = [
+  {
+    title: "Responsable del tratamiento",
+    paragraphs: [
+      "Responsable: Miguel Carmona, como titular de Velz.",
+      "Contacto: miguel@velz.io.",
+    ],
+  },
+  {
+    title: "Qué datos se recogen",
+    paragraphs: [
+      "A través del formulario de esta web se recogen únicamente los datos que el usuario facilita de forma directa: nombre, email y URL de la tienda.",
+      "No se solicitan categorías especiales de datos personales.",
+    ],
+  },
+  {
+    title: "Finalidad",
+    paragraphs: [
+      "Los datos se utilizan exclusivamente para revisar la solicitud, preparar el diagnóstico externo de 24 horas y responder por email al usuario interesado.",
+      "No se usarán para listas de difusión, newsletters ni comunicaciones comerciales no solicitadas.",
+    ],
+  },
+  {
+    title: "Base jurídica",
+    paragraphs: [
+      "La base jurídica del tratamiento es la aplicación de medidas precontractuales a petición del interesado y, en su caso, el consentimiento implícito al enviar voluntariamente el formulario de contacto.",
+    ],
+  },
+  {
+    title: "Conservación",
+    paragraphs: [
+      "Los datos se conservarán durante el tiempo necesario para atender la solicitud y hacer seguimiento de la conversación iniciada por el usuario.",
+      "Si no existe relación posterior, se eliminarán o anonimizarán en un plazo razonable de gestión interna.",
+    ],
+  },
+  {
+    title: "Encargados y terceros",
+    paragraphs: [
+      "El formulario puede apoyarse en proveedores técnicos necesarios para su funcionamiento, como servicios de hosting o procesamiento del formulario.",
+      "No se cederán datos a terceros para finalidades comerciales propias, salvo obligación legal.",
+    ],
+  },
+  {
+    title: "Derechos del usuario",
+    paragraphs: [
+      "El usuario puede solicitar el acceso, rectificación, supresión, oposición, limitación del tratamiento o portabilidad de sus datos escribiendo a miguel@velz.io.",
+      "Si considera que el tratamiento no es correcto, también puede presentar una reclamación ante la Agencia Española de Protección de Datos.",
+    ],
+  },
+  {
+    title: "Cookies y analítica",
+    paragraphs: [
+      "Esta página no publica aquí una política de cookies independiente. Si se incorporan herramientas de analítica, medición o cookies no técnicas, deberá añadirse el correspondiente aviso y gestión de consentimiento antes de publicarlo.",
+    ],
+  },
+];
 
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
@@ -104,12 +217,98 @@ function Reveal({ children, className }) {
   );
 }
 
+function getPageConfig(pathname) {
+  if (pathname === LEGAL_LINK) {
+    return {
+      key: "legal",
+      title: "velz — Aviso legal",
+      description: "Aviso legal de Velz y condiciones de uso del sitio web.",
+      canonical: `https://velz.io${LEGAL_LINK}`,
+    };
+  }
+
+  if (pathname === PRIVACY_LINK) {
+    return {
+      key: "privacy",
+      title: "velz — Privacidad",
+      description: "Política de privacidad de Velz para solicitudes enviadas desde la web.",
+      canonical: `https://velz.io${PRIVACY_LINK}`,
+    };
+  }
+
+  return {
+    key: "landing",
+    title: "velz — Tu negocio, visto desde arriba",
+    description: DEFAULT_META_DESCRIPTION,
+    canonical: "https://velz.io/",
+  };
+}
+
+function LegalLayout({ eyebrow, title, intro, sections }) {
+  return (
+    <>
+      <nav>
+        <a href={HOME_LINK} className="wm nav-home">
+          velz
+        </a>
+        <a href={HOME_LINK} className="nav-a">
+          Volver al inicio →
+        </a>
+      </nav>
+
+      <main className="legal-page">
+        <section className="legal-hero">
+          <div className="wrap legal-wrap">
+            <span className="ey">{eyebrow}</span>
+            <h1 className="legal-title">{title}</h1>
+            <p className="legal-intro">{intro}</p>
+          </div>
+        </section>
+
+        <section className="legal-body">
+          <div className="wrap legal-wrap legal-stack">
+            {sections.map((section) => (
+              <article className="legal-section" key={section.title}>
+                <h2 className="legal-section-title">{section.title}</h2>
+                {section.paragraphs.map((paragraph) => (
+                  <p className="legal-copy" key={paragraph}>
+                    {paragraph}
+                  </p>
+                ))}
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <a href={HOME_LINK} className="wm footer-wm">
+          velz
+        </a>
+        <div className="fr">
+          <a href={EMAIL_LINK} className="fe">
+            {CONTACT_EMAIL}
+          </a>
+          <a href={LEGAL_LINK} className="fl">
+            Aviso legal
+          </a>
+          <a href={PRIVACY_LINK} className="fl">
+            Privacidad
+          </a>
+        </div>
+      </footer>
+    </>
+  );
+}
+
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
   const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
   const reduceMotion = useReducedMotion();
   const disableMotion =
     reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
+  const pathname = typeof window === "undefined" ? HOME_LINK : window.location.pathname;
+  const page = getPageConfig(pathname);
 
   useEffect(() => {
     let mounted = true;
@@ -157,6 +356,71 @@ export default function App() {
     delay: index * 0.08,
     ease: [0.22, 1, 0.36, 1],
   });
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    document.title = page.title;
+
+    const descriptionTag = document.querySelector('meta[name="description"]');
+    if (descriptionTag) {
+      descriptionTag.setAttribute("content", page.description);
+    }
+
+    const ogTitleTag = document.querySelector('meta[property="og:title"]');
+    if (ogTitleTag) {
+      ogTitleTag.setAttribute("content", page.title);
+    }
+
+    const ogDescriptionTag = document.querySelector('meta[property="og:description"]');
+    if (ogDescriptionTag) {
+      ogDescriptionTag.setAttribute("content", page.description);
+    }
+
+    const ogUrlTag = document.querySelector('meta[property="og:url"]');
+    if (ogUrlTag) {
+      ogUrlTag.setAttribute("content", page.canonical);
+    }
+
+    const twitterTitleTag = document.querySelector('meta[name="twitter:title"]');
+    if (twitterTitleTag) {
+      twitterTitleTag.setAttribute("content", page.title);
+    }
+
+    const twitterDescriptionTag = document.querySelector('meta[name="twitter:description"]');
+    if (twitterDescriptionTag) {
+      twitterDescriptionTag.setAttribute("content", page.description);
+    }
+
+    const canonicalTag = document.querySelector('link[rel="canonical"]');
+    if (canonicalTag) {
+      canonicalTag.setAttribute("href", page.canonical);
+    }
+  }, [page.canonical, page.description, page.title]);
+
+  if (page.key === "legal") {
+    return (
+      <LegalLayout
+        eyebrow="Aviso legal"
+        title="Condiciones de uso y titularidad del sitio"
+        intro="Este texto regula el acceso y uso de velz.io y resume el marco básico de titularidad, uso permitido y responsabilidad de la web."
+        sections={legalSections}
+      />
+    );
+  }
+
+  if (page.key === "privacy") {
+    return (
+      <LegalLayout
+        eyebrow="Privacidad"
+        title="Cómo trato los datos que me envías"
+        intro="Aquí se explica qué datos recoge esta web, para qué se usan y qué derechos tienes sobre ellos cuando solicitas un diagnóstico a Velz."
+        sections={privacySections}
+      />
+    );
+  }
 
   return (
     <>
