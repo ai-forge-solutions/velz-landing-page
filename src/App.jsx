@@ -64,6 +64,7 @@ const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
 const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
+const revealViewport = { once: true, amount: 0.2 };
 
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
@@ -82,17 +83,20 @@ function BrandSymbol({ className, width = 72 }) {
 
 function Reveal({ children, className }) {
   const reduceMotion = useReducedMotion();
+  const disableMotion =
+    reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
 
-  if (reduceMotion) {
+  if (disableMotion) {
     return <div className={className}>{children}</div>;
   }
 
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0.56, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={revealViewport}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -104,6 +108,8 @@ export default function App() {
   const [dsReady, setDsReady] = useState(false);
   const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
   const reduceMotion = useReducedMotion();
+  const disableMotion =
+    reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
 
   useEffect(() => {
     let mounted = true;
@@ -144,7 +150,6 @@ export default function App() {
   }, [dsReady]);
 
   const DsCard = ds.Card;
-  const DsButton = ds.Button;
   const DsLogo = ds.Logo;
 
   const cardTransition = (index) => ({
@@ -158,19 +163,19 @@ export default function App() {
       <nav>
         <span className="wm">velz</span>
         <a href="#cta" className="nav-a">
-          Solicitar auditoría →
+          Solicitar diagnóstico →
         </a>
       </nav>
 
       <div className="dark">
         <AuroraBackground className="h-auto" id="hero">
           <motion.div
-            className="relative z-10"
-            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-            animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
+            className="relative z-10 hero-shell"
+            initial={disableMotion ? false : { opacity: 0, y: 18 }}
+            animate={disableMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandSymbol className="h-sym" width={72} />
+            <BrandSymbol className="h-sym" width={76} />
             <h1>
               Tu negocio,
               <br />
@@ -184,8 +189,8 @@ export default function App() {
             <motion.a
               href={CTA_LINK}
               className="btn"
-              whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
-              whileTap={reduceMotion ? {} : { scale: 0.99 }}
+                whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
+                whileTap={disableMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
               Diagnóstico externo de 24h
@@ -198,13 +203,17 @@ export default function App() {
       <section className="sec" id="problema">
         <Reveal className="wrap">
           <span className="ey">El problema</span>
+        </Reveal>
+        <Reveal className="grid-wrap">
           <div className="cards">
             {cardsProblema.map((card, index) => (
               <motion.div
+                className="card-shell"
                 key={card.title}
-                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                initial={disableMotion ? false : { opacity: 0.6, y: 16 }}
+                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
+                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={revealViewport}
                 transition={cardTransition(index)}
               >
                 {DsCard ? (
@@ -221,6 +230,8 @@ export default function App() {
               </motion.div>
             ))}
           </div>
+        </Reveal>
+        <Reveal className="wrap">
           <p className="sec-close">
             No son tres problemas. Es uno: nadie conecta los tres datos antes de que tomes la decisión.
           </p>
@@ -240,13 +251,17 @@ export default function App() {
       <section className="sec" id="vs">
         <Reveal className="wrap">
           <span className="ey">Por qué no es lo que ya tienes</span>
+        </Reveal>
+        <Reveal className="grid-wrap">
           <div className="cards">
             {cardsVs.map((card, index) => (
               <motion.div
+                className="card-shell"
                 key={card.title}
-                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                initial={disableMotion ? false : { opacity: 0.6, y: 16 }}
+                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
+                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={revealViewport}
                 transition={cardTransition(index)}
               >
                 {DsCard ? (
@@ -274,9 +289,10 @@ export default function App() {
               <motion.div
                 className="step"
                 key={step.number}
-                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                initial={disableMotion ? false : { opacity: 0.6, y: 18 }}
+                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
+                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={revealViewport}
                 transition={cardTransition(index)}
               >
                 <span className="sn">{step.number}</span>
@@ -300,9 +316,10 @@ export default function App() {
                 {paraTi.map((item, index) => (
                   <motion.li
                     key={item}
-                    initial={reduceMotion ? false : { opacity: 0, x: -12 }}
-                    whileInView={reduceMotion ? {} : { opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.45 }}
+                    initial={disableMotion ? false : { opacity: 0.7, x: -12 }}
+                    animate={disableMotion ? {} : { opacity: 1, x: 0 }}
+                    whileInView={disableMotion ? {} : { opacity: 1, x: 0 }}
+                    viewport={revealViewport}
                     transition={cardTransition(index)}
                   >
                     {item}
@@ -316,9 +333,10 @@ export default function App() {
                 {noParaTi.map((item, index) => (
                   <motion.li
                     key={item}
-                    initial={reduceMotion ? false : { opacity: 0, x: 12 }}
-                    whileInView={reduceMotion ? {} : { opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.45 }}
+                    initial={disableMotion ? false : { opacity: 0.7, x: 12 }}
+                    animate={disableMotion ? {} : { opacity: 1, x: 0 }}
+                    whileInView={disableMotion ? {} : { opacity: 1, x: 0 }}
+                    viewport={revealViewport}
                     transition={cardTransition(index)}
                   >
                     {item}
@@ -345,7 +363,7 @@ export default function App() {
             </p>
           </div>
           <div className="firma">
-            <img className="fph" src={miguelHeadshot} alt="Miguel Carmona" loading="lazy" decoding="async" />
+            <img className="fph" src={miguelHeadshot} alt="Miguel Carmona" width="68" height="68" loading="lazy" decoding="async" />
             <div>
               <p className="fnm">Miguel Carmona</p>
               <p className="frl">Fundador, Velz · Ex–Senior Data Scientist, Dentsu (2022–2025)</p>
@@ -372,28 +390,13 @@ export default function App() {
       </section>
 
       <section id="cta">
-        <Reveal>
-          <BrandSymbol className="cta-sym" width={72} />
+        <Reveal className="cta-shell">
+          <BrandSymbol className="cta-sym" width={76} />
           <h2>
             Empieza por ver tu negocio
             <br />
             desde arriba.
           </h2>
-          {DsButton ? (
-            <DsButton variant="primary" size="md" onClick={() => window.location.assign(CTA_LINK)}>
-              Diagnóstico externo de 24h
-            </DsButton>
-          ) : (
-            <motion.a
-              href={CTA_LINK}
-              className="btn"
-              whileHover={reduceMotion ? {} : { y: -1.5, scale: 1.01 }}
-              whileTap={reduceMotion ? {} : { scale: 0.99 }}
-              transition={{ duration: 0.18 }}
-            >
-              Diagnóstico externo de 24h
-            </motion.a>
-          )}
           <span className="cta-mc">
             5 plazas al mes. En 24h recibes un vídeo de 10 minutos con 3 hipótesis cuantificadas sobre tu
             marca, te quedes o no.
@@ -417,6 +420,10 @@ export default function App() {
             <button type="submit" className="lead-submit" disabled={formState.submitting}>
               {formState.submitting ? "Enviando..." : "Enviar solicitud"}
             </button>
+            <p className="lead-gdpr">
+              Solo usaré estos datos para enviarte el diagnóstico. Sin listas, sin spam. Consulta la{" "}
+              <a href={PRIVACY_LINK}>política de privacidad</a>.
+            </p>
             <ValidationError className="lead-error" errors={formState.errors} />
             {formState.succeeded ? (
               <p className="lead-status success">Solicitud enviada. Te responderé por email en menos de 24h.</p>

@@ -105,6 +105,12 @@ nav {
   padding: 0 48px;
 }
 
+.grid-wrap {
+  max-width: 1056px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
 .sec {
   padding: 108px 48px;
   border-top: 1px solid var(--ink-150);
@@ -133,6 +139,17 @@ nav {
   padding: 164px 48px 148px;
   text-align: center;
   background: var(--ink-900);
+}
+
+.hero-shell,
+.cta-shell {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 26px 24px;
+  border-radius: 14px;
+  background: rgba(8, 8, 8, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
 }
 
 .h-sym {
@@ -169,7 +186,7 @@ h1 {
 
 #hero .micro,
 .hero-micro {
-  color: var(--ink-500);
+  color: var(--ink-150);
 }
 
 .btn {
@@ -205,6 +222,16 @@ h1 {
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   margin-bottom: 52px;
+  align-items: stretch;
+}
+
+.card-shell {
+  display: flex;
+  min-height: 100%;
+}
+
+.card-shell > * {
+  width: 100%;
 }
 
 .card {
@@ -213,6 +240,13 @@ h1 {
   border-radius: 10px;
   padding: 28px 22px;
   box-shadow: 0 2px 10px rgba(15, 15, 15, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-card {
+  height: 100%;
 }
 
 .ct {
@@ -348,10 +382,10 @@ h1 {
 }
 
 .carta {
-  font-family: var(--serif);
-  font-size: 18px;
+  font-family: "Cormorant Garamond", var(--serif);
+  font-size: 19px;
   font-weight: 400;
-  line-height: 1.8;
+  line-height: 1.9;
   color: var(--ink-800);
   max-width: 620px;
   margin-bottom: 44px;
@@ -394,14 +428,14 @@ h1 {
 .flink {
   display: inline-block;
   margin-top: 4px;
-  font-size: 11px;
-  color: var(--ink-400);
+  font-size: 12px;
+  color: var(--ink-700);
   line-height: 1.4;
   transition: color 120ms;
 }
 
 .flink:hover {
-  color: var(--ink-600);
+  color: var(--ink-900);
 }
 
 .brands {
@@ -420,12 +454,12 @@ h1 {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-300);
+  color: var(--ink-700);
 }
 
 .bnote {
   font-size: 12px;
-  color: var(--ink-400);
+  color: var(--ink-700);
   line-height: 1.55;
   max-width: 480px;
 }
@@ -439,7 +473,7 @@ h1 {
 .cta-sym {
   display: block;
   margin: 0 auto 52px;
-  color: var(--ink-300);
+  color: var(--white);
 }
 
 h2 {
@@ -456,7 +490,7 @@ h2 {
   display: block;
   margin: 14px auto 0;
   font-size: 13px;
-  color: var(--ink-500);
+  color: var(--ink-150);
   line-height: 1.65;
   max-width: 380px;
   text-align: center;
@@ -546,6 +580,23 @@ h2 {
   color: #f3b4b4;
 }
 
+.lead-gdpr {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-150);
+}
+
+.lead-gdpr a {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lead-gdpr a:hover {
+  color: var(--ink-100);
+}
+
 .tag {
   background: #fef3cd;
   color: #9a6c00;
@@ -611,6 +662,7 @@ footer {
     padding-right: 24px;
   }
 
+  .grid-wrap,
   .wrap {
     padding: 0 24px;
   }
