@@ -649,6 +649,8 @@ export default function App() {
                   className="brand-logo"
                   src="/og/vodafone.png"
                   alt="Vodafone"
+                  width="246"
+                  height="121"
                   loading="lazy"
                   decoding="async"
                 />
@@ -658,6 +660,8 @@ export default function App() {
                   className="brand-logo"
                   src="/og/gillete.png"
                   alt="Gillette"
+                  width="246"
+                  height="121"
                   loading="lazy"
                   decoding="async"
                 />
@@ -667,6 +671,8 @@ export default function App() {
                   className="brand-logo"
                   src="/og/adevinta.png"
                   alt="Adevinta"
+                  width="246"
+                  height="121"
                   loading="lazy"
                   decoding="async"
                 />
