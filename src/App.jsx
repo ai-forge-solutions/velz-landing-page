@@ -641,12 +641,38 @@ export default function App() {
               </a>
             </div>
           </div>
-          <div className="brands">
-            <div className="brow">
-              <span className="bn">Vodafone</span>
-              <span className="bn">Gillette</span>
+          <div className="brands-block">
+            <p className="brands-eyebrow">TRAYECTORIA</p>
+            <div className="brands-row">
+              <div className="brand-box">
+                <img
+                  className="brand-logo"
+                  src="/og/vodafone.png"
+                  alt="Vodafone"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="brand-box">
+                <img
+                  className="brand-logo"
+                  src="/og/gillete.png"
+                  alt="Gillette"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="brand-box">
+                <img
+                  className="brand-logo"
+                  src="/og/adevinta.png"
+                  alt="Adevinta"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </div>
-            <p className="bnote">
+            <p className="brands-disclaimer">
               Marcas para las que desarrollé modelos durante mi etapa en Dentsu. No son clientes de Velz.
             </p>
           </div>
