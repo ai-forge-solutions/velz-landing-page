@@ -802,17 +802,131 @@ footer {
   color: #fef3cd;
 }
 
+.lead-magnet-brand {
+  margin-bottom: 14px;
+  color: var(--ink-300);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .lead-magnet-title {
   color: var(--white);
   margin-bottom: 20px;
 }
 
 .lead-magnet-intro {
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto 34px;
   color: var(--ink-200);
   font-size: 18px;
   line-height: 1.7;
+}
+
+.lead-magnet-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 auto 18px;
+  max-width: 760px;
+  text-align: left;
+}
+
+.lead-magnet-card,
+.lead-magnet-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+}
+
+.lead-magnet-card {
+  padding: 20px;
+}
+
+.lead-magnet-card-safety {
+  display: inline-flex;
+  margin-bottom: 14px;
+  border: 1px solid rgba(121, 211, 163, 0.25);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--g300);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lead-magnet-card h2,
+.lead-magnet-panel h2 {
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.lead-magnet-card h2 {
+  margin-bottom: 10px;
+}
+
+.lead-magnet-card p {
+  color: var(--ink-200);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.lead-magnet-panel {
+  max-width: 760px;
+  margin: 14px auto 0;
+  padding: 20px;
+  text-align: left;
+}
+
+.lead-magnet-panel h2 {
+  margin-bottom: 12px;
+}
+
+.lead-magnet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+}
+
+.lead-magnet-list li {
+  color: var(--ink-200);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lead-magnet-list strong {
+  color: var(--white);
+  font-weight: 500;
+}
+
+.lead-magnet-limitations {
+  border-color: rgba(254, 243, 205, 0.16);
+}
+
+.lead-magnet-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin: 28px auto 30px;
+  padding: 0 24px;
+  border-radius: 8px;
+  background: var(--g500);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 140ms;
+}
+
+.lead-magnet-cta:hover {
+  background: var(--g600);
 }
 
 .lead-magnet-meta {
@@ -913,6 +1027,7 @@ footer {
     padding-bottom: 72px;
   }
 
+  .lead-magnet-blocks,
   .lead-magnet-meta {
     grid-template-columns: 1fr;
   }
