@@ -742,6 +742,110 @@ footer {
   margin-top: 14px;
 }
 
+.lead-magnet-page {
+  min-height: calc(100vh - 56px);
+  background: var(--ink-900);
+  color: var(--white);
+}
+
+.lead-magnet-hero {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+  padding: 104px 48px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(47, 179, 107, 0.22), transparent 34%),
+    linear-gradient(180deg, var(--ink-900) 0%, #111714 100%);
+}
+
+.lead-magnet-wrap {
+  max-width: 760px;
+  text-align: center;
+}
+
+.lead-magnet-symbol {
+  display: block;
+  margin: 0 auto 34px;
+  color: var(--white);
+}
+
+.lead-magnet-symbol svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lead-magnet-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 7px 12px;
+  color: var(--ink-150);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lead-magnet-status-ready {
+  border-color: rgba(121, 211, 163, 0.45);
+  color: var(--g300);
+}
+
+.lead-magnet-status-not_ready,
+.lead-magnet-status-degraded,
+.lead-magnet-status-error {
+  border-color: rgba(254, 243, 205, 0.35);
+  color: #fef3cd;
+}
+
+.lead-magnet-title {
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+.lead-magnet-intro {
+  max-width: 600px;
+  margin: 0 auto 34px;
+  color: var(--ink-200);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.lead-magnet-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.lead-magnet-meta div {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.lead-magnet-meta dt {
+  margin-bottom: 8px;
+  color: var(--ink-400);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lead-magnet-meta dd {
+  color: var(--ink-100);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 900px) {
   nav,
   .sec,
@@ -749,7 +853,8 @@ footer {
   #cta,
   footer,
   .legal-hero,
-  .legal-body {
+  .legal-body,
+  .lead-magnet-hero {
     padding-left: 24px;
     padding-right: 24px;
   }
@@ -806,6 +911,10 @@ footer {
   .legal-body {
     padding-top: 44px;
     padding-bottom: 72px;
+  }
+
+  .lead-magnet-meta {
+    grid-template-columns: 1fr;
   }
 }
 
