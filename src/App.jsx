@@ -341,7 +341,7 @@ function getStatusCopy(status) {
     return {
       label: "Ready",
       title: "Tu diagnóstico está listo.",
-      body: "Este es el contenedor público del lead magnet. La entrega final se conectará al payload persistido en una tarea posterior.",
+      body: "Estos bloques están respaldados por fuentes disponibles y limitaciones explícitas.",
     };
   }
 
@@ -349,7 +349,7 @@ function getStatusCopy(status) {
     return {
       label: "Degraded",
       title: "Tu diagnóstico está parcialmente listo.",
-      body: "Algunas señales están disponibles y otras siguen pendientes. La página evita ejecutar enriquecimientos en tiempo real.",
+      body: "Mostramos solo las señales soportadas y ocultamos cualquier claim que necesite una fuente pendiente.",
     };
   }
 
@@ -364,15 +364,29 @@ function getStatusCopy(status) {
   return {
     label: "Not ready",
     title: "Tu diagnóstico aún se está preparando.",
-    body: "El enlace es válido, pero el payload todavía no está marcado como listo. Vuelve a abrirlo más tarde.",
+    body: "El enlace es válido, pero todavía no hay un payload público seguro para enseñar.",
   };
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function getLeadMagnetStatus(payload, fallbackStatus) {
+  if (payload?.status && Object.values(LEAD_MAGNET_STATUSES).includes(payload.status)) {
+    return payload.status;
+  }
+
+  return fallbackStatus;
 }
 
 function LeadMagnetPage({ route }) {
   const [apiState, setApiState] = useState({ status: LEAD_MAGNET_STATUSES.loading });
+  const trackedViewRef = ReactRuntime.useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    trackedViewRef.current = false;
 
     const loadLeadMagnet = async () => {
       setApiState({ status: LEAD_MAGNET_STATUSES.loading });
@@ -385,7 +399,7 @@ function LeadMagnetPage({ route }) {
 
         if (!cancelled) {
           setApiState({
-            status: response.ok ? payload.status : LEAD_MAGNET_STATUSES.error,
+            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : LEAD_MAGNET_STATUSES.error,
             payload,
           });
         }
@@ -403,8 +417,48 @@ function LeadMagnetPage({ route }) {
     };
   }, [route.token]);
 
+  const postLeadMagnetEvent = async (eventType) => {
+    try {
+      await fetch(`/api/lead-magnets/${encodeURIComponent(route.token)}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          event_type: eventType,
+          tool_slug: route.toolSlug,
+          path: typeof window !== "undefined" ? window.location.pathname : undefined,
+        }),
+      });
+    } catch {
+      // Tracking is best-effort and must never break the public page.
+    }
+  };
+
+  useEffect(() => {
+    if (trackedViewRef.current || apiState.status === LEAD_MAGNET_STATUSES.loading) {
+      return;
+    }
+
+    trackedViewRef.current = true;
+    postLeadMagnetEvent("viewed");
+  }, [apiState.status]);
+
+  const payload = apiState.payload || {};
   const statusCopy = getStatusCopy(apiState.status);
-  const tokenSuffix = apiState.payload?.token_suffix || route.token.slice(-6);
+  const tokenSuffix = payload.token_suffix || route.token.slice(-6);
+  const brandName = payload.brand?.name || "Tu marca";
+  const headline = payload.headline || statusCopy.title;
+  const intro = payload.intro || statusCopy.body;
+  const summaryBlocks = asArray(payload.summary_blocks);
+  const evidence = asArray(payload.evidence);
+  const limitations = asArray(payload.limitations);
+  const cta = payload.cta || {
+    label: "Responder al email de Velz",
+    href: EMAIL_LINK,
+  };
+  const showContent = apiState.status !== LEAD_MAGNET_STATUSES.loading && apiState.status !== LEAD_MAGNET_STATUSES.error;
 
   return (
     <>
@@ -424,26 +478,74 @@ function LeadMagnetPage({ route }) {
             <span className={`lead-magnet-status lead-magnet-status-${apiState.status}`}>
               {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Loading" : statusCopy.label}
             </span>
+            <p className="lead-magnet-brand">{brandName}</p>
             <h1 className="lead-magnet-title">
-              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Cargando diagnóstico..." : statusCopy.title}
+              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Cargando diagnóstico..." : headline}
             </h1>
             <p className="lead-magnet-intro">
               {apiState.status === LEAD_MAGNET_STATUSES.loading
                 ? "Estoy comprobando el estado del entregable sin lanzar ETLs ni enriquecimientos síncronos."
-                : statusCopy.body}
+                : intro}
             </p>
+
+            {showContent && summaryBlocks.length > 0 ? (
+              <div className="lead-magnet-blocks" aria-label="Resumen del diagnóstico">
+                {summaryBlocks.map((block) => (
+                  <article className="lead-magnet-card" key={`${block.title}-${block.claim_safety}`}>
+                    <span className="lead-magnet-card-safety">{block.claim_safety || "claim_safe"}</span>
+                    <h2>{block.title}</h2>
+                    <p>{block.body}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
+            {showContent && evidence.length > 0 ? (
+              <section className="lead-magnet-panel" aria-labelledby="lead-magnet-evidence-title">
+                <h2 id="lead-magnet-evidence-title">Evidencia usada</h2>
+                <ul className="lead-magnet-list">
+                  {evidence.map((item) => (
+                    <li key={`${item.label}-${item.value}`}>
+                      <strong>{item.label}:</strong> {item.value}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {limitations.length > 0 ? (
+              <section className="lead-magnet-panel lead-magnet-limitations" aria-labelledby="lead-magnet-limitations-title">
+                <h2 id="lead-magnet-limitations-title">Limitaciones</h2>
+                <ul className="lead-magnet-list">
+                  {limitations.map((limitation) => (
+                    <li key={limitation}>{limitation}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {showContent ? (
+              <a
+                className="lead-magnet-cta"
+                href={cta.href || EMAIL_LINK}
+                onClick={() => postLeadMagnetEvent("clicked")}
+              >
+                {cta.label || "Responder al email de Velz"}
+              </a>
+            ) : null}
+
             <dl className="lead-magnet-meta" aria-label="Detalles técnicos del lead magnet">
               <div>
                 <dt>Tool</dt>
-                <dd>{route.toolSlug}</dd>
+                <dd>{payload.tool_key || route.toolSlug}</dd>
               </div>
               <div>
                 <dt>Token</dt>
                 <dd>…{tokenSuffix}</dd>
               </div>
               <div>
-                <dt>API</dt>
-                <dd>/api/lead-magnets/:token</dd>
+                <dt>Estado</dt>
+                <dd>{apiState.status}</dd>
               </div>
             </dl>
           </div>
