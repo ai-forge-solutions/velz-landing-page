@@ -1,6 +1,13 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/lead-magnets/:token"
+  to = "/.netlify/functions/lead-magnets?token=:token"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
