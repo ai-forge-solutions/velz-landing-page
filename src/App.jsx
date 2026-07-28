@@ -179,6 +179,27 @@ const privacySections = [
   },
 ];
 
+const LEAD_MAGNET_STATUSES = {
+  loading: "loading",
+  ready: "ready",
+  degraded: "degraded",
+  notReady: "not_ready",
+  error: "error",
+};
+
+function parseLeadMagnetPath(pathname) {
+  const match = pathname.match(/^\/tools\/([^/]+)\/([^/]+)\/?$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    toolSlug: decodeURIComponent(match[1]),
+    token: decodeURIComponent(match[2]),
+  };
+}
+
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
   .replace('aria-label="velz symbol"', 'aria-hidden="true" focusable="false"');
@@ -218,6 +239,20 @@ function Reveal({ children, className }) {
 }
 
 function getPageConfig(pathname) {
+  const leadMagnetRoute = parseLeadMagnetPath(pathname);
+
+  if (leadMagnetRoute) {
+    return {
+      key: "lead-magnet",
+      title: "velz — Diagnóstico operativo",
+      description: "Diagnóstico operativo privado de Velz para ecommerce.",
+      canonical: `https://velz.io/tools/${encodeURIComponent(leadMagnetRoute.toolSlug)}/${encodeURIComponent(
+        leadMagnetRoute.token,
+      )}`,
+      leadMagnetRoute,
+    };
+  }
+
   if (pathname === LEGAL_LINK) {
     return {
       key: "legal",
@@ -301,9 +336,228 @@ function LegalLayout({ eyebrow, title, intro, sections }) {
   );
 }
 
+function getStatusCopy(status) {
+  if (status === LEAD_MAGNET_STATUSES.ready) {
+    return {
+      label: "Ready",
+      title: "Tu diagnóstico está listo.",
+      body: "Estos bloques están respaldados por fuentes disponibles y limitaciones explícitas.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.degraded) {
+    return {
+      label: "Degraded",
+      title: "Tu diagnóstico está parcialmente listo.",
+      body: "Mostramos solo las señales soportadas y ocultamos cualquier claim que necesite una fuente pendiente.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.error) {
+    return {
+      label: "Error",
+      title: "No he podido cargar este diagnóstico.",
+      body: "Prueba de nuevo en unos minutos o responde al email desde el que recibiste el enlace.",
+    };
+  }
+
+  return {
+    label: "Not ready",
+    title: "Tu diagnóstico aún se está preparando.",
+    body: "El enlace es válido, pero todavía no hay un payload público seguro para enseñar.",
+  };
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function getLeadMagnetStatus(payload, fallbackStatus) {
+  if (payload?.status && Object.values(LEAD_MAGNET_STATUSES).includes(payload.status)) {
+    return payload.status;
+  }
+
+  return fallbackStatus;
+}
+
+function LeadMagnetPage({ route }) {
+  const [apiState, setApiState] = useState({ status: LEAD_MAGNET_STATUSES.loading });
+  const trackedViewRef = ReactRuntime.useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    trackedViewRef.current = false;
+
+    const loadLeadMagnet = async () => {
+      setApiState({ status: LEAD_MAGNET_STATUSES.loading });
+
+      try {
+        const response = await fetch(`/api/lead-magnets/${encodeURIComponent(route.token)}`, {
+          headers: { Accept: "application/json" },
+        });
+        const payload = await response.json();
+
+        if (!cancelled) {
+          setApiState({
+            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : LEAD_MAGNET_STATUSES.error,
+            payload,
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setApiState({ status: LEAD_MAGNET_STATUSES.error });
+        }
+      }
+    };
+
+    loadLeadMagnet();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [route.token]);
+
+  const postLeadMagnetEvent = async (eventType) => {
+    try {
+      await fetch(`/api/lead-magnets/${encodeURIComponent(route.token)}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          event_type: eventType,
+          tool_slug: route.toolSlug,
+          path: typeof window !== "undefined" ? window.location.pathname : undefined,
+        }),
+      });
+    } catch {
+      // Tracking is best-effort and must never break the public page.
+    }
+  };
+
+  useEffect(() => {
+    if (trackedViewRef.current || apiState.status === LEAD_MAGNET_STATUSES.loading) {
+      return;
+    }
+
+    trackedViewRef.current = true;
+    postLeadMagnetEvent("viewed");
+  }, [apiState.status]);
+
+  const payload = apiState.payload || {};
+  const statusCopy = getStatusCopy(apiState.status);
+  const tokenSuffix = payload.token_suffix || route.token.slice(-6);
+  const brandName = payload.brand?.name || "Tu marca";
+  const headline = payload.headline || statusCopy.title;
+  const intro = payload.intro || statusCopy.body;
+  const summaryBlocks = asArray(payload.summary_blocks);
+  const evidence = asArray(payload.evidence);
+  const limitations = asArray(payload.limitations);
+  const cta = payload.cta || {
+    label: "Responder al email de Velz",
+    href: EMAIL_LINK,
+  };
+  const showContent = apiState.status !== LEAD_MAGNET_STATUSES.loading && apiState.status !== LEAD_MAGNET_STATUSES.error;
+
+  return (
+    <>
+      <nav>
+        <a href={HOME_LINK} className="wm nav-home">
+          velz
+        </a>
+        <a href={HOME_LINK} className="nav-a">
+          Volver al inicio →
+        </a>
+      </nav>
+
+      <main className="lead-magnet-page">
+        <section className="lead-magnet-hero">
+          <div className="wrap lead-magnet-wrap">
+            <BrandSymbol className="lead-magnet-symbol" width={72} />
+            <span className={`lead-magnet-status lead-magnet-status-${apiState.status}`}>
+              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Loading" : statusCopy.label}
+            </span>
+            <p className="lead-magnet-brand">{brandName}</p>
+            <h1 className="lead-magnet-title">
+              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Cargando diagnóstico..." : headline}
+            </h1>
+            <p className="lead-magnet-intro">
+              {apiState.status === LEAD_MAGNET_STATUSES.loading
+                ? "Estoy comprobando el estado del entregable sin lanzar ETLs ni enriquecimientos síncronos."
+                : intro}
+            </p>
+
+            {showContent && summaryBlocks.length > 0 ? (
+              <div className="lead-magnet-blocks" aria-label="Resumen del diagnóstico">
+                {summaryBlocks.map((block) => (
+                  <article className="lead-magnet-card" key={`${block.title}-${block.claim_safety}`}>
+                    <span className="lead-magnet-card-safety">{block.claim_safety || "claim_safe"}</span>
+                    <h2>{block.title}</h2>
+                    <p>{block.body}</p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
+            {showContent && evidence.length > 0 ? (
+              <section className="lead-magnet-panel" aria-labelledby="lead-magnet-evidence-title">
+                <h2 id="lead-magnet-evidence-title">Evidencia usada</h2>
+                <ul className="lead-magnet-list">
+                  {evidence.map((item) => (
+                    <li key={`${item.label}-${item.value}`}>
+                      <strong>{item.label}:</strong> {item.value}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {limitations.length > 0 ? (
+              <section className="lead-magnet-panel lead-magnet-limitations" aria-labelledby="lead-magnet-limitations-title">
+                <h2 id="lead-magnet-limitations-title">Limitaciones</h2>
+                <ul className="lead-magnet-list">
+                  {limitations.map((limitation) => (
+                    <li key={limitation}>{limitation}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {showContent ? (
+              <a
+                className="lead-magnet-cta"
+                href={cta.href || EMAIL_LINK}
+                onClick={() => postLeadMagnetEvent("clicked")}
+              >
+                {cta.label || "Responder al email de Velz"}
+              </a>
+            ) : null}
+
+            <dl className="lead-magnet-meta" aria-label="Detalles técnicos del lead magnet">
+              <div>
+                <dt>Tool</dt>
+                <dd>{payload.tool_key || route.toolSlug}</dd>
+              </div>
+              <div>
+                <dt>Token</dt>
+                <dd>…{tokenSuffix}</dd>
+              </div>
+              <div>
+                <dt>Estado</dt>
+                <dd>{apiState.status}</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
+
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
-  const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
+  const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID || "missing-formspree-id");
   const reduceMotion = useReducedMotion();
   const disableMotion =
     reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
@@ -420,6 +674,10 @@ export default function App() {
         sections={privacySections}
       />
     );
+  }
+
+  if (page.key === "lead-magnet") {
+    return <LeadMagnetPage route={page.leadMagnetRoute} />;
   }
 
   return (
