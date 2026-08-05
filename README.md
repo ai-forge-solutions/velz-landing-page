@@ -57,7 +57,7 @@ npm run preview
   - `test-low-discount-token` devuelve un caso de descuento bajo.
   - `test-not-ready-token` devuelve `status: "not_ready"`.
   - `test-expired-token` devuelve `410 expired_token`; cualquier token desconocido devuelve `404 invalid_token`.
-- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path. Los ejemplos `example-*` leen hechos ya persistidos en Supabase y ensamblan el render payload en la función; los tokens `test-*` siguen siendo fixtures de smoke/local.
+- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path. Los ejemplos `example-*` leen hechos ya persistidos en Supabase y ensamblan el render payload en la función cuando el entorno tiene credenciales Supabase; si el deploy preview no tiene esas variables, devuelven una exportación real de esos mismos registros de Supabase incluida en la PR. Los tokens `test-*` siguen siendo fixtures de smoke/local.
 
 ## Nota
 
