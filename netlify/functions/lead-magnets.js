@@ -4014,10 +4014,10 @@ function buildStockoutPayload(data) {
     const key = product.product_type || product.category || product.type || "Sin categoría en Shopify";
     const current = grouped.get(key) || { category: key, product_count: 0, affected_product_count: 0, fully_out_of_stock_count: 0, products: [] };
     current.product_count += 1;
+    current.products.push(product);
     if (product.fully_out_of_stock || product.partial_stockout || product.functional_stockout) {
       current.affected_product_count += 1;
       if (product.fully_out_of_stock) current.fully_out_of_stock_count += 1;
-      current.products.push(product);
     }
     grouped.set(key, current);
   }

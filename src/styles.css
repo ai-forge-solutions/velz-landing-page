@@ -3272,3 +3272,92 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* MIG-184 review 2: stockout matrix polish */
+.report-stockout-type-head {
+  align-items: baseline;
+}
+
+.report-stockout-type-head h3 {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.report-stockout-type-head p {
+  font-size: 16px;
+}
+
+.report-stockout-type-head p strong {
+  font-size: 26px;
+}
+
+.report-category-denominator {
+  font-size: 16px;
+}
+
+.report-size-summary-dynamic,
+.report-matrix-grid-dynamic {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.report-size-summary-dynamic span,
+.report-size-summary-dynamic strong,
+.report-matrix-grid-dynamic b,
+.report-matrix-grid-dynamic em {
+  min-height: 34px;
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.report-size-summary-dynamic span {
+  justify-content: flex-start;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.report-size-summary-dynamic strong {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.report-matrix-grid-dynamic b {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.report-matrix-grid-dynamic em {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-matrix-grid-dynamic i {
+  min-height: 34px;
+  min-width: 42px;
+  border-radius: 7px;
+}
+
+.report-stockout-products-row a {
+  max-width: 250px;
+  font-size: 13px;
+}
+
+.report-stockout-expand-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.report-stockout-expand-row span {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

@@ -674,7 +674,7 @@ function ReportFooter({ limitations = [], variantCoverage = 40 }) {
           <BrandSymbol className="report-made-symbol" width={44} />
           <strong>Hecho por Velz. Miramos tiendas online y contamos lo que vemos.</strong>
         </div>
-        <p>Datos de snapshot público. No tocamos nada privado tuyo.</p>
+        <p>Datos de catálogo público. No tocamos nada privado tuyo.</p>
         <p>
           ¿Quieres cruzar esto con tus ventas y tu caja de verdad? <a href={EMAIL_LINK}>{CONTACT_EMAIL}</a>
         </p>
@@ -944,31 +944,29 @@ function StockoutCategoryBlock({ group, index }) {
   const products = asArray(group.products);
   const optionLabels = getStockoutColumns(products, products[0]);
   const visibleProducts = expanded ? products : products.slice(0, 10);
-  const affectedCount = group.affected_product_count || products.length;
-  const productCount = group.product_count || affectedCount;
-  const affectedPct = productCount ? Math.round((affectedCount / productCount) * 100) : 0;
-  const systemicCategory = productCount >= 6 && affectedCount >= 3 && affectedPct >= 50;
+  const affectedCount = group.affected_product_count || products.filter((item) => item.fully_out_of_stock || item.partial_stockout || item.functional_stockout).length;
+  const productCount = group.product_count || products.length || affectedCount;
+  const systemicCategory = productCount >= 6 && affectedCount >= 3 && Math.round((affectedCount / Math.max(productCount, 1)) * 100) >= 50;
   const fullyOut = group.fully_out_of_stock_count || products.filter((product) => product.fully_out_of_stock).length;
   const remaining = Math.max(0, products.length - visibleProducts.length);
+  const gridTemplate = `minmax(210px, 1.45fr) repeat(${optionLabels.length}, minmax(42px, 1fr))`;
 
   return (
     <article className="report-stockout-type-block">
       <header className="report-stockout-type-head">
         <div>
           <h3>{group.category}</h3>
-          <span className={`report-pill ${systemicCategory ? "report-pill-red" : "report-pill-muted"}`}>
-            {systemicCategory ? "sistémico" : "aislado"}
-          </span>
+          {systemicCategory ? <span className="report-pill report-pill-red">sistémico</span> : null}
         </div>
-        <p><strong>{affectedCount}</strong> de {productCount} producto{productCount === 1 ? "" : "s"} de esta categoría afectados</p>
+        <p><strong>{affectedCount}</strong> señales en esta línea</p>
       </header>
 
       <div className="report-category-denominator">
-        <span>{affectedPct}% de esta categoría afectado</span>
+        <span>{productCount} producto{productCount === 1 ? "" : "s"} revisado{productCount === 1 ? "" : "s"} en esta línea</span>
         <em>{fullyOut} agotado{fullyOut === 1 ? "" : "s"} total{fullyOut === 1 ? "" : "es"}</em>
       </div>
 
-      <div className="report-size-summary report-size-summary-dynamic" style={{ gridTemplateColumns: `190px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
+      <div className="report-size-summary report-size-summary-dynamic" style={{ gridTemplateColumns: gridTemplate }}>
         <span>Fugas claras por variante</span>
         {optionLabels.map((label) => {
           const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
@@ -985,7 +983,7 @@ function StockoutCategoryBlock({ group, index }) {
         })}
       </div>
 
-      <div className="report-matrix-grid report-matrix-grid-dynamic" style={{ gridTemplateColumns: `190px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
+      <div className="report-matrix-grid report-matrix-grid-dynamic" style={{ gridTemplateColumns: gridTemplate }}>
         <span />
         {optionLabels.map((label) => <b key={label}>{label}</b>)}
         {visibleProducts.map((item, rowIndex) => {
