@@ -1438,9 +1438,9 @@ footer {
   height: 100%;
 }
 
-.bucket-superficial { background: #b9b9b7; }
-.bucket-medium { background: #c9892d; }
-.bucket-deep { background: #c7453c; }
+.report-stacked-bar .bucket-superficial { background: #b9b9b7; }
+.report-stacked-bar .bucket-medium { background: #c9892d; }
+.report-stacked-bar .bucket-deep { background: #c7453c; }
 
 .report-bucket-legend {
   display: flex;
