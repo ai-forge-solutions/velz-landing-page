@@ -4022,9 +4022,22 @@ function buildStockoutPayload(data) {
     grouped.set(key, current);
   }
 
-  const categoryGroups = Array.from(grouped.values())
+  const rawCategoryGroups = Array.from(grouped.values())
     .filter((group) => group.affected_product_count > 0)
     .sort((a, b) => b.affected_product_count - a.affected_product_count || a.category.localeCompare(b.category));
+  const largeCategoryGroups = rawCategoryGroups.filter((group) => toNumber(group.product_count) >= 6);
+  const smallCategoryGroups = rawCategoryGroups.filter((group) => toNumber(group.product_count) < 6);
+  const categoryGroups = [...largeCategoryGroups];
+  if (smallCategoryGroups.length > 0) {
+    categoryGroups.push({
+      category: "Otros productos",
+      product_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.product_count), 0),
+      affected_product_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.affected_product_count), 0),
+      fully_out_of_stock_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.fully_out_of_stock_count), 0),
+      products: smallCategoryGroups.flatMap((group) => group.products),
+      combined_from: smallCategoryGroups.map((group) => group.category),
+    });
+  }
 
   return {
     version: "inventory_lead_magnet_payload_v1",
@@ -4060,7 +4073,7 @@ function buildStockoutPayload(data) {
       {
         code: "public_availability_only",
         message:
-          "Availability is based on public Shopify snapshot data; it does not expose inventory quantity, sales velocity or lost revenue.",
+          "Miramos lo que la tienda muestra públicamente. No vemos unidades internas, ventas ni velocidad real de salida.",
         source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
       },
     ],

@@ -876,13 +876,13 @@ function getStockoutCategoryGroups(stockout) {
   const providedGroups = asArray(stockout?.category_groups)
     .map((group) => ({
       ...group,
-      category: group.category || group.product_type || group.type || "Sin categoría en el payload",
+      category: group.category || group.product_type || group.type || "Otros productos",
       products: asArray(group.products),
     }))
     .filter((group) => group.products.length > 0);
 
   if (providedGroups.length > 0) {
-    return providedGroups;
+    return combineSmallStockoutGroups(providedGroups);
   }
 
   const grouped = new Map();
@@ -902,7 +902,28 @@ function getStockoutCategoryGroups(stockout) {
     grouped.set(category, current);
   }
 
-  return Array.from(grouped.values());
+  return combineSmallStockoutGroups(Array.from(grouped.values()));
+}
+
+function combineSmallStockoutGroups(groups) {
+  const largeGroups = groups.filter((group) => Number(group.product_count || group.products?.length || 0) >= 6);
+  const smallGroups = groups.filter((group) => Number(group.product_count || group.products?.length || 0) < 6);
+
+  if (smallGroups.length === 0) {
+    return largeGroups;
+  }
+
+  return [
+    ...largeGroups,
+    {
+      category: "Otros productos",
+      product_count: smallGroups.reduce((sum, group) => sum + Number(group.product_count || group.products?.length || 0), 0),
+      affected_product_count: smallGroups.reduce((sum, group) => sum + Number(group.affected_product_count || group.products?.length || 0), 0),
+      fully_out_of_stock_count: smallGroups.reduce((sum, group) => sum + Number(group.fully_out_of_stock_count || 0), 0),
+      products: smallGroups.flatMap((group) => asArray(group.products)),
+      combined_from: smallGroups.map((group) => group.category).filter(Boolean),
+    },
+  ];
 }
 
 function stockoutProductUnavailableCount(product) {
@@ -926,7 +947,7 @@ function StockoutCategoryBlock({ group, index }) {
   const affectedCount = group.affected_product_count || products.length;
   const productCount = group.product_count || affectedCount;
   const affectedPct = productCount ? Math.round((affectedCount / productCount) * 100) : 0;
-  const systemicCategory = affectedCount >= 3 && affectedPct >= 50;
+  const systemicCategory = productCount >= 6 && affectedCount >= 3 && affectedPct >= 50;
   const fullyOut = group.fully_out_of_stock_count || products.filter((product) => product.fully_out_of_stock).length;
   const remaining = Math.max(0, products.length - visibleProducts.length);
 
@@ -1021,7 +1042,7 @@ function StockoutLeakReport({ payload }) {
 
   return (
     <ReportShell toolLabel="Nuevo análisis">
-      <div className="report-wrap">
+      <div className="report-wrap report-stockout-wrap">
         <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
 
         <section className="report-card report-stockout-hero report-stockout-hero-v2 report-stockout-draft-hero">
@@ -1030,7 +1051,7 @@ function StockoutLeakReport({ payload }) {
             <div>
               <h1>{fullyOutCount > 0 ? `Tienes ${formatLeadMetric(fullyOutCount)} productos 100% agotados en el catálogo observado.` : "Tienes disponibilidad incompleta en el catálogo observado."}</h1>
               <p className="report-muted">
-                La matriz enseña los productos con señal; el denominador real es el catálogo analizado: {formatLeadMetric(catalogProductCount)} productos / {formatLeadMetric(variantCount)} variantes observadas.
+                Hemos revisado {formatLeadMetric(catalogProductCount)} productos del catálogo público y hemos encontrado {formatLeadMetric(fullyOutCount)} sin ninguna variante disponible.
               </p>
             </div>
             <span className="report-pill report-pill-gold">warning</span>
@@ -1047,10 +1068,10 @@ function StockoutLeakReport({ payload }) {
         <SectionEyebrow>Los tres ejes</SectionEyebrow>
         <div className="report-two-col report-kpi-row report-insight-grid report-stockout-metrics-grid">
           <InsightMetricCard eyebrow="Catálogo analizado" value={formatLeadMetric(catalogProductCount)} tone="neutral">
-            Productos públicos incluidos en el snapshot.
+            Productos revisados en la tienda.
           </InsightMetricCard>
           <InsightMetricCard eyebrow="Variantes observadas" value={formatLeadMetric(variantCount)} tone="neutral">
-            Variantes públicas contadas en el catálogo.
+            Formatos/opciones visibles en el catálogo.
           </InsightMetricCard>
           <InsightMetricCard eyebrow="Productos 100% agotados" value={formatLeadMetric(fullyOutCount)} tone="critical">
             Productos sin ninguna variante disponible.
@@ -1063,7 +1084,7 @@ function StockoutLeakReport({ payload }) {
             {affectedCount} productos con señal dentro de {formatLeadMetric(catalogProductCount)} productos analizados.
           </h2>
           <p className="report-muted report-stockout-denominator-note">
-            Estos porcentajes se calculan contra cada categoría o contra el catálogo completo, no contra las filas visibles de la matriz. Las categorías salen del payload de Shopify/Supabase; si una tienda no informa categoría, se muestra como faltante.
+            Primero miramos el tamaño de la foto completa; después señalamos dónde se concentra el problema para que sepas por dónde empezar.
           </p>
 
           {groups.length > 0 ? groups.map((group, index) => (
