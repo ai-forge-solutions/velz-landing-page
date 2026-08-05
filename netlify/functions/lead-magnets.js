@@ -3740,10 +3740,10 @@ async function loadLiveExampleData({ brandId }) {
 
   const catalogId = analysis.catalog_scrape_id;
   const products = await supabaseFetch(
-    `shopify_products?select=id,title,product_url,featured_image_url,total_variants,available_variants,oos_variants,fully_out_of_stock,partially_out_of_stock,min_price,max_price,min_compare_at_price,max_compare_at_price,max_discount_pct,avg_discount_pct,has_discount,created_at_shopify&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=max_discount_pct.desc.nullslast,oos_variants.desc&limit=24`,
+    `shopify_products?select=id,shopify_product_id,title,handle,product_url,featured_image_url,vendor,product_type,tags,total_variants,available_variants,oos_variants,fully_out_of_stock,partially_out_of_stock,min_price,max_price,min_compare_at_price,max_compare_at_price,max_discount_pct,avg_discount_pct,has_discount,created_at_shopify&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=max_discount_pct.desc.nullslast,oos_variants.desc&limit=200`,
   );
   const items = await supabaseFetch(
-    `shopify_signal_items?select=id,signal_type,claim_safety,product_title,product_url,image_url,metric_label,metric_value,price,compare_at_price,discount_pct,available_variants,total_variants,oos_ratio,product_age_days,created_at&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=created_at.desc&limit=48`,
+    `shopify_signal_items?select=id,signal_type,claim_safety,shopify_product_row_id,shopify_product_id,product_title,product_handle,product_url,image_url,metric_label,metric_value,price,compare_at_price,discount_pct,available_variants,total_variants,oos_ratio,product_age_days,created_at&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=created_at.desc&limit=200`,
   );
 
   return { brand, analysis, products, items };
@@ -3958,25 +3958,37 @@ function buildStockoutPayload(data) {
   if (!analysis) return null;
 
   const stockoutItems = items.filter((item) => ["partial_stockout", "fully_out_of_stock", "functional_stockout", "core_size_stockout"].includes(item.signal_type));
-  const stockoutProducts = products.filter((product) => product.fully_out_of_stock || product.partially_out_of_stock);
-  const selected = (stockoutItems.length ? stockoutItems : stockoutProducts).slice(0, 9);
-  const productCards = selected.map((item, index) => {
-    const product = item.product_title ? item : stockoutProducts[index] || item;
-    const total = toNumber(product.total_variants, 1);
-    const oos = toNumber(product.metric_value || product.oos_variants, 1);
+  const stockoutProducts = products.filter((product) => product.fully_out_of_stock || product.partially_out_of_stock || toNumber(product.oos_variants) > 0);
+  const productsByShopifyId = new Map(products.map((product) => [String(product.shopify_product_id || ""), product]));
+  const itemsByProductKey = new Map(
+    stockoutItems.map((item) => [item.shopify_product_row_id || productsByShopifyId.get(String(item.shopify_product_id || ""))?.id || item.product_title, item]),
+  );
+
+  const productToCard = (product, item) => {
+    const total = toNumber(item?.total_variants || product.total_variants, 1);
+    const oos = toNumber(item?.metric_value || product.oos_variants, product.fully_out_of_stock ? total : 0);
+    const fullyOut = item?.signal_type === "fully_out_of_stock" || Boolean(product.fully_out_of_stock) || oos >= total;
+    const partiallyOut = !fullyOut && (item?.signal_type === "partial_stockout" || Boolean(product.partially_out_of_stock) || oos > 0);
     return {
-      product_id: product.id || product.product_title || product.title,
-      title: product.product_title || product.title,
-      url: product.product_url,
-      image_url: product.image_url || product.featured_image_url,
-      availability_status:
-        product.signal_type === "fully_out_of_stock" || product.fully_out_of_stock ? "fully_out_of_stock" : "partially_out_of_stock",
-      fully_out_of_stock: product.signal_type === "fully_out_of_stock" || product.fully_out_of_stock || false,
-      partial_stockout: product.signal_type !== "fully_out_of_stock" && !product.fully_out_of_stock,
-      functional_stockout: product.signal_type === "functional_stockout",
-      pattern_scope: selected.length > 1 ? "mixed" : "isolated",
-      variant_availability: Array.from({ length: Math.max(1, Math.min(total, 8)) }).map((_, variantIndex) => ({
-        product_id: product.id || product.product_title || product.title,
+      product_id: product.id || item?.id || item?.product_title || product.title,
+      shopify_product_id: product.shopify_product_id || item?.shopify_product_id || null,
+      title: item?.product_title || product.title,
+      handle: product.handle || item?.product_handle || null,
+      url: item?.product_url || product.product_url,
+      image_url: item?.image_url || product.featured_image_url,
+      product_type: product.product_type || null,
+      vendor: product.vendor || null,
+      tags: Array.isArray(product.tags) ? product.tags : [],
+      total_variants: total,
+      oos_variants: oos,
+      available_variants: toNumber(product.available_variants, Math.max(0, total - oos)),
+      availability_status: fullyOut ? "fully_out_of_stock" : partiallyOut ? "partially_out_of_stock" : "in_stock",
+      fully_out_of_stock: fullyOut,
+      partial_stockout: partiallyOut,
+      functional_stockout: item?.signal_type === "functional_stockout",
+      pattern_scope: stockoutItems.length > 1 ? "mixed" : "isolated",
+      variant_availability: Array.from({ length: Math.max(1, Math.min(total, 12)) }).map((_, variantIndex) => ({
+        product_id: product.id || item?.id || item?.product_title || product.title,
         option_name: "Opción",
         option_value: String(variantIndex + 1),
         normalized_option: String(variantIndex + 1),
@@ -3985,12 +3997,47 @@ function buildStockoutPayload(data) {
         available: variantIndex >= oos,
         availability_status: variantIndex < oos ? "fully_out_of_stock" : "in_stock",
         claim_safety: { level: "hard_fact", visibility: "public", rationale: "Availability is public Shopify catalog snapshot data." },
-        source_refs: product.id ? [{ table: product.product_title ? "shopify_signal_items" : "shopify_products", id: product.id }] : buildSourceRefs(data),
+        source_refs: product.id ? [{ table: "shopify_products", id: product.id }] : buildSourceRefs(data),
       })),
-      claim_safety: { level: product.claim_safety || "hard_fact", visibility: "public", rationale: "Public Shopify availability signal." },
-      source_refs: product.id ? [{ table: product.product_title ? "shopify_signal_items" : "shopify_products", id: product.id }] : buildSourceRefs(data),
+      claim_safety: { level: item?.claim_safety || "hard_fact", visibility: "public", rationale: "Public Shopify availability signal." },
+      source_refs: product.id ? [{ table: "shopify_products", id: product.id }] : buildSourceRefs(data),
     };
-  });
+  };
+
+  const allProductCards = products.map((product) => productToCard(product, itemsByProductKey.get(product.id)));
+  const affectedCards = allProductCards.filter((product) => product.fully_out_of_stock || product.partial_stockout || product.functional_stockout);
+  const selected = affectedCards.length ? affectedCards : stockoutProducts.map((product) => productToCard(product, itemsByProductKey.get(product.id)));
+  const productCards = selected.slice(0, 24);
+
+  const grouped = new Map();
+  for (const product of allProductCards) {
+    const key = product.product_type || product.category || product.type || "Sin categoría en Shopify";
+    const current = grouped.get(key) || { category: key, product_count: 0, affected_product_count: 0, fully_out_of_stock_count: 0, products: [] };
+    current.product_count += 1;
+    current.products.push(product);
+    if (product.fully_out_of_stock || product.partial_stockout || product.functional_stockout) {
+      current.affected_product_count += 1;
+      if (product.fully_out_of_stock) current.fully_out_of_stock_count += 1;
+    }
+    grouped.set(key, current);
+  }
+
+  const rawCategoryGroups = Array.from(grouped.values())
+    .filter((group) => group.affected_product_count > 0)
+    .sort((a, b) => b.affected_product_count - a.affected_product_count || a.category.localeCompare(b.category));
+  const largeCategoryGroups = rawCategoryGroups.filter((group) => toNumber(group.product_count) >= 6);
+  const smallCategoryGroups = rawCategoryGroups.filter((group) => toNumber(group.product_count) < 6);
+  const categoryGroups = [...largeCategoryGroups];
+  if (smallCategoryGroups.length > 0) {
+    categoryGroups.push({
+      category: "Otros productos",
+      product_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.product_count), 0),
+      affected_product_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.affected_product_count), 0),
+      fully_out_of_stock_count: smallCategoryGroups.reduce((sum, group) => sum + toNumber(group.fully_out_of_stock_count), 0),
+      products: smallCategoryGroups.flatMap((group) => group.products),
+      combined_from: smallCategoryGroups.map((group) => group.category),
+    });
+  }
 
   return {
     version: "inventory_lead_magnet_payload_v1",
@@ -4026,7 +4073,7 @@ function buildStockoutPayload(data) {
       {
         code: "public_availability_only",
         message:
-          "Availability is based on public Shopify snapshot data; it does not expose inventory quantity, sales velocity or lost revenue.",
+          "Miramos lo que la tienda muestra públicamente. No vemos unidades internas, ventas ni velocidad real de salida.",
         source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
       },
     ],
@@ -4034,6 +4081,9 @@ function buildStockoutPayload(data) {
     source_refs: buildSourceRefs(data),
     stockout: {
       product_cards: productCards,
+      all_product_count: allProductCards.length,
+      affected_product_count: affectedCards.length,
+      category_groups: categoryGroups,
       size_roles: { core: [], peripheral: [], unknown: [], not_applicable: [] },
       pattern_scope: productCards.length > 1 ? "mixed" : "isolated",
       size_curve_applicable: Boolean(analysis.size_pattern_applicable),

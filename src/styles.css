@@ -1841,6 +1841,158 @@ footer {
   background: #c7453c;
 }
 
+.report-stockout-metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.report-stockout-by-category {
+  padding: 36px 42px;
+}
+
+.report-stockout-denominator-note {
+  max-width: 760px;
+  margin: 0 0 30px;
+}
+
+.report-stockout-type-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 0 26px;
+  border-top: 1px solid var(--ink-100);
+}
+
+.report-stockout-type-block:first-of-type {
+  border-top: 0;
+}
+
+.report-stockout-type-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.report-stockout-type-head > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.report-stockout-type-head h3 {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--serif);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 400;
+}
+
+.report-stockout-type-head p,
+.report-category-denominator {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.report-stockout-type-head p strong {
+  color: var(--ink-900);
+  font-family: var(--mono);
+  font-size: 24px;
+}
+
+.report-category-denominator {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.report-category-denominator em {
+  color: var(--report-red);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.report-size-summary-dynamic {
+  margin: 8px 0 2px;
+  overflow-x: auto;
+}
+
+.report-matrix-grid-dynamic {
+  padding-bottom: 8px;
+}
+
+.report-matrix-grid-dynamic em {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.report-matrix-grid-dynamic i {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.report-matrix-grid-dynamic i:hover,
+.report-size-summary-dynamic strong:hover {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 0 6px 14px rgba(15, 15, 15, 0.12);
+}
+
+.report-stockout-products-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-stockout-products-row a {
+  max-width: 210px;
+  overflow: hidden;
+  border: 1px solid var(--ink-100);
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--ink-600);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-stockout-products-row a:hover {
+  border-color: var(--report-red);
+  color: var(--report-red);
+}
+
+.report-stockout-expand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--ink-400);
+  font-size: 14px;
+}
+
+.report-stockout-expand-row button,
+.report-stockout-collapse {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--ink-900);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-stockout-collapse {
+  align-self: flex-start;
+  background: var(--ink-100);
+  color: var(--ink-700);
+}
+
+.report-stockout-product-proof {
+  align-items: center;
+}
+
 .report-kpi-row .report-card strong {
   display: block;
   margin-bottom: 16px;
@@ -2970,6 +3122,16 @@ footer {
   line-height: 1.55;
 }
 
+.report-two-col.report-kpi-row.report-stockout-metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .report-two-col.report-kpi-row.report-stockout-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .tool-result-row {
     grid-template-columns: 1fr;
@@ -2979,4 +3141,223 @@ footer {
   .tool-search-meta {
     flex-direction: column;
   }
+}
+
+
+/* MIG-184 review feedback: cleaner customer copy rhythm, section breathing, boxed axes */
+.report-stockout-wrap > .report-eyebrow {
+  margin-bottom: 28px;
+}
+
+.report-stockout-wrap .report-card {
+  margin-bottom: 62px;
+}
+
+.report-stockout-wrap > .report-eyebrow:not(:first-child) {
+  margin-top: 18px;
+}
+
+.report-stockout-metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 64px;
+}
+
+.report-stockout-metrics-grid .report-insight-card {
+  display: flex;
+  min-height: 142px;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.report-stockout-metrics-grid .report-insight-card + .report-insight-card {
+  border-top: 1px solid var(--border-default);
+  padding-top: 18px;
+}
+
+.report-stockout-metrics-grid .report-insight-card strong {
+  font-size: clamp(34px, 6vw, 48px);
+}
+
+.report-stockout-by-category {
+  padding: 34px;
+}
+
+.report-stockout-by-category h2 {
+  margin-bottom: 14px;
+}
+
+.report-stockout-denominator-note {
+  margin-bottom: 42px;
+}
+
+.report-stockout-type-block {
+  gap: 18px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  background: var(--surface-sunken);
+}
+
+.report-stockout-type-block + .report-stockout-type-block {
+  margin-top: 18px;
+}
+
+.report-stockout-type-block:first-of-type {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.report-size-summary-dynamic {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+  margin: 14px 0 10px;
+}
+
+.report-size-summary-dynamic span,
+.report-size-summary-dynamic strong,
+.report-matrix-grid-dynamic b,
+.report-matrix-grid-dynamic em,
+.report-matrix-grid-dynamic i {
+  min-height: 38px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.report-size-summary-dynamic span,
+.report-size-summary-dynamic strong,
+.report-matrix-grid-dynamic b,
+.report-matrix-grid-dynamic em {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.report-size-summary-dynamic strong,
+.report-matrix-grid-dynamic b {
+  justify-content: center;
+}
+
+.report-size-summary-dynamic strong.hot {
+  border-color: var(--data-negative);
+  background: var(--data-negative-tint);
+  color: var(--data-negative);
+}
+
+.report-matrix-grid-dynamic {
+  gap: 8px;
+}
+
+.report-matrix-grid-dynamic i {
+  min-width: 38px;
+}
+
+.report-matrix-grid-dynamic i.out {
+  border-color: var(--data-negative);
+  background: var(--data-negative);
+}
+
+.report-stockout-products-row {
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .report-stockout-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* MIG-184 review 2: stockout matrix polish */
+.report-stockout-type-head {
+  align-items: baseline;
+}
+
+.report-stockout-type-head h3 {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.report-stockout-type-head p {
+  font-size: 16px;
+}
+
+.report-stockout-type-head p strong {
+  font-size: 26px;
+}
+
+.report-category-denominator {
+  font-size: 16px;
+}
+
+.report-size-summary-dynamic,
+.report-matrix-grid-dynamic {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.report-size-summary-dynamic span,
+.report-size-summary-dynamic strong,
+.report-matrix-grid-dynamic b,
+.report-matrix-grid-dynamic em {
+  min-height: 34px;
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.report-size-summary-dynamic span {
+  justify-content: flex-start;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.report-size-summary-dynamic strong {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.report-matrix-grid-dynamic b {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.report-matrix-grid-dynamic em {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-matrix-grid-dynamic i {
+  min-height: 34px;
+  min-width: 42px;
+  border-radius: 7px;
+}
+
+.report-stockout-products-row a {
+  max-width: 250px;
+  font-size: 13px;
+}
+
+.report-stockout-expand-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.report-stockout-expand-row span {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
