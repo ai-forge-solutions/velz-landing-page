@@ -46,10 +46,18 @@ npm run preview
 
 - Ruta pública SPA: `/tools/:tool_slug/:token`.
 - API read thin: `GET /api/lead-magnets/:token`.
+- Real-data preview examples (server-side Supabase reads, no browser Supabase access):
+  - `example-susmies-discount` devuelve `discount_depth_analyzer` ensamblado desde `shopify_signal_analyses`, `shopify_products` y `shopify_signal_items` para `susmies.com`.
+  - `example-northdeco-stockout` devuelve `stockout_leak_score` ensamblado desde datos Shopify persistidos para `northdeco.com`.
+  - `example-northdeco-discount` devuelve `discount_depth_analyzer` con productos reales de `northdeco.com`.
+  - `example-munkombucha-discount` devuelve `discount_depth_analyzer` con productos reales de `munkombucha.com`.
 - Fixture de smoke test:
-  - `test-ready-token` devuelve `status: "ready"`.
+  - `test-stockout-token` / `test-ready-token` devuelve `stockout_leak_score` con contrato `inventory_lead_magnet_payload_v1` en `degraded`.
+  - `test-discount-token` devuelve `discount_depth_analyzer` en `ready`.
+  - `test-low-discount-token` devuelve un caso de descuento bajo.
   - `test-not-ready-token` devuelve `status: "not_ready"`.
-- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path; solo devuelve estado placeholder claim-safe.
+  - `test-expired-token` devuelve `410 expired_token`; cualquier token desconocido devuelve `404 invalid_token`.
+- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path. Los ejemplos `example-*` leen hechos ya persistidos en Supabase y ensamblan el render payload en la función cuando el entorno tiene credenciales Supabase; si el deploy preview no tiene esas variables, devuelven una exportación real de esos mismos registros de Supabase incluida en la PR. Los tokens `test-*` siguen siendo fixtures de smoke/local.
 
 ## Nota
 

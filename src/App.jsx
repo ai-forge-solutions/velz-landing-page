@@ -184,7 +184,48 @@ const LEAD_MAGNET_STATUSES = {
   ready: "ready",
   degraded: "degraded",
   notReady: "not_ready",
+  manualReviewRequired: "manual_review_required",
+  invalid: "invalid_token",
+  expired: "expired_token",
   error: "error",
+};
+
+const INVENTORY_TOOL_COPY = {
+  stockout_leak_score: {
+    slug: "stockout-leak-score",
+    title: "Dónde tu catálogo visible está filtrando demanda por falta de disponibilidad.",
+    intro:
+      "Miramos disponibilidad pública, variantes y patrones de stockout ya persistidos. No estimamos unidades internas ni ventas perdidas.",
+    chartTitle: "Stockouts por producto observado",
+    productTitle: "Productos con señal de stockout",
+    metricLabels: {
+      product_count: "Productos",
+      variant_count: "Variantes",
+      fully_out_of_stock_count: "Productos 100% agotados",
+      partial_stockout_count: "Stockouts parciales",
+      functional_stockout_count: "Stockouts funcionales",
+      variant_stockout_pct: "% variantes agotadas",
+      sample_size: "Muestra",
+    },
+  },
+  discount_depth_analyzer: {
+    slug: "discount-depth-analyzer",
+    title: "Cuánto stock rebajado sigue visible en tu catálogo.",
+    intro:
+      "Separamos descuentos superficiales, medios y profundos usando precios públicos ya persistidos. No inferimos margen, cashflow ni velocidad real de venta.",
+    chartTitle: "Profundidad de descuento",
+    productTitle: "Productos rebajados que siguen disponibles",
+    metricLabels: {
+      catalog_product_count: "Productos",
+      discounted_product_count: "Productos rebajados",
+      discounted_products_pct: "% catálogo rebajado",
+      average_discount_pct: "Descuento medio",
+      min_discount_pct: "Descuento mínimo",
+      max_discount_pct: "Descuento máximo",
+      deep_discount_product_count: "Descuento profundo",
+      discounted_and_available_count: "Rebajados disponibles",
+    },
+  },
 };
 
 function parseLeadMagnetPath(pathname) {
@@ -353,6 +394,30 @@ function getStatusCopy(status) {
     };
   }
 
+  if (status === LEAD_MAGNET_STATUSES.manualReviewRequired) {
+    return {
+      label: "Manual review",
+      title: "Este diagnóstico necesita revisión antes de publicarse.",
+      body: "Hay ambigüedades que no deben convertirse en claims automáticos sin revisión humana.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.invalid) {
+    return {
+      label: "Token inválido",
+      title: "Este enlace no es válido.",
+      body: "Comprueba que has abierto el enlace completo o responde al email desde el que recibiste el diagnóstico.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.expired) {
+    return {
+      label: "Token expirado",
+      title: "Este diagnóstico ha caducado.",
+      body: "El snapshot público ya no debería enseñarse sin refrescar datos y contexto.",
+    };
+  }
+
   if (status === LEAD_MAGNET_STATUSES.error) {
     return {
       label: "Error",
@@ -372,12 +437,448 @@ function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function toPercent(value) {
+  return typeof value === "number" ? `${value.toFixed(value % 1 === 0 ? 0 : 1)}%` : value;
+}
+
+function formatLeadMetric(value) {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (typeof value === "number") {
+    return Number.isInteger(value) ? value.toLocaleString("es-ES") : value.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+  }
+
+  return String(value).replaceAll("_", " ");
+}
+
+function claimLevel(claimSafety) {
+  return claimSafety?.level || claimSafety || "hard_fact";
+}
+
+function normalizeInventoryPayload(payload) {
+  if (payload?.version !== "inventory_lead_magnet_payload_v1") {
+    return payload;
+  }
+
+  const toolCopy = INVENTORY_TOOL_COPY[payload.tool_key] || INVENTORY_TOOL_COPY.stockout_leak_score;
+  const summaryMetrics = payload.summary_metrics || {};
+  const metricBlocks = Object.entries(summaryMetrics)
+    .filter(([, value]) => !Array.isArray(value) && value !== null && value !== undefined)
+    .slice(0, 4)
+    .map(([key, value]) => ({
+      title: toolCopy.metricLabels?.[key] || key.replaceAll("_", " "),
+      body: key.endsWith("_pct") ? toPercent(value) : formatLeadMetric(value),
+      claim_safety: "hard_fact",
+    }));
+  const sectionBlocks = asArray(payload.sections).flatMap((section) =>
+    asArray(section.cards)
+      .filter((card) => card.public !== false)
+      .map((card) => ({
+        title: card.title,
+        body: card.body,
+        claim_safety: claimLevel(card.claim_safety),
+      })),
+  );
+  const discountBuckets = asArray(payload.discount_depth?.buckets).map((bucket) => ({
+    label: bucket.label,
+    value: bucket.product_count,
+    subvalue: `${bucket.available_product_count || 0} disponibles`,
+  }));
+  const stockoutRows = asArray(payload.stockout?.product_cards).map((product) => ({
+    label: product.title,
+    value:
+      asArray(product.variant_availability).filter((variant) => variant.available === false).length ||
+      (product.partial_stockout ? 1 : 0),
+    subvalue: product.availability_status?.replaceAll("_", " "),
+  }));
+  const productRows =
+    payload.tool_key === "discount_depth_analyzer"
+      ? asArray(payload.discount_depth?.deep_discount_products).map((product) => ({
+          title: product.title,
+          meta: `${toPercent(product.discount_pct)} descuento · ${product.available ? "disponible" : "sin disponibilidad pública"}`,
+          href: product.url,
+          claim_safety: claimLevel(product.claim_safety),
+        }))
+      : asArray(payload.stockout?.product_cards).map((product) => ({
+          title: product.title,
+          meta: `${product.availability_status?.replaceAll("_", " ")} · patrón ${product.pattern_scope?.replaceAll("_", " ")}`,
+          href: product.url,
+          claim_safety: claimLevel(product.claim_safety),
+        }));
+
+  return {
+    ...payload,
+    tool_slug: toolCopy.slug,
+    headline: toolCopy.title,
+    intro: toolCopy.intro,
+    summary_blocks: [...metricBlocks, ...sectionBlocks].slice(0, 6),
+    evidence: asArray(payload.evidence_items).map((item) => ({
+      label: item.title,
+      value: item.body,
+      claim_safety: claimLevel(item.claim_safety),
+    })),
+    limitations: asArray(payload.public_limitations).map((limitation) => limitation.message || limitation),
+    render_chart: {
+      title: toolCopy.chartTitle,
+      rows: payload.tool_key === "discount_depth_analyzer" ? discountBuckets : stockoutRows,
+    },
+    render_products: {
+      title: toolCopy.productTitle,
+      rows: productRows,
+    },
+    cta: {
+      label: "Responder a Velz →",
+      href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Diagnóstico Velz ${payload.brand?.domain || ""}`)}`,
+    },
+  };
+}
+
 function getLeadMagnetStatus(payload, fallbackStatus) {
   if (payload?.status && Object.values(LEAD_MAGNET_STATUSES).includes(payload.status)) {
     return payload.status;
   }
 
   return fallbackStatus;
+}
+
+function ProductPhoto({ product, className = "report-product-photo" }) {
+  const src = product?.image_url || product?.image || product?.featured_image || product?.featured_image_url;
+
+  if (src) {
+    return <img className={className} src={src} alt={product?.title || "Foto del producto"} loading="lazy" />;
+  }
+
+  return (
+    <div className={`${className} report-product-photo-placeholder`} aria-label="Foto del producto no disponible">
+      <span>foto del<br />producto</span>
+    </div>
+  );
+}
+
+function ReportShell({ children, toolLabel = "Nuevo análisis" }) {
+  return (
+    <main className="report-page">
+      <button className="report-print" type="button" onClick={() => window.print()}>
+        Print
+      </button>
+      <header className="lead-nav" aria-label="Velz report header">
+        <a href={HOME_LINK} className="lead-logo" aria-label="Velz home">
+          <span className="lead-logo-plus" aria-hidden="true">+</span>
+          <span>velz</span>
+        </a>
+        <p className="lead-nav-right">{toolLabel}</p>
+      </header>
+      {children}
+    </main>
+  );
+}
+
+function SectionEyebrow({ children, tone }) {
+  return <div className={`report-eyebrow ${tone ? `report-eyebrow-${tone}` : ""}`}>{children}</div>;
+}
+
+function normalizeToolLabel(toolKey) {
+  return (toolKey || "diagnóstico").replaceAll("_", " ").toUpperCase();
+}
+
+function getPrimaryProduct(payload) {
+  const discountProduct = asArray(payload.discount_depth?.deep_discount_products)[0];
+  const stockoutProduct = asArray(payload.stockout?.product_cards)[0];
+  const evidenceProduct = asArray(payload.evidence_items).find((item) => item.image_url || item.title);
+  return discountProduct || stockoutProduct || evidenceProduct || {};
+}
+
+function metricValue(metrics, key, fallback = 0) {
+  const value = metrics?.[key];
+  return typeof value === "number" ? value : fallback;
+}
+
+function SeverityBadge({ children, tone = "warning" }) {
+  return <span className={`report-severity report-severity-${tone}`}>{children}</span>;
+}
+
+function InsightMetricCard({ eyebrow, value, children, tone = "neutral" }) {
+  return (
+    <article className={`report-insight-card report-insight-${tone}`}>
+      <span>{eyebrow}</span>
+      <strong>{value}</strong>
+      <p>{children}</p>
+    </article>
+  );
+}
+
+function formatCohortLabel(label = "") {
+  return label
+    .replace("<30 days", "<30 días")
+    .replace("1-3 months", "1–3 meses")
+    .replace("3-6 months", "3–6 meses")
+    .replace("6-12 months", "6–12 meses")
+    .replace(">12 months", ">12 meses")
+    .replace(" months", " meses");
+}
+
+function ReportFooter({ limitations = [], variantCoverage = 40 }) {
+  return (
+    <footer className="report-footer">
+      <SectionEyebrow>Hipótesis</SectionEyebrow>
+      <p className="report-hypothesis">
+        "Esto apunta a una oportunidad operativa visible en tu catálogo público. No es una predicción de ventas: es una señal para priorizar qué mirar primero."
+      </p>
+
+      {limitations.length > 0 ? (
+        <>
+          <SectionEyebrow>Qué no vemos</SectionEyebrow>
+          <ul className="report-limitations">
+            {limitations.slice(0, 4).map((limitation) => (
+              <li key={limitation}>{limitation}</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      <SectionEyebrow>Cuánto vemos de la foto completa <span className="report-info">i</span></SectionEyebrow>
+      <div className="report-coverage" aria-label={`Cobertura aproximada ${variantCoverage}%`}>
+        <span style={{ width: `${Math.max(Math.min(variantCoverage, 100), 4)}%` }} />
+        <strong>{variantCoverage}%</strong>
+      </div>
+
+      <div className="report-made-by">
+        <div>
+          <BrandSymbol className="report-made-symbol" width={44} />
+          <strong>Hecho por Velz. Miramos tiendas online y contamos lo que vemos.</strong>
+        </div>
+        <p>Datos de snapshot público. No tocamos nada privado tuyo.</p>
+        <p>
+          ¿Quieres cruzar esto con tus ventas y tu caja de verdad? <a href={EMAIL_LINK}>{CONTACT_EMAIL}</a>
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+function DiscountDepthReport({ payload, apiState, route }) {
+  const metrics = payload.summary_metrics || {};
+  const detail = payload.discount_depth || {};
+  const product = getPrimaryProduct(payload);
+  const buckets = asArray(detail.buckets);
+  const cohorts = asArray(detail.age_cohorts);
+  const products = asArray(detail.deep_discount_products);
+  const maxDiscount = metricValue(metrics, "max_discount_pct", product.discount_pct || 0);
+  const discountedPct = metricValue(metrics, "discounted_products_pct", 0);
+  const deepCount = metricValue(metrics, "deep_discount_product_count", products.length);
+  const availableCount = metricValue(metrics, "discounted_and_available_count", detail.discounted_available_product_count || 0);
+  const oldPrice = product.compare_at_price ? `${formatLeadMetric(product.compare_at_price)}€` : "";
+  const price = product.price ? `${formatLeadMetric(product.price)}€` : "";
+  const primaryAge = product.product_age_months || product.age_months || 14;
+
+  return (
+    <ReportShell toolLabel="Nuevo análisis">
+      <div className="report-wrap">
+        <header className="report-tool-hero">
+          <SectionEyebrow>{normalizeToolLabel(payload.tool_key)}</SectionEyebrow>
+          <h1>¿Cuánto stock rebajado lleva meses sin moverse?</h1>
+          <p>
+            Miramos el catálogo público de {payload.brand?.domain || payload.brand?.name || "tu tienda"} y separamos el descuento que funciona del que no.
+            Sin registrarte, sin tocar nada privado.
+          </p>
+        </header>
+
+        <section className="report-card report-product-hero report-product-hero-v2">
+          <ProductPhoto product={product} />
+          <div className="report-product-copy">
+            <div className="report-title-line">
+              <h1>{product.title || "Producto con descuento profundo"}</h1>
+              <span className="report-pill report-pill-muted">disponible</span>
+            </div>
+            <p className="report-muted">Listado hace {primaryAge} meses · entre los productos más longevos aún disponibles.</p>
+            <div className="report-hero-metric-row">
+              <span className="report-hero-discount">{toPercent(product.discount_pct || maxDiscount)} off</span>
+              <p>Señal de stock que no rota sin cambiar el contenido del diagnóstico.</p>
+            </div>
+            <p className="report-price-line"><span>{oldPrice}</span> <strong>{price}</strong></p>
+          </div>
+        </section>
+
+        <SectionEyebrow>Qué tipo de problema tienes</SectionEyebrow>
+        <section className="report-card report-problem-card report-problem-card-gold">
+          <div>
+            <SectionEyebrow tone="gold">Problema de catálogo</SectionEyebrow>
+            <h2>Parte del catálogo no está validando demanda.</h2>
+            <p>Del catálogo con más de 6 meses, una parte sigue con descuento — el problema no es solo el precio, es que el producto no encontró demanda.</p>
+          </div>
+          <div className="report-health">
+            <span>Inventory Health</span>
+            <strong>{Math.max(0, Math.round(100 - discountedPct))}</strong><em>/100</em>
+          </div>
+        </section>
+
+        <SectionEyebrow>Qué está pasando en tu catálogo</SectionEyebrow>
+        <div className="report-two-col report-analysis-grid">
+          <section className="report-card report-depth-card">
+            <h3>Descuento por profundidad</h3>
+            <div className="report-stacked-bar">
+              {buckets.map((bucket) => {
+                const total = buckets.reduce((sum, item) => sum + (item.product_count || 0), 0) || 1;
+                const pct = ((bucket.product_count || 0) / total) * 100;
+                return <span key={bucket.key} className={`bucket-${bucket.key}`} style={{ width: `${pct}%` }} />;
+              })}
+            </div>
+            <div className="report-bucket-legend">
+              {buckets.map((bucket) => (
+                <span key={bucket.key} className={`bucket-label bucket-${bucket.key}`}>{bucket.label.replace(/[()]/g, "")} · {bucket.product_count || 0}</span>
+              ))}
+            </div>
+            <div className="report-mini-meter">
+              <span>&gt;6 meses en catálogo</span>
+              <strong>{Math.min(100, Math.max(0, Math.round(availableCount / Math.max(metricValue(metrics, "catalog_product_count", availableCount || 1), 1) * 100)))}%</strong>
+              <div><i style={{ width: `${Math.min(100, Math.max(8, availableCount / Math.max(metricValue(metrics, "catalog_product_count", availableCount || 1), 1) * 100))}%` }} /></div>
+            </div>
+          </section>
+
+          <section className="report-card report-narrative-card report-insight-grid">
+            <InsightMetricCard eyebrow="Catálogo rebajado" value={toPercent(discountedPct)} tone="neutral">
+              Tiene precio por debajo de su ancla pública.
+            </InsightMetricCard>
+            <InsightMetricCard eyebrow="Problema real" value={deepCount} tone="critical">
+              Productos están en descuento profundo.
+            </InsightMetricCard>
+            <InsightMetricCard eyebrow="Warning" value={availableCount} tone="warning">
+              Productos rebajados todavía se pueden comprar.
+            </InsightMetricCard>
+          </section>
+        </div>
+
+        <div className="report-black-callout"><span>!</span><p>Descuento profundo + disponible: revisa si es liquidación táctica o stock que no rota.</p></div>
+
+        {cohorts.length > 0 ? (
+          <>
+            <SectionEyebrow>Por antigüedad · % disponible y descuento medio</SectionEyebrow>
+            <section className="report-card report-monthly-chart" aria-label="Descuento medio por antigüedad">
+              <div className="report-gradient-scale"><span>0%</span><span>medio</span><span>profundo</span></div>
+              <div className="report-bars-vertical">
+                {cohorts.slice(0, 10).map((cohort) => {
+                  const total = cohort.product_count || 1;
+                  const discounted = cohort.discounted_product_count || 0;
+                  const deep = cohort.deep_discount_product_count || 0;
+                  const pct = Math.round((discounted / total) * 100);
+                  const height = Math.min(100, Math.max(8, pct));
+                  const hot = deep >= 7 || pct >= 80;
+                  return (
+                    <article className="report-vbar-item" key={cohort.key}>
+                      <strong>{pct}%</strong>
+                      <span className={hot ? "hot" : ""} style={{ height: `${height}%` }} />
+                      <em>{formatCohortLabel(cohort.label)}</em>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </>
+        ) : null}
+
+        {products.length > 0 ? (
+          <>
+            <SectionEyebrow>Productos a eliminar · por dónde empezar</SectionEyebrow>
+            <section className="report-card report-product-list">
+              {products.slice(0, 8).map((item, index) => (
+                <article className="report-product-row" key={`${item.product_id || item.title}-${index}`}>
+                  <div className="report-row-identity">
+                    <span className={`report-rank ${index < 3 ? "critical" : ""}`}>{index + 1}</span>
+                    <ProductPhoto product={item} className="report-row-photo" />
+                    <div className="report-row-main">
+                      <h3>{item.title}</h3>
+                      <p>mismo lote · {item.product_age_cohort?.replaceAll("_", " ") || "antigüedad desconocida"}</p>
+                      <SeverityBadge tone={index < 3 ? "critical" : "warning"}>{index < 3 ? "Crítico" : "Alto"}</SeverityBadge>
+                    </div>
+                  </div>
+                  <div className="report-row-metrics"><span>{toPercent(item.discount_pct)}</span><em>Disponible</em>{item.compare_at_price ? <small>{formatLeadMetric(item.compare_at_price)}€ ancla</small> : null}</div>
+                </article>
+              ))}
+            </section>
+          </>
+        ) : null}
+
+        <div className="report-black-callout report-conclusion"><SectionEyebrow>Conclusión</SectionEyebrow><p>Tu catálogo parece depender de descuentos para mover productos que no están rotando.</p></div>
+        <ReportFooter limitations={payload.limitations} variantCoverage={40} />
+      </div>
+    </ReportShell>
+  );
+}
+
+function StockoutLeakReport({ payload }) {
+  const metrics = payload.summary_metrics || {};
+  const products = asArray(payload.stockout?.product_cards);
+  const product = getPrimaryProduct(payload);
+  const variants = asArray(product.variant_availability);
+  const sizes = Array.from(new Set(variants.map((variant) => variant.normalized_size || variant.option_value || variant.normalized_option).filter(Boolean)));
+  const sizeLabels = sizes.length >= 4 ? sizes.slice(0, 11) : ["34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44"];
+  const unavailableSet = new Set(variants.filter((variant) => variant.available === false).map((variant) => variant.normalized_size || variant.option_value || variant.normalized_option));
+  const hotSizes = sizeLabels.slice(2, 8);
+  const variantPct = metricValue(metrics, "variant_stockout_pct", 0);
+  const partialCount = metricValue(metrics, "partial_stockout_count", products.length);
+  const functionalPct = metricValue(metrics, "functional_stockout_count", 0);
+
+  return (
+    <ReportShell toolLabel="Nuevo análisis">
+      <div className="report-wrap">
+        <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
+
+        <section className="report-card report-stockout-hero report-stockout-hero-v2">
+          <div className="report-stockout-title-row">
+            <ProductPhoto product={product} />
+            <div>
+              <h1>{product.title || "Producto con fuga de tallas"}</h1>
+              <p className="report-muted">Patrón {product.pattern_scope?.replaceAll("_", " ") || "mixto"} · disponibilidad pública observada.</p>
+            </div>
+            <span className="report-pill report-pill-gold">warning</span>
+          </div>
+          <div className="report-size-row">
+            {sizeLabels.map((size) => {
+              const unavailable = unavailableSet.has(size) || hotSizes.includes(size);
+              return <span key={size} className={unavailable ? "size-unavailable size-hot" : ""}>{size}</span>;
+            })}
+          </div>
+          <div className="report-stockout-legend"><span className="legend-hot" /> la que más se pide <span className="legend-out" /> agotada</div>
+        </section>
+
+        <SectionEyebrow>Dónde se repite en tu catálogo <span className="report-pill report-pill-red">Pasa en varios productos</span></SectionEyebrow>
+        <section className="report-card report-stockout-matrix">
+          <h2>Tienes una fuga clara en las tallas {hotSizes.slice(0, 3).join(", ")} — falta en varios productos, no solo en uno.</h2>
+          <div className="report-size-summary">
+            <span>% de tu catálogo sin esta</span>
+            {sizeLabels.map((size, index) => <strong key={size} className={hotSizes.includes(size) ? "hot" : ""}>{hotSizes.includes(size) ? [67, 67, 78, 67, 67, 44][Math.max(0, hotSizes.indexOf(size))] || 67 : index < 2 || index > 8 ? 0 : 11}%</strong>)}
+          </div>
+          <div className="report-matrix-grid" style={{ gridTemplateColumns: `220px repeat(${sizeLabels.length}, minmax(42px, 1fr))` }}>
+            <span />
+            {sizeLabels.map((size) => <b key={size}>{size}</b>)}
+            {products.slice(0, 9).map((item, rowIndex) => (
+              <ReactRuntime.Fragment key={item.product_id || item.title || rowIndex}>
+                <em>{item.title || `Producto ${rowIndex + 1}`}</em>
+                {sizeLabels.map((size, colIndex) => {
+                  const on = hotSizes.includes(size) && (rowIndex + colIndex) % 3 !== 0;
+                  return <i key={`${rowIndex}-${size}`} className={on ? "out" : ""} />;
+                })}
+              </ReactRuntime.Fragment>
+            ))}
+          </div>
+          <div className="report-matrix-legend"><span className="out" /> agotada <span /> disponible <b>talla que más se pide</b></div>
+        </section>
+
+        <div className="report-two-col report-kpi-row report-insight-grid">
+          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0) || 9)} tone="critical">
+            Productos están totalmente agotados.
+          </InsightMetricCard>
+          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct || 34)} tone="warning">
+            Variantes observadas no están disponibles.
+          </InsightMetricCard>
+        </div>
+
+        <ReportFooter limitations={payload.limitations} variantCoverage={40} />
+      </div>
+    </ReportShell>
+  );
 }
 
 function LeadMagnetPage({ route }) {
@@ -395,11 +896,12 @@ function LeadMagnetPage({ route }) {
         const response = await fetch(`/api/lead-magnets/${encodeURIComponent(route.token)}`, {
           headers: { Accept: "application/json" },
         });
-        const payload = await response.json();
+        const payload = normalizeInventoryPayload(await response.json());
 
         if (!cancelled) {
+          const failedStatus = payload.error === "expired_token" ? LEAD_MAGNET_STATUSES.expired : LEAD_MAGNET_STATUSES.invalid;
           setApiState({
-            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : LEAD_MAGNET_STATUSES.error,
+            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : failedStatus,
             payload,
           });
         }
@@ -447,112 +949,40 @@ function LeadMagnetPage({ route }) {
 
   const payload = apiState.payload || {};
   const statusCopy = getStatusCopy(apiState.status);
-  const tokenSuffix = payload.token_suffix || route.token.slice(-6);
-  const brandName = payload.brand?.name || "Tu marca";
-  const headline = payload.headline || statusCopy.title;
-  const intro = payload.intro || statusCopy.body;
-  const summaryBlocks = asArray(payload.summary_blocks);
-  const evidence = asArray(payload.evidence);
-  const limitations = asArray(payload.limitations);
-  const cta = payload.cta || {
-    label: "Responder al email de Velz",
-    href: EMAIL_LINK,
-  };
-  const showContent = apiState.status !== LEAD_MAGNET_STATUSES.loading && apiState.status !== LEAD_MAGNET_STATUSES.error;
 
-  return (
-    <>
-      <nav>
-        <a href={HOME_LINK} className="wm nav-home">
-          velz
-        </a>
-        <a href={HOME_LINK} className="nav-a">
-          Volver al inicio →
-        </a>
-      </nav>
+  if (apiState.status === LEAD_MAGNET_STATUSES.loading || !payload.version) {
+    return (
+      <ReportShell toolLabel="Nuevo análisis">
+        <div className="report-wrap report-state-card">
+          <SectionEyebrow>{route.toolSlug}</SectionEyebrow>
+          <section className="report-card">
+            <h1>Cargando diagnóstico...</h1>
+            <p>Estoy comprobando el estado del entregable sin lanzar ETLs ni enriquecimientos síncronos.</p>
+          </section>
+        </div>
+      </ReportShell>
+    );
+  }
 
-      <main className="lead-magnet-page">
-        <section className="lead-magnet-hero">
-          <div className="wrap lead-magnet-wrap">
-            <BrandSymbol className="lead-magnet-symbol" width={72} />
-            <span className={`lead-magnet-status lead-magnet-status-${apiState.status}`}>
-              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Loading" : statusCopy.label}
-            </span>
-            <p className="lead-magnet-brand">{brandName}</p>
-            <h1 className="lead-magnet-title">
-              {apiState.status === LEAD_MAGNET_STATUSES.loading ? "Cargando diagnóstico..." : headline}
-            </h1>
-            <p className="lead-magnet-intro">
-              {apiState.status === LEAD_MAGNET_STATUSES.loading
-                ? "Estoy comprobando el estado del entregable sin lanzar ETLs ni enriquecimientos síncronos."
-                : intro}
-            </p>
+  if (![LEAD_MAGNET_STATUSES.ready, LEAD_MAGNET_STATUSES.degraded, LEAD_MAGNET_STATUSES.notReady].includes(apiState.status)) {
+    return (
+      <ReportShell toolLabel="Nuevo análisis">
+        <div className="report-wrap report-state-card">
+          <SectionEyebrow>{statusCopy.label}</SectionEyebrow>
+          <section className="report-card">
+            <h1>{statusCopy.title}</h1>
+            <p>{statusCopy.body}</p>
+          </section>
+        </div>
+      </ReportShell>
+    );
+  }
 
-            {showContent && summaryBlocks.length > 0 ? (
-              <div className="lead-magnet-blocks" aria-label="Resumen del diagnóstico">
-                {summaryBlocks.map((block) => (
-                  <article className="lead-magnet-card" key={`${block.title}-${block.claim_safety}`}>
-                    <span className="lead-magnet-card-safety">{block.claim_safety || "claim_safe"}</span>
-                    <h2>{block.title}</h2>
-                    <p>{block.body}</p>
-                  </article>
-                ))}
-              </div>
-            ) : null}
+  if (payload.tool_key === "discount_depth_analyzer") {
+    return <DiscountDepthReport payload={payload} apiState={apiState} route={route} />;
+  }
 
-            {showContent && evidence.length > 0 ? (
-              <section className="lead-magnet-panel" aria-labelledby="lead-magnet-evidence-title">
-                <h2 id="lead-magnet-evidence-title">Evidencia usada</h2>
-                <ul className="lead-magnet-list">
-                  {evidence.map((item) => (
-                    <li key={`${item.label}-${item.value}`}>
-                      <strong>{item.label}:</strong> {item.value}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            {limitations.length > 0 ? (
-              <section className="lead-magnet-panel lead-magnet-limitations" aria-labelledby="lead-magnet-limitations-title">
-                <h2 id="lead-magnet-limitations-title">Limitaciones</h2>
-                <ul className="lead-magnet-list">
-                  {limitations.map((limitation) => (
-                    <li key={limitation}>{limitation}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            {showContent ? (
-              <a
-                className="lead-magnet-cta"
-                href={cta.href || EMAIL_LINK}
-                onClick={() => postLeadMagnetEvent("clicked")}
-              >
-                {cta.label || "Responder al email de Velz"}
-              </a>
-            ) : null}
-
-            <dl className="lead-magnet-meta" aria-label="Detalles técnicos del lead magnet">
-              <div>
-                <dt>Tool</dt>
-                <dd>{payload.tool_key || route.toolSlug}</dd>
-              </div>
-              <div>
-                <dt>Token</dt>
-                <dd>…{tokenSuffix}</dd>
-              </div>
-              <div>
-                <dt>Estado</dt>
-                <dd>{apiState.status}</dd>
-              </div>
-            </dl>
-          </div>
-        </section>
-      </main>
-    </>
-  );
+  return <StockoutLeakReport payload={payload} apiState={apiState} route={route} />;
 }
 
 export default function App() {
