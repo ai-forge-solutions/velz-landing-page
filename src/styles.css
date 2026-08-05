@@ -699,6 +699,16 @@ h2 {
 }
 
 
+
+#cta .cta-shell > h2 {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: clamp(32px, 4vw, 40px);
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+}
+
 .cta-subtitle {
   margin: -18px auto 0;
   color: var(--ink-150);
