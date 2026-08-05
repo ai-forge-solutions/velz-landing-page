@@ -868,28 +868,170 @@ function productUnavailableLabels(product) {
   );
 }
 
+function stockoutProductCategory(product) {
+  return product?.product_type || product?.category || product?.type || "Sin categoría en el payload";
+}
+
+function getStockoutCategoryGroups(stockout) {
+  const providedGroups = asArray(stockout?.category_groups)
+    .map((group) => ({
+      ...group,
+      category: group.category || group.product_type || group.type || "Sin categoría en el payload",
+      products: asArray(group.products),
+    }))
+    .filter((group) => group.products.length > 0);
+
+  if (providedGroups.length > 0) {
+    return providedGroups;
+  }
+
+  const grouped = new Map();
+  for (const product of asArray(stockout?.product_cards)) {
+    const category = stockoutProductCategory(product);
+    const current = grouped.get(category) || {
+      category,
+      product_count: 0,
+      affected_product_count: 0,
+      fully_out_of_stock_count: 0,
+      products: [],
+    };
+    current.product_count += 1;
+    current.affected_product_count += 1;
+    if (product.fully_out_of_stock) current.fully_out_of_stock_count += 1;
+    current.products.push(product);
+    grouped.set(category, current);
+  }
+
+  return Array.from(grouped.values());
+}
+
+function stockoutProductUnavailableCount(product) {
+  const explicit = Number(product?.oos_variants);
+  if (Number.isFinite(explicit)) return explicit;
+  return productUnavailableLabels(product).size;
+}
+
+function stockoutStatusLabel(product) {
+  if (product?.fully_out_of_stock) return "agotado total";
+  if (product?.functional_stockout) return "agotado funcional";
+  if (product?.partial_stockout) return "stockout parcial";
+  return "sin señal";
+}
+
+function StockoutCategoryBlock({ group, index }) {
+  const [expanded, setExpanded] = useState(false);
+  const products = asArray(group.products);
+  const optionLabels = getStockoutColumns(products, products[0]);
+  const visibleProducts = expanded ? products : products.slice(0, 10);
+  const affectedCount = group.affected_product_count || products.length;
+  const productCount = group.product_count || affectedCount;
+  const affectedPct = productCount ? Math.round((affectedCount / productCount) * 100) : 0;
+  const systemicCategory = affectedCount >= 3 && affectedPct >= 50;
+  const fullyOut = group.fully_out_of_stock_count || products.filter((product) => product.fully_out_of_stock).length;
+  const remaining = Math.max(0, products.length - visibleProducts.length);
+
+  return (
+    <article className="report-stockout-type-block">
+      <header className="report-stockout-type-head">
+        <div>
+          <h3>{group.category}</h3>
+          <span className={`report-pill ${systemicCategory ? "report-pill-red" : "report-pill-muted"}`}>
+            {systemicCategory ? "sistémico" : "aislado"}
+          </span>
+        </div>
+        <p><strong>{affectedCount}</strong> de {productCount} producto{productCount === 1 ? "" : "s"} de esta categoría afectados</p>
+      </header>
+
+      <div className="report-category-denominator">
+        <span>{affectedPct}% de esta categoría afectado</span>
+        <em>{fullyOut} agotado{fullyOut === 1 ? "" : "s"} total{fullyOut === 1 ? "" : "es"}</em>
+      </div>
+
+      <div className="report-size-summary report-size-summary-dynamic" style={{ gridTemplateColumns: `190px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
+        <span>Fugas claras por variante</span>
+        {optionLabels.map((label) => {
+          const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
+          const pct = productCount ? Math.round((unavailableCount / productCount) * 100) : 0;
+          return (
+            <strong
+              key={label}
+              className={pct > 0 ? "hot" : ""}
+              title={`${label}: no disponible en ${unavailableCount} de ${productCount} productos de ${group.category}`}
+            >
+              {pct}%
+            </strong>
+          );
+        })}
+      </div>
+
+      <div className="report-matrix-grid report-matrix-grid-dynamic" style={{ gridTemplateColumns: `190px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
+        <span />
+        {optionLabels.map((label) => <b key={label}>{label}</b>)}
+        {visibleProducts.map((item, rowIndex) => {
+          const unavailableSet = productUnavailableLabels(item);
+          return (
+            <ReactRuntime.Fragment key={item.product_id || item.title || `${index}-${rowIndex}`}>
+              <em title={item.title}>{item.title || `Producto ${rowIndex + 1}`}</em>
+              {optionLabels.map((label) => (
+                <i
+                  key={`${rowIndex}-${label}`}
+                  className={unavailableSet.has(label) ? "out" : ""}
+                  title={`${item.title || "Producto"} · ${label}: ${unavailableSet.has(label) ? "agotada/no disponible" : "disponible"}`}
+                />
+              ))}
+            </ReactRuntime.Fragment>
+          );
+        })}
+      </div>
+
+      <div className="report-stockout-products-row">
+        {visibleProducts.slice(0, 12).map((product) => (
+          <a href={product.url} key={product.product_id || product.title} target="_blank" rel="noreferrer" title={product.title}>
+            {product.title}
+          </a>
+        ))}
+      </div>
+
+      {remaining > 0 && !expanded ? (
+        <div className="report-stockout-expand-row">
+          <span>…y el mismo patrón en otros {remaining} modelos.</span>
+          <button type="button" onClick={() => setExpanded(true)}>Ver los {products.length} modelos</button>
+        </div>
+      ) : null}
+      {expanded ? (
+        <button className="report-stockout-collapse" type="button" onClick={() => setExpanded(false)}>Ocultar</button>
+      ) : null}
+    </article>
+  );
+}
+
 function StockoutLeakReport({ payload }) {
   const metrics = payload.summary_metrics || {};
   const stockout = payload.stockout || {};
   const products = asArray(stockout.product_cards);
+  const groups = getStockoutCategoryGroups(stockout);
   const product = getPrimaryProduct(payload);
   const optionLabels = getStockoutColumns(products, product);
   const primaryUnavailableSet = productUnavailableLabels(product);
-  const variantPct = metricValue(metrics, "variant_stockout_pct", 0);
-  const highlightedOptions = optionLabels.filter((label) => primaryUnavailableSet.has(label)).slice(0, 4);
-  const headlineOptions = highlightedOptions.length > 0 ? highlightedOptions.join(", ") : optionLabels.slice(0, 3).join(", ");
+  const catalogProductCount = metricValue(metrics, "product_count", stockout.all_product_count || products.length);
+  const variantCount = metricValue(metrics, "variant_count", metrics.sample_size || 0);
+  const fullyOutCount = metricValue(metrics, "fully_out_of_stock_count", products.filter((item) => item.fully_out_of_stock).length);
+  const affectedCount = stockout.affected_product_count || products.length;
+  const statusText = stockoutStatusLabel(product);
 
   return (
     <ReportShell toolLabel="Nuevo análisis">
       <div className="report-wrap">
         <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
 
-        <section className="report-card report-stockout-hero report-stockout-hero-v2">
+        <section className="report-card report-stockout-hero report-stockout-hero-v2 report-stockout-draft-hero">
           <div className="report-stockout-title-row">
             <ProductPhoto product={product} />
             <div>
-              <h1>{product.title || "Producto con disponibilidad incompleta"}</h1>
-              <p className="report-muted">Patrón {product.pattern_scope?.replaceAll("_", " ") || "mixto"} · disponibilidad pública observada.</p>
+              <h1>{fullyOutCount > 0 ? `Tienes ${formatLeadMetric(fullyOutCount)} productos 100% agotados en el catálogo observado.` : "Tienes disponibilidad incompleta en el catálogo observado."}</h1>
+              <p className="report-muted">
+                La matriz enseña los productos con señal; el denominador real es el catálogo analizado: {formatLeadMetric(catalogProductCount)} productos / {formatLeadMetric(variantCount)} variantes observadas.
+              </p>
             </div>
             <span className="report-pill report-pill-gold">warning</span>
           </div>
@@ -902,47 +1044,52 @@ function StockoutLeakReport({ payload }) {
           <div className="report-stockout-legend"><span className="legend-out" /> agotada/no disponible <span /> disponible</div>
         </section>
 
-        <SectionEyebrow>Dónde se repite en tu catálogo <span className="report-pill report-pill-red">Pasa en varios productos</span></SectionEyebrow>
-        <section className="report-card report-stockout-matrix">
-          <h2>
-            Tienes variantes no disponibles ({headlineOptions}) en varios productos observados.
-          </h2>
-          <div className="report-size-summary">
-            <span>% de productos observados sin esa variante</span>
-            {optionLabels.map((label) => {
-              const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
-              const pct = products.length ? Math.round((unavailableCount / products.length) * 100) : 0;
-              return <strong key={label} className={pct > 0 ? "hot" : ""}>{pct}%</strong>;
-            })}
-          </div>
-          <div className="report-matrix-grid" style={{ gridTemplateColumns: `220px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
-            <span />
-            {optionLabels.map((label) => <b key={label}>{label}</b>)}
-            {products.slice(0, 9).map((item, rowIndex) => {
-              const unavailableSet = productUnavailableLabels(item);
-              return (
-                <ReactRuntime.Fragment key={item.product_id || item.title || rowIndex}>
-                  <em>{item.title || `Producto ${rowIndex + 1}`}</em>
-                  {optionLabels.map((label) => (
-                    <i key={`${rowIndex}-${label}`} className={unavailableSet.has(label) ? "out" : ""} />
-                  ))}
-                </ReactRuntime.Fragment>
-              );
-            })}
-          </div>
-          <div className="report-matrix-legend"><span className="out" /> agotada/no disponible <span /> disponible</div>
-        </section>
-
-        <div className="report-two-col report-kpi-row report-insight-grid">
-          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0))} tone="critical">
-            Productos están totalmente agotados.
+        <SectionEyebrow>Los tres ejes</SectionEyebrow>
+        <div className="report-two-col report-kpi-row report-insight-grid report-stockout-metrics-grid">
+          <InsightMetricCard eyebrow="Catálogo analizado" value={formatLeadMetric(catalogProductCount)} tone="neutral">
+            Productos públicos incluidos en el snapshot.
           </InsightMetricCard>
-          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct)} tone="warning">
-            Variantes observadas no están disponibles.
+          <InsightMetricCard eyebrow="Variantes observadas" value={formatLeadMetric(variantCount)} tone="neutral">
+            Variantes públicas contadas en el catálogo.
+          </InsightMetricCard>
+          <InsightMetricCard eyebrow="Productos 100% agotados" value={formatLeadMetric(fullyOutCount)} tone="critical">
+            Productos sin ninguna variante disponible.
           </InsightMetricCard>
         </div>
 
-        <ReportFooter limitations={payload.limitations} variantCoverage={40} />
+        <SectionEyebrow>Dónde está tu problema, por categoría de producto</SectionEyebrow>
+        <section className="report-card report-stockout-matrix report-stockout-by-category">
+          <h2>
+            {affectedCount} productos con señal dentro de {formatLeadMetric(catalogProductCount)} productos analizados.
+          </h2>
+          <p className="report-muted report-stockout-denominator-note">
+            Estos porcentajes se calculan contra cada categoría o contra el catálogo completo, no contra las filas visibles de la matriz. Las categorías salen del payload de Shopify/Supabase; si una tienda no informa categoría, se muestra como faltante.
+          </p>
+
+          {groups.length > 0 ? groups.map((group, index) => (
+            <StockoutCategoryBlock group={group} index={index} key={`${group.category}-${index}`} />
+          )) : (
+            <p className="report-muted">No hay categorías con señal pública suficiente para pintar la matriz.</p>
+          )}
+
+          <div className="report-matrix-legend"><span className="out" /> agotada/no disponible <span /> disponible</div>
+        </section>
+
+        <SectionEyebrow>El caso más claro de tu catálogo</SectionEyebrow>
+        <section className="report-card report-product-hero report-stockout-product-proof">
+          <ProductPhoto product={product} />
+          <div className="report-product-copy">
+            <div className="report-title-line">
+              <h1>{product.title || "Producto con señal de stockout"}</h1>
+              <span className="report-pill report-pill-red">{statusText}</span>
+            </div>
+            <p className="report-muted">
+              {stockoutProductCategory(product)} · {stockoutProductUnavailableCount(product)} de {product.total_variants || asArray(product.variant_availability).length || 1} variantes no disponibles.
+            </p>
+          </div>
+        </section>
+
+        <ReportFooter limitations={payload.limitations} variantCoverage={Math.min(100, Math.max(4, Math.round((variantCount / Math.max(variantCount, 1)) * 40)))} />
       </div>
     </ReportShell>
   );
