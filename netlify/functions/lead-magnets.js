@@ -1433,6 +1433,25 @@ function isEventRequest(event) {
   return event.path?.includes("/events") || event.queryStringParameters?.event === "1";
 }
 
+const LIVE_EXAMPLE_TOKENS = {
+  "example-susmies-discount": {
+    brandId: "11dcb1c4-069b-400a-b025-6fb1a7087bd5",
+    toolKey: "discount_depth_analyzer",
+  },
+  "example-northdeco-stockout": {
+    brandId: "92e18414-055b-4a05-a6f6-5303ee918f9b",
+    toolKey: "stockout_leak_score",
+  },
+  "example-northdeco-discount": {
+    brandId: "92e18414-055b-4a05-a6f6-5303ee918f9b",
+    toolKey: "discount_depth_analyzer",
+  },
+  "example-munkombucha-discount": {
+    brandId: "127b2031-413e-488c-8ac0-827dbd59b15a",
+    toolKey: "discount_depth_analyzer",
+  },
+};
+
 function payloadWithToken(token, payload) {
   return {
     ...payload,
@@ -1441,9 +1460,338 @@ function payloadWithToken(token, payload) {
   };
 }
 
-function getPayload(token) {
+function getSupabaseConfig() {
+  return {
+    url: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+    key:
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY,
+  };
+}
+
+function toNumber(value, fallback = 0) {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function monthsSince(dateString) {
+  if (!dateString) {
+    return 14;
+  }
+
+  const ts = Date.parse(dateString);
+  if (Number.isNaN(ts)) {
+    return 14;
+  }
+
+  return Math.max(0, Math.round((Date.now() - ts) / (1000 * 60 * 60 * 24 * 30.4375)));
+}
+
+function ageCohortFromMonths(months) {
+  if (months < 1) return "lt_30_days";
+  if (months < 3) return "one_to_three_months";
+  if (months < 6) return "three_to_six_months";
+  if (months < 12) return "six_to_twelve_months";
+  return "gt_12_months";
+}
+
+function deepBucket(product) {
+  const discount = toNumber(product.max_discount_pct || product.discount_pct);
+  if (discount >= 40) return "deep";
+  if (discount >= 25) return "medium";
+  return "superficial";
+}
+
+async function supabaseFetch(path) {
+  const { url, key } = getSupabaseConfig();
+  if (!url || !key) {
+    throw new Error("missing_supabase_env");
+  }
+
+  const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${path}`, {
+    headers: {
+      apikey: key,
+      authorization: `Bearer ${key}`,
+      accept: "application/json",
+    },
+  });
+
+  const body = await response.text();
+  if (!response.ok) {
+    throw new Error(`supabase_${response.status}_${body.slice(0, 160)}`);
+  }
+
+  return JSON.parse(body);
+}
+
+async function loadLiveExampleData({ brandId }) {
+  const brandRows = await supabaseFetch(
+    `brands?select=id,name,domain,website_url&id=eq.${encodeURIComponent(brandId)}&limit=1`,
+  );
+  const brand = brandRows[0];
+  if (!brand) {
+    return null;
+  }
+
+  const analysisRows = await supabaseFetch(
+    `shopify_signal_analyses?select=*&brand_id=eq.${encodeURIComponent(brandId)}&order=generated_at.desc.nullslast&limit=1`,
+  );
+  const analysis = analysisRows[0];
+  if (!analysis) {
+    return { brand, analysis: null, products: [], items: [] };
+  }
+
+  const catalogId = analysis.catalog_scrape_id;
+  const products = await supabaseFetch(
+    `shopify_products?select=id,title,product_url,featured_image_url,total_variants,available_variants,oos_variants,fully_out_of_stock,partially_out_of_stock,min_price,max_price,min_compare_at_price,max_compare_at_price,max_discount_pct,avg_discount_pct,has_discount,created_at_shopify&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=max_discount_pct.desc.nullslast,oos_variants.desc&limit=24`,
+  );
+  const items = await supabaseFetch(
+    `shopify_signal_items?select=id,signal_type,claim_safety,product_title,product_url,image_url,metric_label,metric_value,price,compare_at_price,discount_pct,available_variants,total_variants,oos_ratio,product_age_days,created_at&brand_id=eq.${encodeURIComponent(brandId)}&catalog_scrape_id=eq.${encodeURIComponent(catalogId)}&order=created_at.desc&limit=48`,
+  );
+
+  return { brand, analysis, products, items };
+}
+
+function buildSourceRefs(data) {
+  return [
+    { table: "brands", id: data.brand.id },
+    data.analysis?.catalog_scrape_id ? { table: "shopify_catalog_scrapes", id: data.analysis.catalog_scrape_id } : null,
+    data.analysis?.id ? { table: "shopify_signal_analyses", id: data.analysis.id } : null,
+  ].filter(Boolean);
+}
+
+function buildDiscountPayload(data) {
+  const { brand, analysis, products, items } = data;
+  if (!analysis) return null;
+
+  const discountedProducts = products.filter((product) => product.has_discount);
+  const deepProducts = discountedProducts.filter((product) => toNumber(product.max_discount_pct) >= 40);
+  const selectedProducts = (deepProducts.length ? deepProducts : discountedProducts).slice(0, 8);
+  const buckets = ["superficial", "medium", "deep"].map((key) => {
+    const matching = discountedProducts.filter((product) => deepBucket(product) === key);
+    return {
+      key,
+      label: key === "superficial" ? "Superficial (<25%)" : key === "medium" ? "Medium (25-40%)" : "Deep (>=40%)",
+      min_pct_inclusive: key === "superficial" ? 0 : key === "medium" ? 25 : 40,
+      max_pct_exclusive: key === "superficial" ? 25 : key === "medium" ? 40 : null,
+      product_count: matching.length,
+      available_product_count: matching.filter((product) => toNumber(product.available_variants) > 0).length,
+      source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
+    };
+  });
+  const cohortMap = new Map();
+  discountedProducts.forEach((product) => {
+    const months = monthsSince(product.created_at_shopify);
+    const key = ageCohortFromMonths(months);
+    const current = cohortMap.get(key) || { product_count: 0, discounted_product_count: 0, deep_discount_product_count: 0 };
+    current.product_count += 1;
+    current.discounted_product_count += 1;
+    if (toNumber(product.max_discount_pct) >= 40) current.deep_discount_product_count += 1;
+    cohortMap.set(key, current);
+  });
+  const cohortLabels = {
+    lt_30_days: "<30 days",
+    one_to_three_months: "1-3 months",
+    three_to_six_months: "3-6 months",
+    six_to_twelve_months: "6-12 months",
+    gt_12_months: ">12 months",
+  };
+  const ageCohorts = Object.entries(cohortLabels).map(([key, label]) => ({
+    key,
+    label,
+    product_count: cohortMap.get(key)?.product_count || 0,
+    discounted_product_count: cohortMap.get(key)?.discounted_product_count || 0,
+    deep_discount_product_count: cohortMap.get(key)?.deep_discount_product_count || 0,
+    source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
+  }));
+  const evidenceItems = selectedProducts.slice(0, 3).map((product) => ({
+    id: product.id,
+    title: product.title,
+    body: `${product.title} aparece con un descuento máximo observado de ${toNumber(product.max_discount_pct).toFixed(1)}% en el catálogo público.`,
+    claim_safety: { level: "hard_fact", visibility: "public", rationale: "Price and compare_at_price are public Shopify catalog fields." },
+    source_refs: [{ table: "shopify_products", id: product.id }],
+    public: true,
+    metrics: { discount_pct: toNumber(product.max_discount_pct), available: toNumber(product.available_variants) > 0 },
+  }));
+
+  return {
+    version: "inventory_lead_magnet_payload_v1",
+    status: selectedProducts.length ? "ready" : "not_ready",
+    tool_key: "discount_depth_analyzer",
+    brand,
+    generated_at: new Date().toISOString(),
+    data_freshness: { catalog_scraped_at: analysis.created_at, analysis_generated_at: analysis.generated_at },
+    summary_metrics: {
+      catalog_product_count: products.length,
+      discounted_product_count: toNumber(analysis.discounted_products_count, discountedProducts.length),
+      discounted_products_pct: toNumber(analysis.discounted_products_pct),
+      average_discount_pct: null,
+      min_discount_pct: null,
+      max_discount_pct: Math.max(0, ...discountedProducts.map((product) => toNumber(product.max_discount_pct))),
+      deep_discount_product_count: deepProducts.length,
+      discounted_and_available_count: discountedProducts.filter((product) => toNumber(product.available_variants) > 0).length,
+    },
+    sections: [],
+    evidence_items: evidenceItems,
+    charts: {},
+    public_limitations: [
+      {
+        code: "compare_at_price_anchor",
+        message:
+          "Discount depth uses Shopify compare_at_price as the anchor price; this is a public catalog field, not proof of historical selling price or margin impact.",
+        source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
+      },
+    ],
+    internal_warnings: [],
+    source_refs: buildSourceRefs(data),
+    discount_depth: {
+      buckets,
+      age_cohorts: ageCohorts,
+      deep_discount_products: selectedProducts.map((product) => ({
+        product_id: product.id,
+        title: product.title,
+        url: product.product_url,
+        image_url: product.featured_image_url,
+        price: toNumber(product.min_price, null),
+        compare_at_price: toNumber(product.max_compare_at_price, null),
+        discount_pct: toNumber(product.max_discount_pct),
+        bucket: deepBucket(product),
+        available: toNumber(product.available_variants) > 0,
+        product_age_cohort: ageCohortFromMonths(monthsSince(product.created_at_shopify)),
+        product_age_months: monthsSince(product.created_at_shopify),
+        claim_safety: { level: "hard_fact", visibility: "public", rationale: "Public Shopify catalog product row." },
+        source_refs: [{ table: "shopify_products", id: product.id }],
+      })),
+      discounted_available_product_count: discountedProducts.filter((product) => toNumber(product.available_variants) > 0).length,
+      compare_at_price_caveat_required: true,
+    },
+    stockout: null,
+    debug: { input_layer: "live_supabase_shopify_signals", fixture: false },
+  };
+}
+
+function buildStockoutPayload(data) {
+  const { brand, analysis, products, items } = data;
+  if (!analysis) return null;
+
+  const stockoutItems = items.filter((item) => ["partial_stockout", "fully_out_of_stock", "functional_stockout", "core_size_stockout"].includes(item.signal_type));
+  const stockoutProducts = products.filter((product) => product.fully_out_of_stock || product.partially_out_of_stock);
+  const selected = (stockoutItems.length ? stockoutItems : stockoutProducts).slice(0, 9);
+  const productCards = selected.map((item, index) => {
+    const product = item.product_title ? item : stockoutProducts[index] || item;
+    const total = toNumber(product.total_variants, 1);
+    const oos = toNumber(product.metric_value || product.oos_variants, 1);
+    return {
+      product_id: product.id || product.product_title || product.title,
+      title: product.product_title || product.title,
+      url: product.product_url,
+      image_url: product.image_url || product.featured_image_url,
+      availability_status:
+        product.signal_type === "fully_out_of_stock" || product.fully_out_of_stock ? "fully_out_of_stock" : "partially_out_of_stock",
+      fully_out_of_stock: product.signal_type === "fully_out_of_stock" || product.fully_out_of_stock || false,
+      partial_stockout: product.signal_type !== "fully_out_of_stock" && !product.fully_out_of_stock,
+      functional_stockout: product.signal_type === "functional_stockout",
+      pattern_scope: selected.length > 1 ? "mixed" : "isolated",
+      variant_availability: Array.from({ length: Math.max(1, Math.min(total, 8)) }).map((_, variantIndex) => ({
+        product_id: product.id || product.product_title || product.title,
+        option_name: "Opción",
+        option_value: String(variantIndex + 1),
+        normalized_option: String(variantIndex + 1),
+        normalized_size: String(variantIndex + 1),
+        size_role: "unknown",
+        available: variantIndex >= oos,
+        availability_status: variantIndex < oos ? "fully_out_of_stock" : "in_stock",
+        claim_safety: { level: "hard_fact", visibility: "public", rationale: "Availability is public Shopify catalog snapshot data." },
+        source_refs: product.id ? [{ table: product.product_title ? "shopify_signal_items" : "shopify_products", id: product.id }] : buildSourceRefs(data),
+      })),
+      claim_safety: { level: product.claim_safety || "hard_fact", visibility: "public", rationale: "Public Shopify availability signal." },
+      source_refs: product.id ? [{ table: product.product_title ? "shopify_signal_items" : "shopify_products", id: product.id }] : buildSourceRefs(data),
+    };
+  });
+
+  return {
+    version: "inventory_lead_magnet_payload_v1",
+    status: productCards.length ? "degraded" : "not_ready",
+    tool_key: "stockout_leak_score",
+    brand,
+    generated_at: new Date().toISOString(),
+    data_freshness: { catalog_scraped_at: analysis.created_at, analysis_generated_at: analysis.generated_at },
+    summary_metrics: {
+      product_count: products.length,
+      variant_count: products.reduce((sum, product) => sum + toNumber(product.total_variants), 0),
+      fully_out_of_stock_count: toNumber(analysis.fully_out_of_stock_count),
+      partial_stockout_count: toNumber(analysis.partially_out_of_stock_count),
+      functional_stockout_count: stockoutItems.filter((item) => item.signal_type === "functional_stockout").length,
+      variant_stockout_pct: toNumber(analysis.variant_stockout_pct),
+      pattern_scope: productCards.length > 1 ? "mixed" : "isolated",
+      size_curve_applicable: Boolean(analysis.size_pattern_applicable),
+      sample_size: products.reduce((sum, product) => sum + toNumber(product.total_variants), 0),
+      sample_limitations: Array.isArray(analysis.data_quality_warnings) ? analysis.data_quality_warnings : [],
+    },
+    sections: [],
+    evidence_items: productCards.slice(0, 3).map((product) => ({
+      id: product.product_id,
+      title: product.title,
+      body: `${product.title} tiene disponibilidad incompleta en el snapshot público de Shopify.`,
+      claim_safety: { level: "hard_fact", visibility: "public", rationale: "Public Shopify availability signal." },
+      source_refs: product.source_refs,
+      public: true,
+      metrics: { availability_status: product.availability_status },
+    })),
+    charts: {},
+    public_limitations: [
+      {
+        code: "public_availability_only",
+        message:
+          "Availability is based on public Shopify snapshot data; it does not expose inventory quantity, sales velocity or lost revenue.",
+        source_refs: [{ table: "shopify_signal_analyses", id: analysis.id }],
+      },
+    ],
+    internal_warnings: [],
+    source_refs: buildSourceRefs(data),
+    stockout: {
+      product_cards: productCards,
+      size_roles: { core: [], peripheral: [], unknown: [], not_applicable: [] },
+      pattern_scope: productCards.length > 1 ? "mixed" : "isolated",
+      size_curve_applicable: Boolean(analysis.size_pattern_applicable),
+      sample_limitations: Array.isArray(analysis.data_quality_warnings) ? analysis.data_quality_warnings : [],
+    },
+    discount_depth: null,
+    debug: { input_layer: "live_supabase_shopify_signals", fixture: false },
+  };
+}
+
+async function getLiveExamplePayload(token) {
+  const example = LIVE_EXAMPLE_TOKENS[token];
+  if (!example) return undefined;
+
+  const data = await loadLiveExampleData(example);
+  if (!data || !data.analysis) return null;
+
+  const payload = example.toolKey === "discount_depth_analyzer" ? buildDiscountPayload(data) : buildStockoutPayload(data);
+  if (!payload) return null;
+
+  return {
+    ...payload,
+    token_suffix: token.slice(-6),
+    fixture: false,
+    live_example: true,
+  };
+}
+
+async function getPayload(token) {
   if (FIXTURE_PAYLOADS.has(token)) {
     return payloadWithToken(token, FIXTURE_PAYLOADS.get(token));
+  }
+
+  const liveExamplePayload = await getLiveExamplePayload(token);
+  if (liveExamplePayload !== undefined) {
+    return liveExamplePayload;
   }
 
   if (EXPIRED_TOKENS.has(token)) {
@@ -1497,7 +1845,15 @@ export async function handler(event) {
     return json(405, { error: "method_not_allowed" });
   }
 
-  const payload = getPayload(token);
+  let payload;
+  try {
+    payload = await getPayload(token);
+  } catch (error) {
+    return json(500, {
+      error: "lead_magnet_payload_load_failed",
+      message: error.message,
+    });
+  }
 
   if (payload === null) {
     return json(410, { error: "expired_token" });
