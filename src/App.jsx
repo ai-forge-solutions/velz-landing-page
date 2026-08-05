@@ -1,7 +1,6 @@
 import * as ReactRuntime from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useForm, ValidationError } from "@formspree/react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 import miguelHeadshot from "../assets/miguel-headshot.webp";
@@ -36,21 +35,41 @@ const cardsVs = [
   },
 ];
 
-const steps = [
+const mechanismSteps = [
   {
+    key: "ventas",
     number: "01",
-    title: "Conexión.",
-    body: "Shopify, Meta, Google, tu inventario y tu banco. Una semana, sin trabajo de tu parte.",
+    eyebrow: "Ventas históricas",
+    title: "Primero miro la línea real, no el dashboard aislado.",
+    body: "Parto de las ventas históricas por producto para ver qué demanda ya existe antes de tocar presupuesto, stock o caja.",
   },
   {
+    key: "prediccion",
     number: "02",
-    title: "Modelo.",
-    body: "Cruzo demanda esperada por canal con cobertura de stock y posición de caja.",
+    eyebrow: "Predicción",
+    title: "Después proyecto qué pasaría si empujas Meta.",
+    body: "La predicción marca el rango de demanda futura y señala qué producto puede quedarse corto si el impulso funciona.",
   },
   {
+    key: "palancas",
     number: "03",
-    title: "Decisión.",
-    body: "Reunión quincenal de 45 minutos. Sales con qué hacer, cuándo y con qué dinero.",
+    eyebrow: "Palancas",
+    title: "Luego convierto esa demanda en rango correcto de stock.",
+    body: "No es “pide más”. Es cuánto pedir, qué SKU priorizar y dónde está el margen de seguridad antes de inmovilizar dinero.",
+  },
+  {
+    key: "datos",
+    number: "04",
+    eyebrow: "Origen de dato",
+    title: "Cada recomendación queda conectada a su fuente.",
+    body: "Ads, inventario y ventas no se sustituyen entre sí: se conectan para que veas de dónde sale cada hipótesis.",
+  },
+  {
+    key: "caja",
+    number: "05",
+    eyebrow: "Caja",
+    title: "Y solo entonces cierro el loop con caja.",
+    body: "Escalar y pedir stock solo tiene sentido si hay caja para ejecutarlo sin asfixiar el mes siguiente.",
   },
 ];
 
@@ -58,12 +77,12 @@ const paraTi = ["Marca de 500K–5M €", "Shopify", "12+ meses de historial de 
 const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar la ejecución de ads"];
 
 const DS_NAMESPACE = "VeldDesignSystem_c12abb";
-const CTA_LINK = "#lead-form";
 const CONTACT_EMAIL = "miguel@velz.io";
 const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
+const CAL_BOOKING_LINK = import.meta.env.VITE_CAL_BOOKING_URL || "https://cal.com/velz/15min";
+const DIAGNOSTIC_FALLBACK_LINK = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Diagnóstico externo Velz")}`;
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
-const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
 const revealViewport = { once: true, amount: 0.2 };
 const HOME_LINK = "/";
 
@@ -339,7 +358,7 @@ function getPageConfig(pathname) {
 
   return {
     key: "landing",
-    title: "velz — Tu negocio, visto desde arriba",
+    title: "velz — Decisión operativa para ads, stock y caja",
     description: DEFAULT_META_DESCRIPTION,
     canonical: "https://velz.io/",
   };
@@ -568,6 +587,21 @@ function getLeadMagnetStatus(payload, fallbackStatus) {
   return fallbackStatus;
 }
 
+function getLandingCtaHook(search = "") {
+  const params = new URLSearchParams(search);
+  const source = `${params.get("tool") || ""} ${params.get("utm_content") || ""} ${params.get("utm_campaign") || ""}`.toLowerCase();
+
+  if (source.includes("atrib") || source.includes("roas") || source.includes("meta")) {
+    return "¿Sabes si el ROAS que ves es el que de verdad te vendió, o el que Meta se atribuye a sí misma?";
+  }
+
+  if (source.includes("invent") || source.includes("sku") || source.includes("stock")) {
+    return "¿Pedirías 500 unidades del SKU-3 a ojo, o con dato real?";
+  }
+
+  return "¿Escalaste Meta este mes sin saber si había stock detrás?";
+}
+
 function ProductPhoto({ product, className = "report-product-photo" }) {
   const src = product?.image_url || product?.image || product?.featured_image || product?.featured_image_url;
 
@@ -674,7 +708,7 @@ function ReportFooter({ limitations = [], variantCoverage = 40 }) {
           <BrandSymbol className="report-made-symbol" width={44} />
           <strong>Hecho por Velz. Miramos tiendas online y contamos lo que vemos.</strong>
         </div>
-        <p>Datos de snapshot público. No tocamos nada privado tuyo.</p>
+        <p>Datos de catálogo público. No tocamos nada privado tuyo.</p>
         <p>
           ¿Quieres cruzar esto con tus ventas y tu caja de verdad? <a href={EMAIL_LINK}>{CONTACT_EMAIL}</a>
         </p>
@@ -868,28 +902,189 @@ function productUnavailableLabels(product) {
   );
 }
 
+function stockoutProductCategory(product) {
+  return product?.product_type || product?.category || product?.type || "Sin categoría en el payload";
+}
+
+function getStockoutCategoryGroups(stockout) {
+  const providedGroups = asArray(stockout?.category_groups)
+    .map((group) => ({
+      ...group,
+      category: group.category || group.product_type || group.type || "Otros productos",
+      products: asArray(group.products),
+    }))
+    .filter((group) => group.products.length > 0);
+
+  if (providedGroups.length > 0) {
+    return combineSmallStockoutGroups(providedGroups);
+  }
+
+  const grouped = new Map();
+  for (const product of asArray(stockout?.product_cards)) {
+    const category = stockoutProductCategory(product);
+    const current = grouped.get(category) || {
+      category,
+      product_count: 0,
+      affected_product_count: 0,
+      fully_out_of_stock_count: 0,
+      products: [],
+    };
+    current.product_count += 1;
+    current.affected_product_count += 1;
+    if (product.fully_out_of_stock) current.fully_out_of_stock_count += 1;
+    current.products.push(product);
+    grouped.set(category, current);
+  }
+
+  return combineSmallStockoutGroups(Array.from(grouped.values()));
+}
+
+function combineSmallStockoutGroups(groups) {
+  const largeGroups = groups.filter((group) => Number(group.product_count || group.products?.length || 0) >= 6);
+  const smallGroups = groups.filter((group) => Number(group.product_count || group.products?.length || 0) < 6);
+
+  if (smallGroups.length === 0) {
+    return largeGroups;
+  }
+
+  return [
+    ...largeGroups,
+    {
+      category: "Otros productos",
+      product_count: smallGroups.reduce((sum, group) => sum + Number(group.product_count || group.products?.length || 0), 0),
+      affected_product_count: smallGroups.reduce((sum, group) => sum + Number(group.affected_product_count || group.products?.length || 0), 0),
+      fully_out_of_stock_count: smallGroups.reduce((sum, group) => sum + Number(group.fully_out_of_stock_count || 0), 0),
+      products: smallGroups.flatMap((group) => asArray(group.products)),
+      combined_from: smallGroups.map((group) => group.category).filter(Boolean),
+    },
+  ];
+}
+
+function stockoutProductUnavailableCount(product) {
+  const explicit = Number(product?.oos_variants);
+  if (Number.isFinite(explicit)) return explicit;
+  return productUnavailableLabels(product).size;
+}
+
+function stockoutStatusLabel(product) {
+  if (product?.fully_out_of_stock) return "agotado total";
+  if (product?.functional_stockout) return "agotado funcional";
+  if (product?.partial_stockout) return "stockout parcial";
+  return "sin señal";
+}
+
+function StockoutCategoryBlock({ group, index }) {
+  const [expanded, setExpanded] = useState(false);
+  const products = asArray(group.products);
+  const optionLabels = getStockoutColumns(products, products[0]);
+  const visibleProducts = expanded ? products : products.slice(0, 10);
+  const affectedCount = group.affected_product_count || products.filter((item) => item.fully_out_of_stock || item.partial_stockout || item.functional_stockout).length;
+  const productCount = group.product_count || products.length || affectedCount;
+  const systemicCategory = productCount >= 6 && affectedCount >= 3 && Math.round((affectedCount / Math.max(productCount, 1)) * 100) >= 50;
+  const fullyOut = group.fully_out_of_stock_count || products.filter((product) => product.fully_out_of_stock).length;
+  const remaining = Math.max(0, products.length - visibleProducts.length);
+  const gridTemplate = `minmax(210px, 1.45fr) repeat(${optionLabels.length}, minmax(42px, 1fr))`;
+
+  return (
+    <article className="report-stockout-type-block">
+      <header className="report-stockout-type-head">
+        <div>
+          <h3>{group.category}</h3>
+          {systemicCategory ? <span className="report-pill report-pill-red">sistémico</span> : null}
+        </div>
+        <p><strong>{affectedCount}</strong> señales en esta línea</p>
+      </header>
+
+      <div className="report-category-denominator">
+        <span>{productCount} producto{productCount === 1 ? "" : "s"} revisado{productCount === 1 ? "" : "s"} en esta línea</span>
+        <em>{fullyOut} agotado{fullyOut === 1 ? "" : "s"} total{fullyOut === 1 ? "" : "es"}</em>
+      </div>
+
+      <div className="report-size-summary report-size-summary-dynamic" style={{ gridTemplateColumns: gridTemplate }}>
+        <span>Fugas claras por variante</span>
+        {optionLabels.map((label) => {
+          const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
+          const pct = productCount ? Math.round((unavailableCount / productCount) * 100) : 0;
+          return (
+            <strong
+              key={label}
+              className={pct > 0 ? "hot" : ""}
+              title={`${label}: no disponible en ${unavailableCount} de ${productCount} productos de ${group.category}`}
+            >
+              {pct}%
+            </strong>
+          );
+        })}
+      </div>
+
+      <div className="report-matrix-grid report-matrix-grid-dynamic" style={{ gridTemplateColumns: gridTemplate }}>
+        <span />
+        {optionLabels.map((label) => <b key={label}>{label}</b>)}
+        {visibleProducts.map((item, rowIndex) => {
+          const unavailableSet = productUnavailableLabels(item);
+          return (
+            <ReactRuntime.Fragment key={item.product_id || item.title || `${index}-${rowIndex}`}>
+              <em title={item.title}>{item.title || `Producto ${rowIndex + 1}`}</em>
+              {optionLabels.map((label) => (
+                <i
+                  key={`${rowIndex}-${label}`}
+                  className={unavailableSet.has(label) ? "out" : ""}
+                  title={`${item.title || "Producto"} · ${label}: ${unavailableSet.has(label) ? "agotada/no disponible" : "disponible"}`}
+                />
+              ))}
+            </ReactRuntime.Fragment>
+          );
+        })}
+      </div>
+
+      <div className="report-stockout-products-row">
+        {visibleProducts.slice(0, 12).map((product) => (
+          <a href={product.url} key={product.product_id || product.title} target="_blank" rel="noreferrer" title={product.title}>
+            {product.title}
+          </a>
+        ))}
+      </div>
+
+      {remaining > 0 && !expanded ? (
+        <div className="report-stockout-expand-row">
+          <span>…y el mismo patrón en otros {remaining} modelos.</span>
+          <button type="button" onClick={() => setExpanded(true)}>Ver los {products.length} modelos</button>
+        </div>
+      ) : null}
+      {expanded ? (
+        <button className="report-stockout-collapse" type="button" onClick={() => setExpanded(false)}>Ocultar</button>
+      ) : null}
+    </article>
+  );
+}
+
 function StockoutLeakReport({ payload }) {
   const metrics = payload.summary_metrics || {};
   const stockout = payload.stockout || {};
   const products = asArray(stockout.product_cards);
+  const groups = getStockoutCategoryGroups(stockout);
   const product = getPrimaryProduct(payload);
   const optionLabels = getStockoutColumns(products, product);
   const primaryUnavailableSet = productUnavailableLabels(product);
-  const variantPct = metricValue(metrics, "variant_stockout_pct", 0);
-  const highlightedOptions = optionLabels.filter((label) => primaryUnavailableSet.has(label)).slice(0, 4);
-  const headlineOptions = highlightedOptions.length > 0 ? highlightedOptions.join(", ") : optionLabels.slice(0, 3).join(", ");
+  const catalogProductCount = metricValue(metrics, "product_count", stockout.all_product_count || products.length);
+  const variantCount = metricValue(metrics, "variant_count", metrics.sample_size || 0);
+  const fullyOutCount = metricValue(metrics, "fully_out_of_stock_count", products.filter((item) => item.fully_out_of_stock).length);
+  const affectedCount = stockout.affected_product_count || products.length;
+  const statusText = stockoutStatusLabel(product);
 
   return (
     <ReportShell toolLabel="Nuevo análisis">
-      <div className="report-wrap">
+      <div className="report-wrap report-stockout-wrap">
         <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
 
-        <section className="report-card report-stockout-hero report-stockout-hero-v2">
+        <section className="report-card report-stockout-hero report-stockout-hero-v2 report-stockout-draft-hero">
           <div className="report-stockout-title-row">
             <ProductPhoto product={product} />
             <div>
-              <h1>{product.title || "Producto con disponibilidad incompleta"}</h1>
-              <p className="report-muted">Patrón {product.pattern_scope?.replaceAll("_", " ") || "mixto"} · disponibilidad pública observada.</p>
+              <h1>{fullyOutCount > 0 ? `Tienes ${formatLeadMetric(fullyOutCount)} productos 100% agotados en el catálogo observado.` : "Tienes disponibilidad incompleta en el catálogo observado."}</h1>
+              <p className="report-muted">
+                Hemos revisado {formatLeadMetric(catalogProductCount)} productos del catálogo público y hemos encontrado {formatLeadMetric(fullyOutCount)} sin ninguna variante disponible.
+              </p>
             </div>
             <span className="report-pill report-pill-gold">warning</span>
           </div>
@@ -902,47 +1097,52 @@ function StockoutLeakReport({ payload }) {
           <div className="report-stockout-legend"><span className="legend-out" /> agotada/no disponible <span /> disponible</div>
         </section>
 
-        <SectionEyebrow>Dónde se repite en tu catálogo <span className="report-pill report-pill-red">Pasa en varios productos</span></SectionEyebrow>
-        <section className="report-card report-stockout-matrix">
-          <h2>
-            Tienes variantes no disponibles ({headlineOptions}) en varios productos observados.
-          </h2>
-          <div className="report-size-summary">
-            <span>% de productos observados sin esa variante</span>
-            {optionLabels.map((label) => {
-              const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
-              const pct = products.length ? Math.round((unavailableCount / products.length) * 100) : 0;
-              return <strong key={label} className={pct > 0 ? "hot" : ""}>{pct}%</strong>;
-            })}
-          </div>
-          <div className="report-matrix-grid" style={{ gridTemplateColumns: `220px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
-            <span />
-            {optionLabels.map((label) => <b key={label}>{label}</b>)}
-            {products.slice(0, 9).map((item, rowIndex) => {
-              const unavailableSet = productUnavailableLabels(item);
-              return (
-                <ReactRuntime.Fragment key={item.product_id || item.title || rowIndex}>
-                  <em>{item.title || `Producto ${rowIndex + 1}`}</em>
-                  {optionLabels.map((label) => (
-                    <i key={`${rowIndex}-${label}`} className={unavailableSet.has(label) ? "out" : ""} />
-                  ))}
-                </ReactRuntime.Fragment>
-              );
-            })}
-          </div>
-          <div className="report-matrix-legend"><span className="out" /> agotada/no disponible <span /> disponible</div>
-        </section>
-
-        <div className="report-two-col report-kpi-row report-insight-grid">
-          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0))} tone="critical">
-            Productos están totalmente agotados.
+        <SectionEyebrow>Los tres ejes</SectionEyebrow>
+        <div className="report-two-col report-kpi-row report-insight-grid report-stockout-metrics-grid">
+          <InsightMetricCard eyebrow="Catálogo analizado" value={formatLeadMetric(catalogProductCount)} tone="neutral">
+            Productos revisados en la tienda.
           </InsightMetricCard>
-          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct)} tone="warning">
-            Variantes observadas no están disponibles.
+          <InsightMetricCard eyebrow="Variantes observadas" value={formatLeadMetric(variantCount)} tone="neutral">
+            Formatos/opciones visibles en el catálogo.
+          </InsightMetricCard>
+          <InsightMetricCard eyebrow="Productos 100% agotados" value={formatLeadMetric(fullyOutCount)} tone="critical">
+            Productos sin ninguna variante disponible.
           </InsightMetricCard>
         </div>
 
-        <ReportFooter limitations={payload.limitations} variantCoverage={40} />
+        <SectionEyebrow>Dónde está tu problema, por categoría de producto</SectionEyebrow>
+        <section className="report-card report-stockout-matrix report-stockout-by-category">
+          <h2>
+            {affectedCount} productos con señal dentro de {formatLeadMetric(catalogProductCount)} productos analizados.
+          </h2>
+          <p className="report-muted report-stockout-denominator-note">
+            Primero miramos el tamaño de la foto completa; después señalamos dónde se concentra el problema para que sepas por dónde empezar.
+          </p>
+
+          {groups.length > 0 ? groups.map((group, index) => (
+            <StockoutCategoryBlock group={group} index={index} key={`${group.category}-${index}`} />
+          )) : (
+            <p className="report-muted">No hay categorías con señal pública suficiente para pintar la matriz.</p>
+          )}
+
+          <div className="report-matrix-legend"><span className="out" /> agotada/no disponible <span /> disponible</div>
+        </section>
+
+        <SectionEyebrow>El caso más claro de tu catálogo</SectionEyebrow>
+        <section className="report-card report-product-hero report-stockout-product-proof">
+          <ProductPhoto product={product} />
+          <div className="report-product-copy">
+            <div className="report-title-line">
+              <h1>{product.title || "Producto con señal de stockout"}</h1>
+              <span className="report-pill report-pill-red">{statusText}</span>
+            </div>
+            <p className="report-muted">
+              {stockoutProductCategory(product)} · {stockoutProductUnavailableCount(product)} de {product.total_variants || asArray(product.variant_availability).length || 1} variantes no disponibles.
+            </p>
+          </div>
+        </section>
+
+        <ReportFooter limitations={payload.limitations} variantCoverage={Math.min(100, Math.max(4, Math.round((variantCount / Math.max(variantCount, 1)) * 40)))} />
       </div>
     </ReportShell>
   );
@@ -1136,14 +1336,99 @@ function LeadMagnetPage({ route }) {
   return <StockoutLeakReport payload={payload} apiState={apiState} route={route} />;
 }
 
+function MicroMechanismSection() {
+  const leverRows = [
+    { label: "Meta", attributed: 88, real: 52 },
+    { label: "Contenido orgánico", attributed: 24, real: 62 },
+    { label: "Email", attributed: 52, real: 46 },
+  ];
+
+  return (
+    <section className="sec mechanism-sec micro-mechanism-sec" id="mecanismo">
+      <div className="micro-mechanism-wrap">
+        <span className="ey">Cómo se monta la decisión</span>
+
+        <article className="micro-mechanism-block">
+          <div className="micro-mechanism-copy">
+            <span className="micro-mechanism-number">01</span>
+            <h2>El mismo tipo de modelo que usan las grandes multinacionales para repartir su presupuesto</h2>
+            <p>
+              Entrenado con tu histórico y tu mercado, no con una media de sector. Proyecta cuánto vas a vender las próximas 8–12 semanas, producto a producto.
+            </p>
+          </div>
+          <svg className="micro-forecast" viewBox="0 0 360 180" role="img" aria-labelledby="micro-forecast-title">
+            <title id="micro-forecast-title">Proyección con banda de incertidumbre</title>
+            <line x1="20" y1="150" x2="345" y2="150" />
+            <line className="micro-today-line" x1="180" y1="30" x2="180" y2="150" />
+            <text x="180" y="166" textAnchor="middle">hoy</text>
+            <text x="345" y="166" textAnchor="end">+12 sem</text>
+            <path className="micro-band" d="M182.5,109.0L196.0,103.8L209.6,96.7L223.1,91.3L236.7,84.3L250.2,79.8L263.8,75.0L277.3,72.7L290.8,74.7L304.4,77.2L317.9,82.0L331.5,85.8L345.0,88.0L345.0,100.0L331.5,108.2L317.9,112.0L304.4,114.8L290.8,117.3L277.3,119.3L263.8,119.0L250.2,120.2L236.7,121.7L223.1,122.7L209.6,125.3L196.0,128.2L182.5,127.0Z" />
+            <path className="micro-history" d="M20.0,140.0L33.5,132.0L47.1,142.0L60.6,128.0L74.2,134.0L87.7,120.0L101.2,126.0L114.8,114.0L128.3,120.0L141.9,108.0L155.4,114.0L169.0,102.0L182.5,106.0" />
+            <path className="micro-projection" d="M182.5,106.0L196.0,102.0L209.6,96.0L223.1,91.0L236.7,85.0L250.2,81.0L263.8,78.0L277.3,77.0L290.8,80.0L304.4,84.0L317.9,90.0L331.5,95.0L345.0,99.0" />
+          </svg>
+        </article>
+
+        <article className="micro-mechanism-block">
+          <div className="micro-mechanism-copy">
+            <span className="micro-mechanism-number">02</span>
+            <h2>Qué palanca mueve más por cada euro</h2>
+            <p>
+              Con tu presupuesto actual, el modelo separa lo que empuja ventas de lo que solo se lleva el crédito. La recomendación de dónde ponerlo la firmo yo, no un panel.
+            </p>
+          </div>
+          <div className="micro-levers" aria-label="Comparación entre atribución de panel y empuje real">
+            <div className="micro-lever-legend">
+              <span><i className="panel" />lo que el panel le atribuye</span>
+              <span><i className="real" />lo que empuja de verdad</span>
+            </div>
+            {leverRows.map((row) => (
+              <div className="micro-lever-row" key={row.label}>
+                <span>{row.label}</span>
+                <i className="micro-bar micro-bar-panel" style={{ width: `${row.attributed * 0.9}%` }} />
+                <i className="micro-bar micro-bar-real" style={{ width: `${row.real * 0.9}%` }} />
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="micro-mechanism-block">
+          <div className="micro-mechanism-copy">
+            <span className="micro-mechanism-number">03</span>
+            <h2>Y cuánto stock necesitas para recogerlo</h2>
+            <p>
+              Ni más, ni menos. El stock justo para no dejar ventas fuera ni inmovilizar caja en algo que tardará meses en salir.
+            </p>
+          </div>
+          <svg className="micro-stock" viewBox="0 0 360 130" role="img" aria-labelledby="micro-stock-title">
+            <title id="micro-stock-title">Punto justo de stock entre rotura y exceso</title>
+            <rect x="20" y="55" width="150" height="14" rx="7" className="micro-shortage" />
+            <rect x="190" y="55" width="150" height="14" rx="7" className="micro-excess" />
+            <rect x="20" y="55" width="320" height="14" rx="7" className="micro-stock-frame" />
+            <text x="95" y="92" textAnchor="middle" className="micro-shortage-label">te quedas corto · ventas fuera</text>
+            <text x="265" y="92" textAnchor="middle" className="micro-excess-label">te pasas · caja inmovilizada</text>
+            <g className="micro-stock-marker">
+              <line x1="180" y1="38" x2="180" y2="86" />
+              <circle cx="180" cy="62" r="5.5" />
+              <text x="180" y="26" textAnchor="middle" className="micro-stock-title">el pedido justo</text>
+              <text x="180" y="116" textAnchor="middle" className="micro-stock-note">con semanas de antelación, no a última hora</text>
+            </g>
+          </svg>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
-  const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID || "missing-formspree-id");
+  const [activeMechanismStep, setActiveMechanismStep] = useState(0);
+  const mechanismRefs = useRef([]);
   const reduceMotion = useReducedMotion();
   const disableMotion =
     reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
   const pathname = typeof window === "undefined" ? HOME_LINK : window.location.pathname;
   const page = getPageConfig(pathname);
+  const ctaHook = getLandingCtaHook(typeof window === "undefined" ? "" : window.location.search);
 
   useEffect(() => {
     let mounted = true;
@@ -1235,6 +1520,40 @@ export default function App() {
     }
   }, [page.canonical, page.description, page.title]);
 
+  useEffect(() => {
+    if (page.key !== "landing") {
+      return undefined;
+    }
+
+    if (disableMotion) {
+      setActiveMechanismStep(mechanismSteps.length - 1);
+      return undefined;
+    }
+
+    const entriesByIndex = new Map();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = Number(entry.target.getAttribute("data-mechanism-index"));
+          entriesByIndex.set(index, entry);
+        });
+
+        const visible = [...entriesByIndex.entries()]
+          .filter(([, entry]) => entry.isIntersecting)
+          .sort(([, a], [, b]) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visible.length > 0) {
+          setActiveMechanismStep(visible[0][0]);
+        }
+      },
+      { root: null, rootMargin: "-42% 0px -42% 0px", threshold: [0, 0.2, 0.55, 1] },
+    );
+
+    mechanismRefs.current.filter(Boolean).forEach((node) => observer.observe(node));
+
+    return () => observer.disconnect();
+  }, [disableMotion, page.key]);
+
   if (page.key === "legal") {
     return (
       <LegalLayout
@@ -1268,41 +1587,41 @@ export default function App() {
   return (
     <>
       <nav>
-        <span className="wm">velz</span>
+        <span className="nav-brand">
+          <BrandSymbol className="nav-symbol" width={18} />
+          <span className="wm">velz</span>
+        </span>
         <a href="#cta" className="nav-a">
-          Solicitar diagnóstico →
+          Reservar 15 minutos →
         </a>
       </nav>
 
       <div className="dark">
-        <AuroraBackground className="h-auto" id="hero">
+        <AuroraBackground className="h-auto" id="hero" showRadialGradient={false}>
           <motion.div
             className="relative z-10 hero-shell"
             initial={disableMotion ? false : { opacity: 0, y: 18 }}
             animate={disableMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandSymbol className="h-sym" width={76} />
             <h1>
-              Tu negocio,
-              <br />
-              visto desde arriba.
+              Toma la decisión que maximiza el revenue de tu ecommerce
             </h1>
             <p className="hero-sub">
-              Tus ads, tu inventario y tu caja ya generan datos.
-              <br />
-              Nadie los conecta en una decisión. Eso es lo que hago.
+              Optimiza tus acciones publicitarias y anticipa tu stock con la metodologia que emplean las grandes marcas.
             </p>
             <motion.a
-              href={CTA_LINK}
+              href={CAL_BOOKING_LINK}
               className="btn"
-                whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
-                whileTap={disableMotion ? {} : { scale: 0.99 }}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
+              whileTap={disableMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
-              Diagnóstico externo de 24h
+              Reservar 15 minutos
             </motion.a>
-            <p className="micro hero-micro">Entregable concreto. Sin llamada de venta previa.</p>
+            <p className="micro hero-micro">Una llamada corta para decidir con el dato real delante.</p>
           </motion.div>
         </AuroraBackground>
       </div>
@@ -1355,6 +1674,8 @@ export default function App() {
         </Reveal>
       </section>
 
+      <MicroMechanismSection />
+
       <section className="sec" id="vs">
         <Reveal className="wrap">
           <span className="ey">Por qué no es lo que ya tienes</span>
@@ -1388,30 +1709,6 @@ export default function App() {
         </Reveal>
       </section>
 
-      <section className="sec" id="como">
-        <Reveal className="wrap">
-          <span className="ey">Cómo funciona</span>
-          <div className="steps">
-            {steps.map((step, index) => (
-              <motion.div
-                className="step"
-                key={step.number}
-                initial={disableMotion ? false : { opacity: 0.6, y: 18 }}
-                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
-                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={revealViewport}
-                transition={cardTransition(index)}
-              >
-                <span className="sn">{step.number}</span>
-                <div>
-                  <p className="st">{step.title}</p>
-                  <p className="sb">{step.body}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
 
       <section className="sec" id="para-quien">
         <Reveal className="wrap">
@@ -1460,10 +1757,10 @@ export default function App() {
           <span className="ey">Quién está detrás</span>
           <div className="carta">
             <p>
-              Durante casi cuatro años construí en Dentsu —el cuarto grupo de marketing más grande del mundo— los modelos bayesianos que optimizaban los presupuestos de marcas como Vodafone o Gillette: cuánto invertir en cada canal para maximizar ventas.
+              Durante casi cuatro años en Dentsu —el cuarto grupo de marketing más grande del mundo— construí los modelos que le decían a marcas como Vodafone o Gillette dónde estaban tirando presupuesto de marketing sin saberlo, en cualquier canal, y dónde ponerlo para que generara nuevas ventas. Nuevas ventas hoy y en el futuro.
             </p>
             <p>
-              Para optimizar un presupuesto, primero hay que predecir cuánto vas a vender. Y esa predicción es la misma que un ecommerce necesita para sus tres preguntas: cuánto venderé, cuánto stock pido y si mi caja lo aguanta. Las multinacionales pagan equipos enteros por esa respuesta. Yo hablo cada semana con founders que tienen las mismas preguntas — y nadie que las conecte.
+              Esa misma lógica de largo plazo es la que le falta a cualquier founder que escala Meta mirando solo el ROAS de hoy: no sabe si ese cliente nuevo le compensará dentro de seis meses, o si le costó más de lo que va a devolverle. Las multinacionales pagan equipos enteros para no tener ese punto ciego. Yo hablo cada semana con founders que lo sufren solos, sin ese equipo.
             </p>
             <p>
               Velz existe para eso. No vendo ads, no vendo software, no cobro comisión de nadie. Mi único incentivo es que tu próxima decisión sea mejor que la anterior.
@@ -1530,44 +1827,13 @@ export default function App() {
 
       <section id="cta">
         <Reveal className="cta-shell">
-          <BrandSymbol className="cta-sym" width={76} />
-          <h2>
-            Empieza por ver tu negocio
-            <br />
-            desde arriba.
-          </h2>
-          <span className="cta-mc">
-            5 plazas al mes. En 24h recibes un vídeo de 10 minutos con 3 hipótesis cuantificadas sobre tu
-            marca, te quedes o no.
-          </span>
-          <form id="lead-form" className="lead-form" onSubmit={handleFormspreeSubmit}>
-            <label className="lead-field">
-              Nombre
-              <input type="text" name="name" autoComplete="name" required />
-              <ValidationError className="lead-error" field="name" errors={formState.errors} />
-            </label>
-            <label className="lead-field">
-              Email
-              <input type="email" name="email" autoComplete="email" required />
-              <ValidationError className="lead-error" field="email" errors={formState.errors} />
-            </label>
-            <label className="lead-field">
-              URL de la tienda
-              <input type="url" name="storeUrl" placeholder="https://tu-tienda.com" required />
-              <ValidationError className="lead-error" field="storeUrl" errors={formState.errors} />
-            </label>
-            <button type="submit" className="lead-submit" disabled={formState.submitting}>
-              {formState.submitting ? "Enviando..." : "Enviar solicitud"}
-            </button>
-            <p className="lead-gdpr">
-              Solo usaré estos datos para enviarte el diagnóstico. Sin listas, sin spam. Consulta la{" "}
-              <a href={PRIVACY_LINK}>política de privacidad</a>.
-            </p>
-            <ValidationError className="lead-error" errors={formState.errors} />
-            {formState.succeeded ? (
-              <p className="lead-status success">Solicitud enviada. Te responderé por email en menos de 24h.</p>
-            ) : null}
-          </form>
+          <h2>¿Tienes a la vista una decisión sobre qué hacer con tus ads y cuánto stock pedir?</h2>
+          <p className="cta-subtitle">Agenda una llamada y lo vemos juntos.</p>
+          <div className="booking-cta-card" id="lead-form">
+            <a className="booking-primary" href={CAL_BOOKING_LINK} target="_blank" rel="noopener noreferrer">
+              Reservar 15 minutos
+            </a>
+          </div>
         </Reveal>
       </section>
 
