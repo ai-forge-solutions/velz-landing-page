@@ -86,6 +86,25 @@ nav {
   color: var(--white);
 }
 
+
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-symbol {
+  display: inline-flex;
+  color: var(--white);
+  opacity: 0.82;
+}
+
+.nav-symbol svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .nav-a {
   font-family: var(--sans);
   font-size: 13px;
@@ -140,7 +159,7 @@ nav {
 }
 
 #hero {
-  padding: 164px 48px 148px;
+  padding: 138px 48px 126px;
   text-align: center;
   background: var(--ink-900);
 }
@@ -153,9 +172,7 @@ nav {
 }
 
 .h-sym {
-  display: block;
-  margin: 0 auto 56px;
-  color: var(--white);
+  display: none;
 }
 
 .h-sym svg,
@@ -167,9 +184,9 @@ nav {
 
 h1 {
   font-family: var(--serif);
-  font-size: clamp(56px, 8vw, 96px);
+  font-size: clamp(40px, 5.6vw, 68px);
   font-weight: 400;
-  line-height: 1.01;
+  line-height: 1.04;
   letter-spacing: -0.025em;
   color: var(--white);
   margin-bottom: 24px;
@@ -180,7 +197,7 @@ h1 {
   font-weight: 400;
   line-height: 1.72;
   color: var(--ink-300);
-  max-width: 460px;
+  max-width: 620px;
   margin: 0 auto 40px;
 }
 

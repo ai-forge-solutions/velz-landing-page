@@ -1587,7 +1587,10 @@ export default function App() {
   return (
     <>
       <nav>
-        <span className="wm">velz</span>
+        <span className="nav-brand">
+          <BrandSymbol className="nav-symbol" width={18} />
+          <span className="wm">velz</span>
+        </span>
         <a href="#cta" className="nav-a">
           Reservar 15 minutos →
         </a>
@@ -1601,12 +1604,11 @@ export default function App() {
             animate={disableMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandSymbol className="h-sym" width={76} />
             <h1>
-              toma la decisión que maximiza el revenue de tu ecommerce
+              Toma la decisión que maximiza el revenue de tu ecommerce
             </h1>
             <p className="hero-sub">
-              optimiza tus acciones publicitarias y anticipa tu stock con la metodologia que emplean los grandes players, by velz
+              Optimiza tus acciones publicitarias y anticipa tu stock con la metodologia que emplean las grandes marcas.
             </p>
             <motion.a
               href={CAL_BOOKING_LINK}
@@ -1825,7 +1827,6 @@ export default function App() {
 
       <section id="cta">
         <Reveal className="cta-shell">
-          <BrandSymbol className="cta-sym" width={76} />
           <h2>{ctaHook}</h2>
           <div className="booking-cta-card" id="lead-form">
             <a className="booking-primary" href={CAL_BOOKING_LINK} target="_blank" rel="noopener noreferrer">
