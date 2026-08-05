@@ -59,6 +59,12 @@ npm run preview
   - `test-expired-token` devuelve `410 expired_token`; cualquier token desconocido devuelve `404 invalid_token`.
 - El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path. Los ejemplos `example-*` leen hechos ya persistidos en Supabase y ensamblan el render payload en la función cuando el entorno tiene credenciales Supabase; si el deploy preview no tiene esas variables, devuelven una exportación real de esos mismos registros de Supabase incluida en la PR. Los tokens `test-*` siguen siendo fixtures de smoke/local.
 
+## Worker skills / agent context
+
+- `AGENTS.md`: instrucciones de repo para Hermes/Codex/Claude-style workers.
+- `.github/skills/velz-brand/SKILL.md`: look & feel de Velz; obligatorio antes de tocar UI, copy, landing, lead magnets o componentes visibles.
+- `.github/skills/README.md`: mapa de skills repo-locales importadas para diseño, landing y performance.
+
 ## Nota
 
 La migracion mantiene tipografias, paleta, iconografia SVG y narrativa del original. Si quieres cambiar enlaces (CTA, aviso legal, privacidad, email), edita los `href` en `src/App.jsx`.
