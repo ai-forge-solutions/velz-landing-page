@@ -2871,3 +2871,112 @@ footer {
   word-break: normal;
   overflow-wrap: anywhere;
 }
+
+
+/* Tool home: dynamic URL search for populated lead magnets */
+.tool-home-wrap {
+  max-width: 760px;
+}
+
+.tool-home-hero {
+  margin-bottom: 34px;
+}
+
+.tool-search-card {
+  padding: 24px;
+}
+
+.tool-search-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text-tertiary, var(--ink-400));
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tool-search-input {
+  width: 100%;
+  height: 54px;
+  border: 1px solid var(--border-default, var(--ink-200));
+  border-radius: var(--radius-md, 10px);
+  background: var(--white);
+  color: var(--ink-900);
+  font-family: var(--sans);
+  font-size: 18px;
+  padding: 0 16px;
+}
+
+.tool-search-input:focus {
+  outline: none;
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.06);
+}
+
+.tool-search-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 18px;
+  color: var(--text-tertiary, var(--ink-400));
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool-result-list {
+  display: grid;
+  gap: 8px;
+}
+
+.tool-result-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid var(--border-hairline, var(--ink-150));
+  border-radius: var(--radius-md, 10px);
+  padding: 16px 18px;
+  color: var(--ink-900);
+  background: var(--white);
+  transition: border-color 120ms, background 120ms;
+}
+
+.tool-result-row:hover {
+  border-color: var(--ink-900);
+  background: var(--ink-50);
+}
+
+.tool-result-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.tool-result-row span {
+  color: var(--text-tertiary, var(--ink-400));
+  font-size: 13px;
+}
+
+.tool-empty-state {
+  margin: 8px 0 0;
+  color: var(--text-secondary, var(--ink-600));
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .tool-result-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .tool-search-meta {
+    flex-direction: column;
+  }
+}
