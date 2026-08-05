@@ -47,9 +47,12 @@ npm run preview
 - Ruta pública SPA: `/tools/:tool_slug/:token`.
 - API read thin: `GET /api/lead-magnets/:token`.
 - Fixture de smoke test:
-  - `test-ready-token` devuelve `status: "ready"`.
+  - `test-stockout-token` / `test-ready-token` devuelve `stockout_leak_score` con contrato `inventory_lead_magnet_payload_v1` en `degraded`.
+  - `test-discount-token` devuelve `discount_depth_analyzer` en `ready`.
+  - `test-low-discount-token` devuelve un caso de descuento bajo.
   - `test-not-ready-token` devuelve `status: "not_ready"`.
-- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path; solo devuelve estado placeholder claim-safe.
+  - `test-expired-token` devuelve `410 expired_token`; cualquier token desconocido devuelve `404 invalid_token`.
+- El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path; solo devuelve snapshots fixture claim-safe hasta conectar la lectura real de snapshots persistidos.
 
 ## Nota
 

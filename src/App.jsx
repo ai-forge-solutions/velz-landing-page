@@ -184,7 +184,48 @@ const LEAD_MAGNET_STATUSES = {
   ready: "ready",
   degraded: "degraded",
   notReady: "not_ready",
+  manualReviewRequired: "manual_review_required",
+  invalid: "invalid_token",
+  expired: "expired_token",
   error: "error",
+};
+
+const INVENTORY_TOOL_COPY = {
+  stockout_leak_score: {
+    slug: "stockout-leak-score",
+    title: "Dónde tu catálogo visible está filtrando demanda por falta de disponibilidad.",
+    intro:
+      "Miramos disponibilidad pública, variantes y patrones de stockout ya persistidos. No estimamos unidades internas ni ventas perdidas.",
+    chartTitle: "Stockouts por producto observado",
+    productTitle: "Productos con señal de stockout",
+    metricLabels: {
+      product_count: "Productos",
+      variant_count: "Variantes",
+      fully_out_of_stock_count: "Productos 100% agotados",
+      partial_stockout_count: "Stockouts parciales",
+      functional_stockout_count: "Stockouts funcionales",
+      variant_stockout_pct: "% variantes agotadas",
+      sample_size: "Muestra",
+    },
+  },
+  discount_depth_analyzer: {
+    slug: "discount-depth-analyzer",
+    title: "Cuánto stock rebajado sigue visible en tu catálogo.",
+    intro:
+      "Separamos descuentos superficiales, medios y profundos usando precios públicos ya persistidos. No inferimos margen, cashflow ni velocidad real de venta.",
+    chartTitle: "Profundidad de descuento",
+    productTitle: "Productos rebajados que siguen disponibles",
+    metricLabels: {
+      catalog_product_count: "Productos",
+      discounted_product_count: "Productos rebajados",
+      discounted_products_pct: "% catálogo rebajado",
+      average_discount_pct: "Descuento medio",
+      min_discount_pct: "Descuento mínimo",
+      max_discount_pct: "Descuento máximo",
+      deep_discount_product_count: "Descuento profundo",
+      discounted_and_available_count: "Rebajados disponibles",
+    },
+  },
 };
 
 function parseLeadMagnetPath(pathname) {
@@ -353,6 +394,30 @@ function getStatusCopy(status) {
     };
   }
 
+  if (status === LEAD_MAGNET_STATUSES.manualReviewRequired) {
+    return {
+      label: "Manual review",
+      title: "Este diagnóstico necesita revisión antes de publicarse.",
+      body: "Hay ambigüedades que no deben convertirse en claims automáticos sin revisión humana.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.invalid) {
+    return {
+      label: "Token inválido",
+      title: "Este enlace no es válido.",
+      body: "Comprueba que has abierto el enlace completo o responde al email desde el que recibiste el diagnóstico.",
+    };
+  }
+
+  if (status === LEAD_MAGNET_STATUSES.expired) {
+    return {
+      label: "Token expirado",
+      title: "Este diagnóstico ha caducado.",
+      body: "El snapshot público ya no debería enseñarse sin refrescar datos y contexto.",
+    };
+  }
+
   if (status === LEAD_MAGNET_STATUSES.error) {
     return {
       label: "Error",
@@ -370,6 +435,104 @@ function getStatusCopy(status) {
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function toPercent(value) {
+  return typeof value === "number" ? `${value.toFixed(value % 1 === 0 ? 0 : 1)}%` : value;
+}
+
+function formatLeadMetric(value) {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (typeof value === "number") {
+    return Number.isInteger(value) ? value.toLocaleString("es-ES") : value.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+  }
+
+  return String(value).replaceAll("_", " ");
+}
+
+function claimLevel(claimSafety) {
+  return claimSafety?.level || claimSafety || "hard_fact";
+}
+
+function normalizeInventoryPayload(payload) {
+  if (payload?.version !== "inventory_lead_magnet_payload_v1") {
+    return payload;
+  }
+
+  const toolCopy = INVENTORY_TOOL_COPY[payload.tool_key] || INVENTORY_TOOL_COPY.stockout_leak_score;
+  const summaryMetrics = payload.summary_metrics || {};
+  const metricBlocks = Object.entries(summaryMetrics)
+    .filter(([, value]) => !Array.isArray(value) && value !== null && value !== undefined)
+    .slice(0, 4)
+    .map(([key, value]) => ({
+      title: toolCopy.metricLabels?.[key] || key.replaceAll("_", " "),
+      body: key.endsWith("_pct") ? toPercent(value) : formatLeadMetric(value),
+      claim_safety: "hard_fact",
+    }));
+  const sectionBlocks = asArray(payload.sections).flatMap((section) =>
+    asArray(section.cards)
+      .filter((card) => card.public !== false)
+      .map((card) => ({
+        title: card.title,
+        body: card.body,
+        claim_safety: claimLevel(card.claim_safety),
+      })),
+  );
+  const discountBuckets = asArray(payload.discount_depth?.buckets).map((bucket) => ({
+    label: bucket.label,
+    value: bucket.product_count,
+    subvalue: `${bucket.available_product_count || 0} disponibles`,
+  }));
+  const stockoutRows = asArray(payload.stockout?.product_cards).map((product) => ({
+    label: product.title,
+    value:
+      asArray(product.variant_availability).filter((variant) => variant.available === false).length ||
+      (product.partial_stockout ? 1 : 0),
+    subvalue: product.availability_status?.replaceAll("_", " "),
+  }));
+  const productRows =
+    payload.tool_key === "discount_depth_analyzer"
+      ? asArray(payload.discount_depth?.deep_discount_products).map((product) => ({
+          title: product.title,
+          meta: `${toPercent(product.discount_pct)} descuento · ${product.available ? "disponible" : "sin disponibilidad pública"}`,
+          href: product.url,
+          claim_safety: claimLevel(product.claim_safety),
+        }))
+      : asArray(payload.stockout?.product_cards).map((product) => ({
+          title: product.title,
+          meta: `${product.availability_status?.replaceAll("_", " ")} · patrón ${product.pattern_scope?.replaceAll("_", " ")}`,
+          href: product.url,
+          claim_safety: claimLevel(product.claim_safety),
+        }));
+
+  return {
+    ...payload,
+    tool_slug: toolCopy.slug,
+    headline: toolCopy.title,
+    intro: toolCopy.intro,
+    summary_blocks: [...metricBlocks, ...sectionBlocks].slice(0, 6),
+    evidence: asArray(payload.evidence_items).map((item) => ({
+      label: item.title,
+      value: item.body,
+      claim_safety: claimLevel(item.claim_safety),
+    })),
+    limitations: asArray(payload.public_limitations).map((limitation) => limitation.message || limitation),
+    render_chart: {
+      title: toolCopy.chartTitle,
+      rows: payload.tool_key === "discount_depth_analyzer" ? discountBuckets : stockoutRows,
+    },
+    render_products: {
+      title: toolCopy.productTitle,
+      rows: productRows,
+    },
+    cta: {
+      label: "Responder a Velz →",
+      href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Diagnóstico Velz ${payload.brand?.domain || ""}`)}`,
+    },
+  };
 }
 
 function getLeadMagnetStatus(payload, fallbackStatus) {
@@ -395,11 +558,12 @@ function LeadMagnetPage({ route }) {
         const response = await fetch(`/api/lead-magnets/${encodeURIComponent(route.token)}`, {
           headers: { Accept: "application/json" },
         });
-        const payload = await response.json();
+        const payload = normalizeInventoryPayload(await response.json());
 
         if (!cancelled) {
+          const failedStatus = payload.error === "expired_token" ? LEAD_MAGNET_STATUSES.expired : LEAD_MAGNET_STATUSES.invalid;
           setApiState({
-            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : LEAD_MAGNET_STATUSES.error,
+            status: response.ok ? getLeadMagnetStatus(payload, LEAD_MAGNET_STATUSES.notReady) : failedStatus,
             payload,
           });
         }
@@ -458,7 +622,11 @@ function LeadMagnetPage({ route }) {
     label: "Responder al email de Velz",
     href: EMAIL_LINK,
   };
-  const showContent = apiState.status !== LEAD_MAGNET_STATUSES.loading && apiState.status !== LEAD_MAGNET_STATUSES.error;
+  const showContent = [
+    LEAD_MAGNET_STATUSES.ready,
+    LEAD_MAGNET_STATUSES.degraded,
+    LEAD_MAGNET_STATUSES.notReady,
+  ].includes(apiState.status);
 
   return (
     <>
@@ -510,6 +678,50 @@ function LeadMagnetPage({ route }) {
                     </li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+
+            {showContent && payload.render_chart?.rows?.length > 0 ? (
+              <section className="lead-magnet-panel lead-magnet-chart" aria-labelledby="lead-magnet-chart-title">
+                <h2 id="lead-magnet-chart-title">{payload.render_chart.title}</h2>
+                <div className="lead-magnet-bars">
+                  {payload.render_chart.rows.map((row) => {
+                    const maxValue = Math.max(...payload.render_chart.rows.map((candidate) => candidate.value || 0), 1);
+
+                    return (
+                      <div className="lead-magnet-bar-row" key={row.label}>
+                        <div>
+                          <strong>{row.label}</strong>
+                          <span>{row.subvalue}</span>
+                        </div>
+                        <div className="lead-magnet-bar-track">
+                          <span style={{ width: `${Math.max(((row.value || 0) / maxValue) * 100, 4)}%` }} />
+                        </div>
+                        <em>{row.value}</em>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            {showContent && payload.render_products?.rows?.length > 0 ? (
+              <section className="lead-magnet-panel" aria-labelledby="lead-magnet-products-title">
+                <h2 id="lead-magnet-products-title">{payload.render_products.title}</h2>
+                <div className="lead-magnet-products">
+                  {payload.render_products.rows.slice(0, 4).map((row) => (
+                    <article className="lead-magnet-product" key={row.title}>
+                      <span className="lead-magnet-card-safety">{row.claim_safety}</span>
+                      <h3>{row.title}</h3>
+                      <p>{row.meta}</p>
+                      {row.href ? (
+                        <a href={row.href} target="_blank" rel="noopener noreferrer">
+                          Ver producto público →
+                        </a>
+                      ) : null}
+                    </article>
+                  ))}
+                </div>
               </section>
             ) : null}
 
