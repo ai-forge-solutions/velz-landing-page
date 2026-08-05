@@ -807,18 +807,52 @@ function DiscountDepthReport({ payload, apiState, route }) {
   );
 }
 
+function stockoutOptionLabel(variant, index) {
+  const optionName = variant?.option_name && variant.option_name !== "unknown" ? String(variant.option_name).trim() : "Opción";
+  const optionValue = variant?.option_value || variant?.normalized_option || variant?.normalized_size;
+
+  if (!optionValue || optionValue === "unknown") {
+    return `${optionName} ${index + 1}`;
+  }
+
+  return `${optionName} ${optionValue}`;
+}
+
+function getStockoutColumns(products, primaryProduct) {
+  const sourceProducts = [primaryProduct, ...products].filter(Boolean);
+  const labels = [];
+
+  for (const item of sourceProducts) {
+    for (const [index, variant] of asArray(item.variant_availability).entries()) {
+      const label = stockoutOptionLabel(variant, index);
+      if (!labels.includes(label)) {
+        labels.push(label);
+      }
+    }
+  }
+
+  return labels.slice(0, 11).length > 0 ? labels.slice(0, 11) : ["Variante 1", "Variante 2"];
+}
+
+function productUnavailableLabels(product) {
+  return new Set(
+    asArray(product?.variant_availability)
+      .map((variant, index) => ({ label: stockoutOptionLabel(variant, index), available: variant.available }))
+      .filter((variant) => variant.available === false)
+      .map((variant) => variant.label),
+  );
+}
+
 function StockoutLeakReport({ payload }) {
   const metrics = payload.summary_metrics || {};
-  const products = asArray(payload.stockout?.product_cards);
+  const stockout = payload.stockout || {};
+  const products = asArray(stockout.product_cards);
   const product = getPrimaryProduct(payload);
-  const variants = asArray(product.variant_availability);
-  const sizes = Array.from(new Set(variants.map((variant) => variant.normalized_size || variant.option_value || variant.normalized_option).filter(Boolean)));
-  const sizeLabels = sizes.length >= 4 ? sizes.slice(0, 11) : ["34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44"];
-  const unavailableSet = new Set(variants.filter((variant) => variant.available === false).map((variant) => variant.normalized_size || variant.option_value || variant.normalized_option));
-  const hotSizes = sizeLabels.slice(2, 8);
+  const optionLabels = getStockoutColumns(products, product);
+  const primaryUnavailableSet = productUnavailableLabels(product);
   const variantPct = metricValue(metrics, "variant_stockout_pct", 0);
-  const partialCount = metricValue(metrics, "partial_stockout_count", products.length);
-  const functionalPct = metricValue(metrics, "functional_stockout_count", 0);
+  const highlightedOptions = optionLabels.filter((label) => primaryUnavailableSet.has(label)).slice(0, 4);
+  const headlineOptions = highlightedOptions.length > 0 ? highlightedOptions.join(", ") : optionLabels.slice(0, 3).join(", ");
 
   return (
     <ReportShell toolLabel="Nuevo análisis">
@@ -829,48 +863,56 @@ function StockoutLeakReport({ payload }) {
           <div className="report-stockout-title-row">
             <ProductPhoto product={product} />
             <div>
-              <h1>{product.title || "Producto con fuga de tallas"}</h1>
+              <h1>{product.title || "Producto con disponibilidad incompleta"}</h1>
               <p className="report-muted">Patrón {product.pattern_scope?.replaceAll("_", " ") || "mixto"} · disponibilidad pública observada.</p>
             </div>
             <span className="report-pill report-pill-gold">warning</span>
           </div>
-          <div className="report-size-row">
-            {sizeLabels.map((size) => {
-              const unavailable = unavailableSet.has(size) || hotSizes.includes(size);
-              return <span key={size} className={unavailable ? "size-unavailable size-hot" : ""}>{size}</span>;
+          <div className="report-size-row report-option-row">
+            {optionLabels.map((label) => {
+              const unavailable = primaryUnavailableSet.has(label);
+              return <span key={label} className={unavailable ? "size-unavailable size-hot" : ""}>{label}</span>;
             })}
           </div>
-          <div className="report-stockout-legend"><span className="legend-hot" /> la que más se pide <span className="legend-out" /> agotada</div>
+          <div className="report-stockout-legend"><span className="legend-out" /> agotada/no disponible <span /> disponible</div>
         </section>
 
         <SectionEyebrow>Dónde se repite en tu catálogo <span className="report-pill report-pill-red">Pasa en varios productos</span></SectionEyebrow>
         <section className="report-card report-stockout-matrix">
-          <h2>Tienes una fuga clara en las tallas {hotSizes.slice(0, 3).join(", ")} — falta en varios productos, no solo en uno.</h2>
+          <h2>
+            Tienes variantes no disponibles ({headlineOptions}) en varios productos observados.
+          </h2>
           <div className="report-size-summary">
-            <span>% de tu catálogo sin esta</span>
-            {sizeLabels.map((size, index) => <strong key={size} className={hotSizes.includes(size) ? "hot" : ""}>{hotSizes.includes(size) ? [67, 67, 78, 67, 67, 44][Math.max(0, hotSizes.indexOf(size))] || 67 : index < 2 || index > 8 ? 0 : 11}%</strong>)}
+            <span>% de productos observados sin esa variante</span>
+            {optionLabels.map((label) => {
+              const unavailableCount = products.filter((item) => productUnavailableLabels(item).has(label)).length;
+              const pct = products.length ? Math.round((unavailableCount / products.length) * 100) : 0;
+              return <strong key={label} className={pct > 0 ? "hot" : ""}>{pct}%</strong>;
+            })}
           </div>
-          <div className="report-matrix-grid" style={{ gridTemplateColumns: `220px repeat(${sizeLabels.length}, minmax(42px, 1fr))` }}>
+          <div className="report-matrix-grid" style={{ gridTemplateColumns: `220px repeat(${optionLabels.length}, minmax(42px, 1fr))` }}>
             <span />
-            {sizeLabels.map((size) => <b key={size}>{size}</b>)}
-            {products.slice(0, 9).map((item, rowIndex) => (
-              <ReactRuntime.Fragment key={item.product_id || item.title || rowIndex}>
-                <em>{item.title || `Producto ${rowIndex + 1}`}</em>
-                {sizeLabels.map((size, colIndex) => {
-                  const on = hotSizes.includes(size) && (rowIndex + colIndex) % 3 !== 0;
-                  return <i key={`${rowIndex}-${size}`} className={on ? "out" : ""} />;
-                })}
-              </ReactRuntime.Fragment>
-            ))}
+            {optionLabels.map((label) => <b key={label}>{label}</b>)}
+            {products.slice(0, 9).map((item, rowIndex) => {
+              const unavailableSet = productUnavailableLabels(item);
+              return (
+                <ReactRuntime.Fragment key={item.product_id || item.title || rowIndex}>
+                  <em>{item.title || `Producto ${rowIndex + 1}`}</em>
+                  {optionLabels.map((label) => (
+                    <i key={`${rowIndex}-${label}`} className={unavailableSet.has(label) ? "out" : ""} />
+                  ))}
+                </ReactRuntime.Fragment>
+              );
+            })}
           </div>
-          <div className="report-matrix-legend"><span className="out" /> agotada <span /> disponible <b>talla que más se pide</b></div>
+          <div className="report-matrix-legend"><span className="out" /> agotada/no disponible <span /> disponible</div>
         </section>
 
         <div className="report-two-col report-kpi-row report-insight-grid">
-          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0) || 9)} tone="critical">
+          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0))} tone="critical">
             Productos están totalmente agotados.
           </InsightMetricCard>
-          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct || 34)} tone="warning">
+          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct)} tone="warning">
             Variantes observadas no están disponibles.
           </InsightMetricCard>
         </div>
