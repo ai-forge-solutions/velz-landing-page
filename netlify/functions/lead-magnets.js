@@ -3595,6 +3595,36 @@ function isEventRequest(event) {
   return event.path?.includes("/events") || event.queryStringParameters?.event === "1";
 }
 
+function isSearchRequest(event) {
+  return event.path?.match(/\/api\/lead-magnets\/search\/?$/) || event.queryStringParameters?.action === "search";
+}
+
+function slugToToolKey(slug) {
+  if (slug === "discount-depth-analyzer" || slug === "discount_depth_analyzer") return "discount_depth_analyzer";
+  if (slug === "stockout-leak-score" || slug === "stockout_leak_score") return "stockout_leak_score";
+  return null;
+}
+
+function toolKeyToSlug(toolKey) {
+  if (toolKey === "discount_depth_analyzer") return "discount-depth-analyzer";
+  if (toolKey === "stockout_leak_score") return "stockout-leak-score";
+  return "diagnostico";
+}
+
+function liveTokenFor(toolKey, brandId) {
+  return `live-${toolKeyToSlug(toolKey)}-${brandId}`;
+}
+
+function parseLiveToken(token) {
+  const match = token.match(/^live-(discount-depth-analyzer|stockout-leak-score)-([0-9a-f-]{36})$/i);
+  if (!match) return null;
+
+  return {
+    toolKey: slugToToolKey(match[1]),
+    brandId: match[2],
+  };
+}
+
 const LIVE_EXAMPLE_TOKENS = {
   "example-susmies-discount": {
     brandId: "11dcb1c4-069b-400a-b025-6fb1a7087bd5",
@@ -3717,6 +3747,92 @@ async function loadLiveExampleData({ brandId }) {
   );
 
   return { brand, analysis, products, items };
+}
+
+function analysisSupportsTool(analysis, toolKey) {
+  if (toolKey === "discount_depth_analyzer") {
+    return toNumber(analysis.discounted_products_count) > 0 || toNumber(analysis.discounted_products_pct) > 0;
+  }
+
+  if (toolKey === "stockout_leak_score") {
+    return (
+      toNumber(analysis.fully_out_of_stock_count) > 0 ||
+      toNumber(analysis.partially_out_of_stock_count) > 0 ||
+      toNumber(analysis.variant_stockout_pct) > 0
+    );
+  }
+
+  return false;
+}
+
+async function searchLeadMagnetBrands({ toolKey, query = "" }) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const analyses = await supabaseFetch(
+    "shopify_signal_analyses?select=brand_id,generated_at,created_at,discounted_products_count,discounted_products_pct,fully_out_of_stock_count,partially_out_of_stock_count,variant_stockout_pct&order=generated_at.desc.nullslast&limit=100",
+  );
+
+  const latestByBrand = new Map();
+  for (const analysis of analyses) {
+    if (!analysisSupportsTool(analysis, toolKey)) continue;
+    if (!latestByBrand.has(analysis.brand_id)) {
+      latestByBrand.set(analysis.brand_id, analysis);
+    }
+  }
+
+  const brandIds = Array.from(latestByBrand.keys()).slice(0, 60);
+  if (brandIds.length === 0) {
+    return [];
+  }
+
+  const brands = await supabaseFetch(
+    `brands?select=id,name,domain,website_url&id=in.(${brandIds.map(encodeURIComponent).join(",")})`,
+  );
+
+  return brands
+    .map((brand) => {
+      const analysis = latestByBrand.get(brand.id);
+      const domain = brand.domain || (brand.website_url || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+      const url = brand.website_url || (domain ? `https://${domain}` : "");
+      return {
+        brand_id: brand.id,
+        domain,
+        url,
+        tool_key: toolKey,
+        tool_slug: toolKeyToSlug(toolKey),
+        lead_magnet_url: `/tools/${toolKeyToSlug(toolKey)}/${liveTokenFor(toolKey, brand.id)}`,
+        latest_analysis_at: analysis?.generated_at || analysis?.created_at || null,
+      };
+    })
+    .filter((item) => item.domain || item.url)
+    .filter((item) => {
+      if (!normalizedQuery) return true;
+      return item.domain.toLowerCase().includes(normalizedQuery) || item.url.toLowerCase().includes(normalizedQuery);
+    })
+    .sort((a, b) => String(b.latest_analysis_at || "").localeCompare(String(a.latest_analysis_at || "")))
+    .slice(0, 12);
+}
+
+function buildSearchFallback(toolKey, query = "") {
+  const normalizedQuery = query.trim().toLowerCase();
+  return Object.entries(LIVE_EXAMPLE_TOKENS)
+    .filter(([, config]) => config.toolKey === toolKey)
+    .map(([token, config]) => {
+      const payload = EXPORTED_REAL_PAYLOADS.get(token);
+      const domain = payload?.brand?.domain || "";
+      const url = payload?.brand?.website_url || (domain ? `https://${domain}` : "");
+      return {
+        brand_id: config.brandId,
+        domain,
+        url,
+        tool_key: toolKey,
+        tool_slug: toolKeyToSlug(toolKey),
+        lead_magnet_url: `/tools/${toolKeyToSlug(toolKey)}/${token}`,
+        latest_analysis_at: payload?.generated_at || null,
+        exported_real_data: true,
+      };
+    })
+    .filter((item) => item.domain || item.url)
+    .filter((item) => !normalizedQuery || item.domain.toLowerCase().includes(normalizedQuery) || item.url.toLowerCase().includes(normalizedQuery));
 }
 
 function buildSourceRefs(data) {
@@ -3967,6 +4083,20 @@ async function getPayload(token) {
     return payloadWithToken(token, FIXTURE_PAYLOADS.get(token));
   }
 
+  const liveToken = parseLiveToken(token);
+  if (liveToken?.brandId && liveToken?.toolKey) {
+    const data = await loadLiveExampleData({ brandId: liveToken.brandId });
+    if (!data || !data.analysis) return null;
+    const payload = liveToken.toolKey === "discount_depth_analyzer" ? buildDiscountPayload(data) : buildStockoutPayload(data);
+    if (!payload) return null;
+    return {
+      ...payload,
+      token_suffix: token.slice(-6),
+      fixture: false,
+      live_generated: true,
+    };
+  }
+
   const liveExamplePayload = await getLiveExamplePayload(token);
   if (liveExamplePayload !== undefined) {
     return liveExamplePayload;
@@ -3992,6 +4122,35 @@ async function readJsonBody(event) {
 }
 
 export async function handler(event) {
+  if (isSearchRequest(event)) {
+    if (event.httpMethod !== "GET") {
+      return json(405, { error: "method_not_allowed" });
+    }
+
+    const toolKey = slugToToolKey(event.queryStringParameters?.tool || "");
+    if (!toolKey) {
+      return json(400, { error: "invalid_tool" });
+    }
+
+    const query = event.queryStringParameters?.q || "";
+    try {
+      return json(200, {
+        tool_key: toolKey,
+        tool_slug: toolKeyToSlug(toolKey),
+        results: await searchLeadMagnetBrands({ toolKey, query }),
+        source: "live_supabase_shopify_signals",
+      });
+    } catch (error) {
+      return json(200, {
+        tool_key: toolKey,
+        tool_slug: toolKeyToSlug(toolKey),
+        results: buildSearchFallback(toolKey, query),
+        source: "exported_real_data_fallback",
+        warning: error.message,
+      });
+    }
+  }
+
   const token = getToken(event).trim();
 
   if (!token) {
