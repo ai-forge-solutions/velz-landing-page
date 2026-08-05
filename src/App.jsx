@@ -559,22 +559,19 @@ function ProductPhoto({ product, className = "report-product-photo" }) {
 
 function ReportShell({ children, toolLabel = "Nuevo análisis" }) {
   return (
-    <>
-      <nav className="lead-nav">
-        <a href={HOME_LINK} className="lead-logo" aria-label="Velz home">
-          <BrandSymbol className="lead-logo-symbol" width={34} />
-          <span>velz</span>
-        </a>
-        <div className="lead-nav-right">
-          <span>e</span>
-          <strong>{toolLabel}</strong>
-        </div>
-      </nav>
+    <main className="report-page">
       <button className="report-print" type="button" onClick={() => window.print()}>
         Print
       </button>
-      <main className="report-page">{children}</main>
-    </>
+      <header className="lead-nav" aria-label="Velz report header">
+        <a href={HOME_LINK} className="lead-logo" aria-label="Velz home">
+          <span className="lead-logo-plus" aria-hidden="true">+</span>
+          <span>velz</span>
+        </a>
+        <p className="lead-nav-right">{toolLabel}</p>
+      </header>
+      {children}
+    </main>
   );
 }
 
@@ -679,7 +676,14 @@ function DiscountDepthReport({ payload, apiState, route }) {
   return (
     <ReportShell toolLabel="Nuevo análisis">
       <div className="report-wrap">
-        <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
+        <header className="report-tool-hero">
+          <SectionEyebrow>{normalizeToolLabel(payload.tool_key)}</SectionEyebrow>
+          <h1>¿Cuánto stock rebajado lleva meses sin moverse?</h1>
+          <p>
+            Miramos el catálogo público de {payload.brand?.domain || payload.brand?.name || "tu tienda"} y separamos el descuento que funciona del que no.
+            Sin registrarte, sin tocar nada privado.
+          </p>
+        </header>
 
         <section className="report-card report-product-hero report-product-hero-v2">
           <ProductPhoto product={product} />
@@ -751,28 +755,25 @@ function DiscountDepthReport({ payload, apiState, route }) {
         {cohorts.length > 0 ? (
           <>
             <SectionEyebrow>Por antigüedad · % disponible y descuento medio</SectionEyebrow>
-            <section className="report-card report-cohort-grid">
-              {cohorts.slice(0, 10).map((cohort) => {
-                const total = cohort.product_count || 1;
-                const discounted = cohort.discounted_product_count || 0;
-                const deep = cohort.deep_discount_product_count || 0;
-                const pct = Math.round((discounted / total) * 100);
-                const critical = deep >= 7 || pct >= 80;
-                const warning = deep > 0 && !critical;
-                return (
-                  <article className={`report-cohort-card ${critical ? "is-critical" : warning ? "is-warning" : ""}`} key={cohort.key}>
-                    <div>
-                      <h3>{formatCohortLabel(cohort.label)}</h3>
-                      <p>{discounted} de {total} productos rebajados</p>
-                    </div>
-                    <div className="report-cohort-metrics">
+            <section className="report-card report-monthly-chart" aria-label="Descuento medio por antigüedad">
+              <div className="report-gradient-scale"><span>0%</span><span>medio</span><span>profundo</span></div>
+              <div className="report-bars-vertical">
+                {cohorts.slice(0, 10).map((cohort) => {
+                  const total = cohort.product_count || 1;
+                  const discounted = cohort.discounted_product_count || 0;
+                  const deep = cohort.deep_discount_product_count || 0;
+                  const pct = Math.round((discounted / total) * 100);
+                  const height = Math.min(100, Math.max(8, pct));
+                  const hot = deep >= 7 || pct >= 80;
+                  return (
+                    <article className="report-vbar-item" key={cohort.key}>
                       <strong>{pct}%</strong>
-                      <span><i style={{ width: `${Math.min(100, Math.max(4, pct))}%` }} /></span>
-                      <em>{deep} profundos</em>
-                    </div>
-                  </article>
-                );
-              })}
+                      <span className={hot ? "hot" : ""} style={{ height: `${height}%` }} />
+                      <em>{formatCohortLabel(cohort.label)}</em>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           </>
         ) : null}
