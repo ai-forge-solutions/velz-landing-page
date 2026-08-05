@@ -598,6 +598,30 @@ function metricValue(metrics, key, fallback = 0) {
   return typeof value === "number" ? value : fallback;
 }
 
+function SeverityBadge({ children, tone = "warning" }) {
+  return <span className={`report-severity report-severity-${tone}`}>{children}</span>;
+}
+
+function InsightMetricCard({ eyebrow, value, children, tone = "neutral" }) {
+  return (
+    <article className={`report-insight-card report-insight-${tone}`}>
+      <span>{eyebrow}</span>
+      <strong>{value}</strong>
+      <p>{children}</p>
+    </article>
+  );
+}
+
+function formatCohortLabel(label = "") {
+  return label
+    .replace("<30 days", "<30 días")
+    .replace("1-3 months", "1–3 meses")
+    .replace("3-6 months", "3–6 meses")
+    .replace("6-12 months", "6–12 meses")
+    .replace(">12 months", ">12 meses")
+    .replace(" months", " meses");
+}
+
 function ReportFooter({ limitations = [], variantCoverage = 40 }) {
   return (
     <footer className="report-footer">
@@ -657,15 +681,18 @@ function DiscountDepthReport({ payload, apiState, route }) {
       <div className="report-wrap">
         <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
 
-        <section className="report-card report-product-hero">
+        <section className="report-card report-product-hero report-product-hero-v2">
           <ProductPhoto product={product} />
           <div className="report-product-copy">
             <div className="report-title-line">
               <h1>{product.title || "Producto con descuento profundo"}</h1>
-              <span className="report-pill report-pill-red">disponible</span>
+              <span className="report-pill report-pill-muted">disponible</span>
             </div>
-            <p className="report-product-claim"><strong>{toPercent(product.discount_pct || maxDiscount)} off</strong>, listado hace {primaryAge} meses — inmovilizando capital.</p>
-            <p className="report-muted">Está entre los productos más longevos aún disponibles de tu catálogo.</p>
+            <p className="report-muted">Listado hace {primaryAge} meses · entre los productos más longevos aún disponibles.</p>
+            <div className="report-hero-metric-row">
+              <span className="report-hero-discount">{toPercent(product.discount_pct || maxDiscount)} off</span>
+              <p>Señal de stock que no rota sin cambiar el contenido del diagnóstico.</p>
+            </div>
             <p className="report-price-line"><span>{oldPrice}</span> <strong>{price}</strong></p>
           </div>
         </section>
@@ -684,7 +711,7 @@ function DiscountDepthReport({ payload, apiState, route }) {
         </section>
 
         <SectionEyebrow>Qué está pasando en tu catálogo</SectionEyebrow>
-        <div className="report-two-col">
+        <div className="report-two-col report-analysis-grid">
           <section className="report-card report-depth-card">
             <h3>Descuento por profundidad</h3>
             <div className="report-stacked-bar">
@@ -706,34 +733,46 @@ function DiscountDepthReport({ payload, apiState, route }) {
             </div>
           </section>
 
-          <section className="report-card report-narrative-card">
-            <p>La mayoría del catálogo está descontado — <strong>{toPercent(discountedPct)}</strong> tiene precio por debajo de su ancla.</p>
-            <p>Parte usa descuentos agresivos — <strong className="red">{deepCount}</strong> productos están en descuento profundo.</p>
-            <p>Una gran parte sigue disponible — <strong className="gold">{availableCount}</strong> productos rebajados se pueden comprar.</p>
+          <section className="report-card report-narrative-card report-insight-grid">
+            <InsightMetricCard eyebrow="Catálogo rebajado" value={toPercent(discountedPct)} tone="neutral">
+              Tiene precio por debajo de su ancla pública.
+            </InsightMetricCard>
+            <InsightMetricCard eyebrow="Problema real" value={deepCount} tone="critical">
+              Productos están en descuento profundo.
+            </InsightMetricCard>
+            <InsightMetricCard eyebrow="Warning" value={availableCount} tone="warning">
+              Productos rebajados todavía se pueden comprar.
+            </InsightMetricCard>
           </section>
         </div>
 
-        <div className="report-black-callout"><span>!</span><p>Productos con descuento profundo siguen disponibles: prioriza revisar si son liquidación táctica o stock que no rota.</p></div>
+        <div className="report-black-callout"><span>!</span><p>Descuento profundo + disponible: revisa si es liquidación táctica o stock que no rota.</p></div>
 
         {cohorts.length > 0 ? (
           <>
             <SectionEyebrow>Por antigüedad · % disponible y descuento medio</SectionEyebrow>
-            <section className="report-card report-bar-chart">
-              <h3>Descuento medio de los disponibles</h3>
-              <div className="report-gradient-scale"><span>0%</span><span>32%</span><span>63%+</span></div>
-              <div className="report-bars-vertical">
-                {cohorts.slice(0, 10).map((cohort) => {
-                  const height = Math.max(14, Math.min(100, cohort.deep_discount_product_count ? 75 : cohort.discounted_product_count ? 44 : 25));
-                  const strong = cohort.deep_discount_product_count > 0;
-                  return (
-                    <div className="report-vbar-item" key={cohort.key}>
-                      <strong>{height}%</strong>
-                      <span className={strong ? "hot" : ""} style={{ height: `${height}%` }} />
-                      <em>{cohort.label.replace(" months", "m")}</em>
+            <section className="report-card report-cohort-grid">
+              {cohorts.slice(0, 10).map((cohort) => {
+                const total = cohort.product_count || 1;
+                const discounted = cohort.discounted_product_count || 0;
+                const deep = cohort.deep_discount_product_count || 0;
+                const pct = Math.round((discounted / total) * 100);
+                const critical = deep >= 7 || pct >= 80;
+                const warning = deep > 0 && !critical;
+                return (
+                  <article className={`report-cohort-card ${critical ? "is-critical" : warning ? "is-warning" : ""}`} key={cohort.key}>
+                    <div>
+                      <h3>{formatCohortLabel(cohort.label)}</h3>
+                      <p>{discounted} de {total} productos rebajados</p>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="report-cohort-metrics">
+                      <strong>{pct}%</strong>
+                      <span><i style={{ width: `${Math.min(100, Math.max(4, pct))}%` }} /></span>
+                      <em>{deep} profundos</em>
+                    </div>
+                  </article>
+                );
+              })}
             </section>
           </>
         ) : null}
@@ -744,14 +783,16 @@ function DiscountDepthReport({ payload, apiState, route }) {
             <section className="report-card report-product-list">
               {products.slice(0, 8).map((item, index) => (
                 <article className="report-product-row" key={`${item.product_id || item.title}-${index}`}>
-                  <span className={`report-rank ${index < 3 ? "critical" : ""}`}>{index + 1}</span>
-                  <ProductPhoto product={item} className="report-row-photo" />
-                  <div className="report-row-main">
-                    <h3>{item.title}</h3>
-                    <p>· mismo lote · {item.product_age_cohort?.replaceAll("_", " ") || "antigüedad desconocida"}</p>
-                    <strong>{index < 3 ? "Muy antiguo + alto descuento + sigue disponible" : "Descuento activo, todavía sin agotar"}</strong>
+                  <div className="report-row-identity">
+                    <span className={`report-rank ${index < 3 ? "critical" : ""}`}>{index + 1}</span>
+                    <ProductPhoto product={item} className="report-row-photo" />
+                    <div className="report-row-main">
+                      <h3>{item.title}</h3>
+                      <p>mismo lote · {item.product_age_cohort?.replaceAll("_", " ") || "antigüedad desconocida"}</p>
+                      <SeverityBadge tone={index < 3 ? "critical" : "warning"}>{index < 3 ? "Crítico" : "Alto"}</SeverityBadge>
+                    </div>
                   </div>
-                  <div className="report-row-metrics"><span>{toPercent(item.discount_pct)}</span><em>Disponible</em>{item.compare_at_price ? <small>{formatLeadMetric(item.compare_at_price)}€</small> : null}</div>
+                  <div className="report-row-metrics"><span>{toPercent(item.discount_pct)}</span><em>Disponible</em>{item.compare_at_price ? <small>{formatLeadMetric(item.compare_at_price)}€ ancla</small> : null}</div>
                 </article>
               ))}
             </section>
@@ -783,11 +824,14 @@ function StockoutLeakReport({ payload }) {
       <div className="report-wrap">
         <SectionEyebrow>{normalizeToolLabel(payload.tool_key)} · {payload.brand?.domain || payload.brand?.name || "catálogo"}</SectionEyebrow>
 
-        <section className="report-card report-stockout-hero">
+        <section className="report-card report-stockout-hero report-stockout-hero-v2">
           <div className="report-stockout-title-row">
             <ProductPhoto product={product} />
-            <h1>{product.title || "Producto con fuga de tallas"}</h1>
-            <span className="report-pill report-pill-gold">se agotó una que se vende mucho</span>
+            <div>
+              <h1>{product.title || "Producto con fuga de tallas"}</h1>
+              <p className="report-muted">Patrón {product.pattern_scope?.replaceAll("_", " ") || "mixto"} · disponibilidad pública observada.</p>
+            </div>
+            <span className="report-pill report-pill-gold">warning</span>
           </div>
           <div className="report-size-row">
             {sizeLabels.map((size) => {
@@ -821,9 +865,13 @@ function StockoutLeakReport({ payload }) {
           <div className="report-matrix-legend"><span className="out" /> agotada <span /> disponible <b>talla que más se pide</b></div>
         </section>
 
-        <div className="report-two-col report-kpi-row">
-          <section className="report-card"><strong>{toPercent(metricValue(metrics, "fully_out_of_stock_count", 0) || 9)}</strong><p>de tus productos están totalmente agotados</p></section>
-          <section className="report-card"><strong className="gold">{toPercent(variantPct || 34)}</strong><p>solo les quedan opciones periféricas o incompletas</p></section>
+        <div className="report-two-col report-kpi-row report-insight-grid">
+          <InsightMetricCard eyebrow="Problema real" value={formatLeadMetric(metricValue(metrics, "fully_out_of_stock_count", 0) || 9)} tone="critical">
+            Productos están totalmente agotados.
+          </InsightMetricCard>
+          <InsightMetricCard eyebrow="Warning" value={toPercent(variantPct || 34)} tone="warning">
+            Variantes observadas no están disponibles.
+          </InsightMetricCard>
         </div>
 
         <ReportFooter limitations={payload.limitations} variantCoverage={40} />
