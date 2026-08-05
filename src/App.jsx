@@ -1827,7 +1827,8 @@ export default function App() {
 
       <section id="cta">
         <Reveal className="cta-shell">
-          <h2>{ctaHook}</h2>
+          <h2>¿Tienes a la vista una decisión sobre qué hacer con tus ads y cuánto stock pedir?</h2>
+          <p className="cta-subtitle">Agenda una llamada y lo vemos juntos.</p>
           <div className="booking-cta-card" id="lead-form">
             <a className="booking-primary" href={CAL_BOOKING_LINK} target="_blank" rel="noopener noreferrer">
               Reservar 15 minutos

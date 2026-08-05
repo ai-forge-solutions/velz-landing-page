@@ -698,6 +698,15 @@ h2 {
   text-align: center;
 }
 
+
+.cta-subtitle {
+  margin: -18px auto 0;
+  color: var(--ink-150);
+  font-size: 18px;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .booking-cta-card {
   width: min(100%, 520px);
   margin: 32px auto 0;
