@@ -241,6 +241,19 @@ function parseLeadMagnetPath(pathname) {
   };
 }
 
+function parseToolHomePath(pathname) {
+  const match = pathname.match(/^\/tools\/([^/]+)\/?$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const toolSlug = decodeURIComponent(match[1]);
+  const knownTool = Object.values(INVENTORY_TOOL_COPY).some((tool) => tool.slug === toolSlug);
+
+  return knownTool ? { toolSlug } : null;
+}
+
 const symbolMarkup = velzSymbolSvg
   .replace('role="img"', "")
   .replace('aria-label="velz symbol"', 'aria-hidden="true" focusable="false"');
@@ -281,6 +294,7 @@ function Reveal({ children, className }) {
 
 function getPageConfig(pathname) {
   const leadMagnetRoute = parseLeadMagnetPath(pathname);
+  const toolHomeRoute = parseToolHomePath(pathname);
 
   if (leadMagnetRoute) {
     return {
@@ -291,6 +305,17 @@ function getPageConfig(pathname) {
         leadMagnetRoute.token,
       )}`,
       leadMagnetRoute,
+    };
+  }
+
+  if (toolHomeRoute) {
+    const tool = Object.values(INVENTORY_TOOL_COPY).find((item) => item.slug === toolHomeRoute.toolSlug);
+    return {
+      key: "tool-home",
+      title: `velz — ${tool?.slug || "tool"}`,
+      description: "Busca una URL con Shopify Signals para abrir su lead magnet público.",
+      canonical: `https://velz.io/tools/${encodeURIComponent(toolHomeRoute.toolSlug)}`,
+      toolHomeRoute,
     };
   }
 
@@ -923,6 +948,90 @@ function StockoutLeakReport({ payload }) {
   );
 }
 
+function toolCopyFromSlug(toolSlug) {
+  return Object.entries(INVENTORY_TOOL_COPY).find(([, config]) => config.slug === toolSlug) || ["stockout_leak_score", INVENTORY_TOOL_COPY.stockout_leak_score];
+}
+
+function ToolHomePage({ route }) {
+  const [toolKey, toolCopy] = useMemo(() => toolCopyFromSlug(route.toolSlug), [route.toolSlug]);
+  const [query, setQuery] = useState("");
+  const [state, setState] = useState({ status: LEAD_MAGNET_STATUSES.loading, results: [] });
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      setState((current) => ({ ...current, status: LEAD_MAGNET_STATUSES.loading }));
+      try {
+        const response = await fetch(
+          `/api/lead-magnets/search?tool=${encodeURIComponent(route.toolSlug)}&q=${encodeURIComponent(query)}`,
+          { headers: { Accept: "application/json" }, signal: controller.signal },
+        );
+        const payload = await response.json();
+        if (!cancelled) {
+          setState({
+            status: response.ok ? LEAD_MAGNET_STATUSES.ready : LEAD_MAGNET_STATUSES.error,
+            results: Array.isArray(payload.results) ? payload.results : [],
+            source: payload.source,
+            warning: payload.warning,
+          });
+        }
+      } catch (error) {
+        if (!cancelled && error.name !== "AbortError") {
+          setState({ status: LEAD_MAGNET_STATUSES.error, results: [] });
+        }
+      }
+    }, query ? 180 : 0);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, [query, route.toolSlug]);
+
+  return (
+    <ReportShell toolLabel="Tools">
+      <div className="report-wrap tool-home-wrap">
+        <header className="report-tool-hero tool-home-hero">
+          <SectionEyebrow>{normalizeToolLabel(toolKey)}</SectionEyebrow>
+          <h1>{toolCopy.title}</h1>
+          <p>Busca por URL. Solo aparecen marcas con Shopify Signals ya analizado y suficiente dato para poblar esta tool.</p>
+        </header>
+
+        <section className="report-card tool-search-card">
+          <label className="tool-search-label" htmlFor="tool-search-input">URL de la marca</label>
+          <input
+            id="tool-search-input"
+            className="tool-search-input"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="empieza a escribir: northdeco.com, occre.com..."
+            autoComplete="off"
+          />
+
+          <div className="tool-search-meta">
+            <span>{state.status === LEAD_MAGNET_STATUSES.loading ? "Buscando..." : `${state.results.length} URLs disponibles`}</span>
+            {state.source ? <span>{state.source === "live_supabase_shopify_signals" ? "live Supabase" : "fallback export"}</span> : null}
+          </div>
+
+          <div className="tool-result-list">
+            {state.results.map((result) => (
+              <a className="tool-result-row" href={result.lead_magnet_url} key={`${result.tool_key}-${result.brand_id}`}>
+                <strong>{result.domain || result.url}</strong>
+                <span>{result.url}</span>
+              </a>
+            ))}
+            {state.status !== LEAD_MAGNET_STATUSES.loading && state.results.length === 0 ? (
+              <p className="tool-empty-state">No hay URLs pobladas para esa búsqueda todavía. Ejecuta Shopify Signals para esa marca y vuelve a buscarla.</p>
+            ) : null}
+          </div>
+        </section>
+      </div>
+    </ReportShell>
+  );
+}
+
 function LeadMagnetPage({ route }) {
   const [apiState, setApiState] = useState({ status: LEAD_MAGNET_STATUSES.loading });
   const trackedViewRef = ReactRuntime.useRef(false);
@@ -1146,6 +1255,10 @@ export default function App() {
         sections={privacySections}
       />
     );
+  }
+
+  if (page.key === "tool-home") {
+    return <ToolHomePage route={page.toolHomeRoute} />;
   }
 
   if (page.key === "lead-magnet") {
