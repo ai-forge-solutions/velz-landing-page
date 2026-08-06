@@ -4,6 +4,12 @@ Landing de Velz migrada a Vite + React con animaciones de Framer Motion, conserv
 
 ## Desarrollo
 
+### CTA de agenda Cal.com
+
+La landing usa `VITE_CAL_BOOKING_URL` para los CTAs de reserva. Configura esa variable con la URL pública del evento de Cal.com (por ejemplo `https://cal.com/<usuario>/<evento>`) en Netlify y en `.env.local` para pruebas locales.
+
+Si la variable no está configurada, el CTA no apunta a una URL de Cal.com rota: cae a `mailto:miguel@velz.io` y mantiene un enlace secundario de email.
+
 1. Instalar dependencias:
 
 ```bash
