@@ -79,8 +79,12 @@ const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar 
 const DS_NAMESPACE = "VeldDesignSystem_c12abb";
 const CONTACT_EMAIL = "miguel@velz.io";
 const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
-const CAL_BOOKING_LINK = import.meta.env.VITE_CAL_BOOKING_URL || "https://cal.com/velz/15min";
 const DIAGNOSTIC_FALLBACK_LINK = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Diagnóstico externo Velz")}`;
+const RAW_CAL_BOOKING_URL = import.meta.env.VITE_CAL_BOOKING_URL?.trim();
+const HAS_CAL_BOOKING_URL = Boolean(RAW_CAL_BOOKING_URL);
+const CAL_BOOKING_LINK = RAW_CAL_BOOKING_URL || DIAGNOSTIC_FALLBACK_LINK;
+const BOOKING_CTA_LABEL = HAS_CAL_BOOKING_URL ? "Reservar 15 minutos" : "Solicitar enlace de agenda";
+const BOOKING_LINK_PROPS = HAS_CAL_BOOKING_URL ? { target: "_blank", rel: "noopener noreferrer" } : {};
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
 const revealViewport = { once: true, amount: 0.2 };
@@ -1613,13 +1617,12 @@ export default function App() {
             <motion.a
               href={CAL_BOOKING_LINK}
               className="btn"
-              target="_blank"
-              rel="noopener noreferrer"
+              {...BOOKING_LINK_PROPS}
               whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
               whileTap={disableMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
-              Reservar 15 minutos
+              {BOOKING_CTA_LABEL}
             </motion.a>
             <p className="micro hero-micro">Una llamada corta para decidir con el dato real delante.</p>
           </motion.div>
@@ -1830,8 +1833,16 @@ export default function App() {
           <h2>¿Tienes a la vista una decisión sobre qué hacer con tus ads y cuánto stock pedir?</h2>
           <p className="cta-subtitle">Agenda una llamada y lo vemos juntos.</p>
           <div className="booking-cta-card" id="lead-form">
-            <a className="booking-primary" href={CAL_BOOKING_LINK} target="_blank" rel="noopener noreferrer">
-              Reservar 15 minutos
+            <a className="booking-primary" href={CAL_BOOKING_LINK} {...BOOKING_LINK_PROPS}>
+              {BOOKING_CTA_LABEL}
+            </a>
+            <p className="booking-note">
+              {HAS_CAL_BOOKING_URL
+                ? "Se abrirá Cal.com en una pestaña nueva para escoger hueco."
+                : "Te responderé por email con el enlace de agenda cuando la disponibilidad esté abierta."}
+            </p>
+            <a className="booking-secondary" href={EMAIL_LINK}>
+              O escribir a {CONTACT_EMAIL}
             </a>
           </div>
         </Reveal>
