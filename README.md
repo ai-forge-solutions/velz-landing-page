@@ -62,8 +62,8 @@ npm run preview
 ## Worker skills / agent context
 
 - `AGENTS.md`: instrucciones de repo para Hermes/Codex/Claude-style workers.
-- `.github/skills/velz-brand/SKILL.md`: look & feel de Velz; obligatorio antes de tocar UI, copy, landing, lead magnets o componentes visibles.
-- `.github/skills/README.md`: mapa de skills repo-locales importadas para diseño, landing y performance.
+- `.github/skills/velz-brand/SKILL.md`: look & feel de Velz; obligatorio antes de tocar UI, copy, landing, lead magnets o componentes visibles. Incorpora el kit de diseño entregado y referencia `.github/skills/velz-brand/references/design-system.md` / `integration.md` para trabajos de marca sustanciales.
+- `.github/skills/README.md`: mapa de skills repo-locales importadas para diseño, landing y performance. Todas se cargan igual: `.github/skills/<skill>/SKILL.md` + `references/` si aplica.
 
 ## Nota
 

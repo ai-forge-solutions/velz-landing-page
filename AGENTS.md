@@ -14,7 +14,9 @@ This repo is `ai-forge-solutions/velz-landing-page`, the public Velz landing and
 
 Repo-local worker skills live under `.github/skills/`. Read the relevant `SKILL.md` before making changes.
 
-Before changing visible UI, copy, public landing pages, lead-magnet pages, CTAs, or frontend components, read and apply `.github/skills/velz-brand/SKILL.md`. It is the strict Velz look-and-feel and claim-safety source of truth and overrides generic design advice.
+Before changing visible UI, copy, public landing pages, lead-magnet pages, CTAs, or frontend components, read and apply `.github/skills/velz-brand/SKILL.md`. It is the strict Velz look-and-feel and claim-safety source of truth and overrides generic design advice. For substantial design or brand work, also read `.github/skills/velz-brand/references/design-system.md` and `.github/skills/velz-brand/references/integration.md`.
+
+All repo-local skills are loaded the same way: read `.github/skills/<skill>/SKILL.md` first, then any `references/` files named by that skill. Do not install or load the supplied Claude-Code-style `velz-design` manifest as a separate top-level skill; it is preserved only as `.github/skills/velz-brand/references/claude-code-skill.md` for provenance.
 
 Additional reusable worker skills:
 
@@ -31,7 +33,7 @@ Use these skills additively with the Velz brand skill. Do not introduce colors, 
 ## Brand/source rules
 
 - Do not use trujas/TURNO/barber branding, product assumptions, colors, copy, or design rules in this repo.
-- Current Velz design tokens live in `tokens/*.css`; production patterns live in `src/styles.css`; the preserved original reference is `landing-v2-contraste.html`.
+- Current Velz design tokens live in `tokens/*.css`; production patterns live in `src/styles.css`; the preserved original reference is `landing-v2-contraste.html`; the supplied full design-system guide lives in `.github/skills/velz-brand/references/design-system.md`.
 - Lead-magnet pages must remain claim-safe: public observations and proxies need source refs/caveats; do not imply private account access or exact revenue/stock/cashflow unless explicitly backed by data.
 
 ## Lead magnet architecture
