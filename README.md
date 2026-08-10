@@ -4,6 +4,12 @@ Landing de Velz migrada a Vite + React con animaciones de Framer Motion, conserv
 
 ## Desarrollo
 
+### CTA de agenda Cal.com
+
+La landing usa `VITE_CAL_BOOKING_URL` para los CTAs de reserva. Configura esa variable con la URL pública del evento de Cal.com (por ejemplo `https://cal.com/<usuario>/<evento>`) en Netlify y en `.env.local` para pruebas locales.
+
+Si la variable no está configurada, el CTA no apunta a una URL de Cal.com rota: cae a `mailto:miguel@velz.io` y mantiene un enlace secundario de email.
+
 1. Instalar dependencias:
 
 ```bash
@@ -58,6 +64,12 @@ npm run preview
   - `test-not-ready-token` devuelve `status: "not_ready"`.
   - `test-expired-token` devuelve `410 expired_token`; cualquier token desconocido devuelve `404 invalid_token`.
 - El endpoint no ejecuta ETLs, scraping, conductor ni enriquecimientos en el request path. Los ejemplos `example-*` leen hechos ya persistidos en Supabase y ensamblan el render payload en la función cuando el entorno tiene credenciales Supabase; si el deploy preview no tiene esas variables, devuelven una exportación real de esos mismos registros de Supabase incluida en la PR. Los tokens `test-*` siguen siendo fixtures de smoke/local.
+
+## Worker skills / agent context
+
+- `AGENTS.md`: instrucciones de repo para Hermes/Codex/Claude-style workers.
+- `.github/skills/velz-brand/SKILL.md`: look & feel de Velz; obligatorio antes de tocar UI, copy, landing, lead magnets o componentes visibles. Incorpora el kit de diseño entregado y referencia `.github/skills/velz-brand/references/design-system.md` / `integration.md` para trabajos de marca sustanciales.
+- `.github/skills/README.md`: mapa de skills repo-locales importadas para diseño, landing y performance. Todas se cargan igual: `.github/skills/<skill>/SKILL.md` + `references/` si aplica.
 
 ## Nota
 
