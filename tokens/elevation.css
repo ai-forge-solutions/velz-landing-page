@@ -1,6 +1,49 @@
+/* ============================================================
+   Velz — Elevation & motion tokens
+   Elevation is mostly hairline borders, not shadow. Velz is
+   flat and precise; shadows are soft, low, and used sparingly
+   to lift only what floats (menus, dialogs, toasts).
+   Motion accompanies — it never announces. Calm fades and
+   short eases. No bounce, no overshoot.
+   ============================================================ */
+
+:root {
+  /* --- Shadows (cool ink, low alpha) --- */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px rgba(15, 15, 15, 0.04);
+  --shadow-sm: 0 2px 6px rgba(15, 15, 15, 0.05);
+  --shadow-md: 0 6px 20px rgba(15, 15, 15, 0.07);
+  --shadow-lg: 0 16px 44px rgba(15, 15, 15, 0.10);
+  --shadow-focus: 0 0 0 3px rgba(26, 143, 84, 0.28); /* green focus ring */
+
+  /* --- Hairline border shorthands --- */
+  --line-hairline: var(--stroke-hairline) solid var(--border-hairline);
+  --line-default:  var(--stroke-hairline) solid var(--border-default);
+  --line-strong:   var(--stroke-hairline) solid var(--border-strong);
+
+  /* --- Motion: durations --- */
+  --dur-instant: 80ms;  /* @kind other */
+  --dur-fast:    140ms; /* @kind other */
+  --dur-base:    220ms; /* @kind other */
+  --dur-slow:    380ms; /* @kind other */
+
+  /* --- Motion: easing --- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+  --ease-linear:   linear; /* @kind other */
+
+  /* z-index scale */
+  --z-base: 0; /* @kind other */
+  --z-raised: 10; /* @kind other */
+  --z-sticky: 100; /* @kind other */
+  --z-overlay: 1000; /* @kind other */
+  --z-modal: 1100; /* @kind other */
+  --z-toast: 1200; /* @kind other */
+}
+
+
+/* Backward-compatible aliases used by existing cards. */
 :root {
   --shadow-card: 0 2px 10px rgba(15, 15, 15, 0.05);
-  --shadow-sm: 0 2px 10px rgba(15, 15, 15, 0.05);
-  --dur-fast: 140ms;
-  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 }

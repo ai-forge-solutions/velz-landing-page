@@ -1,19 +1,57 @@
-:root {
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
+/* ============================================================
+   Velz — Spacing & sizing tokens
+   8px base grid with editorial generosity at the large end.
+   The brand breathes — whitespace is the medium, not filler.
+   ============================================================ */
 
-  --pad-card: 28px 22px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-full: 9999px;
-  --control-h-sm: 40px;
-  --control-h-md: 48px;
-  --control-h-lg: 52px;
+:root {
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+  --space-11: 192px;
+
+  /* semantic spacing */
+  --gap-inline:    var(--space-2);   /* between inline siblings */
+  --gap-control:   var(--space-3);   /* inside controls */
+  --gap-stack:     var(--space-4);   /* vertical rhythm */
+  --gap-section:   var(--space-9);   /* between page sections */
+  --pad-card:      var(--space-6);
+  --pad-page:      var(--space-8);
+
+  /* container widths */
+  --container-prose: 68ch;
+  --container-narrow: 720px;
+  --container-wide:  1200px;
+  --container-max:   1440px;
+
+  /* --- Radii — precise, architectural; modest curvature --- */
+  --radius-none: 0;
+  --radius-xs:   3px;
+  --radius-sm:   6px;   /* controls: buttons, inputs */
+  --radius-md:   10px;  /* cards */
+  --radius-lg:   14px;  /* panels, dialogs */
+  --radius-full: 999px; /* pills, avatars, switches */
+
+  /* --- Control sizing --- */
+  --control-h-sm: 32px;
+  --control-h-md: 40px;
+  --control-h-lg: 48px;
+
+  /* --- Hairline / stroke widths --- */
+  --stroke-hairline: 1px;
+  --stroke-emphasis: 1.5px;
+}
+
+
+/* Backward-compatible aliases from the first landing token pass. */
+:root {
+  --space-12: var(--space-7);
 }

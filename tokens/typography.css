@@ -1,15 +1,75 @@
-:root {
-  --font-serif: "Newsreader", Georgia, serif;
-  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --weight-medium: 500;
-  --text-body-s: 13px;
-  --text-body-m: 15px;
-  --text-body-l: 16px;
-  --text-caption: 12px;
-  --text-micro: 10px;
+/* ============================================================
+   Velz — Typography tokens
+   Display: Newsreader (serif) — personality, editorial moments.
+   UI / body: Hanken Grotesk (neutral grotesque) — also the wordmark.
+   Data / mono: IBM Plex Mono — tabular figures, metrics, code.
 
-  /* Backward-compatible aliases used by the current landing styles. */
+   Two weights for general use: regular (400) and medium (500).
+   Light (300) is reserved for the wordmark and large display.
+   Never heavy bold. Sentence case always — never ALL CAPS,
+   never Title Case (small UI labels may use tracked caps sparingly).
+   ============================================================ */
+
+:root {
+  /* --- Families --- */
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans:  "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* semantic family aliases */
+  --font-display: var(--font-serif);
+  --font-ui:      var(--font-sans);
+  --font-body:    var(--font-sans);
+  --font-data:    var(--font-mono);
+
+  /* --- Weights (disciplined: 300 / 400 / 500 only) --- */
+  --weight-light:   300;   /* wordmark, large display only */
+  --weight-regular: 400;
+  --weight-medium:  500;
+
+  /* --- Type scale (display sizes lean serif; UI sizes lean sans) --- */
+  --text-display-xl: 4.5rem;   /* 72px — hero editorial */
+  --text-display-l:  3.25rem;  /* 52px */
+  --text-display-m:  2.5rem;   /* 40px */
+  --text-title-l:    2rem;     /* 32px */
+  --text-title-m:    1.5rem;   /* 24px */
+  --text-title-s:    1.25rem;  /* 20px */
+  --text-body-l:     1.125rem; /* 18px */
+  --text-body-m:     1rem;     /* 16px — base */
+  --text-body-s:     0.875rem; /* 14px */
+  --text-caption:    0.8125rem;/* 13px */
+  --text-micro:      0.6875rem;/* 11px — tracked labels */
+
+  /* --- Line heights --- */
+  --leading-tight:   1.05;
+  --leading-snug:    1.18;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  /* --- Letter spacing --- */
+  --tracking-wordmark: 0.18em;  /* the wordmark — wide */
+  --tracking-label:    0.14em;  /* tracked micro labels */
+  --tracking-tight:    -0.02em; /* large display */
+  --tracking-snug:     -0.01em;
+  --tracking-normal:   0;
+
+  /* --- Numeric / tabular figures for data --- */
+  --font-feature-tabular: "tnum" 1, "lnum" 1;
+}
+
+/* Base document defaults */
+:root {
+  font-family: var(--font-body);
+  font-size: var(--text-body-m);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+
+/* Backward-compatible aliases used by the current Velz landing styles. */
+:root {
   --serif: var(--font-serif);
   --sans: var(--font-sans);
   --mono: var(--font-mono);
