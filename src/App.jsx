@@ -6,59 +6,47 @@ import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 import miguelHeadshot from "../assets/miguel-headshot.webp";
 
-const cardsProblema = [
-  {
-    title: '"Mis ads no escalan"',
-    body: "Tu herramienta de atribución no sabe si hay stock para vender lo que generan.",
-  },
-  {
-    title: '"Me quedo sin stock"',
-    body: "Tu forecast de inventario no sabe que vas a escalar Meta un 40% la semana que viene.",
-  },
-  {
-    title: '"No sé si tengo caja"',
-    body: "Tu contabilidad llega tarde para decidir el pedido de hoy.",
-  },
+const pasIntro = [
+  "¿Te has fijado en que el panorama se ha vuelto extremadamente competitivo? Eso trae consigo muchos inconvenientes hoy en día. Los CPMs suben cada vez más. Los algoritmos de las redes sociales y las tendencias cambian de un mes para otro.",
+  "Para colmo, la privacidad y la pérdida de señales hacen cada vez más difícil medir. Y no es trivial. Las plataformas no tienen en cuenta el resto de tu inversión ni ven lo que pasa en tu negocio. Se apuntan todas tus ventas. ¡Qué listas! ¿Cómo pueden las agencias o las plataformas medir su propia eficacia? ¿Te imaginas que en el colegio los niños se corrigiesen ellos mismos los exámenes? ¿Qué nota crees que se iban a poner? No tiene sentido.",
 ];
 
-const cardsVs = [
+const services = [
   {
-    title: "Vs. tus herramientas",
-    body: "Triple Whale, Prediko y tu contable resuelven su silo. Ninguno habla con los otros dos.",
+    key: "mmm",
+    name: "MMM",
+    kicker: "Marketing Mix Modeling",
+    lead: "¿Quieres entender…",
+    items: [
+      "El impacto que han tenido tus medios (offline y online)",
+      "El impacto de los medios de branding en tu caja",
+      "El impacto de la competencia sobre tu negocio",
+      "El impacto del precio de tu producto en tus ventas",
+    ],
+    more: [
+      "Hacer un presupuesto con escenarios respaldados por evidencia matemática.",
+      "Dónde escalar más porque todavía queda eficiencia desaprovechada.",
+      "¿Qué momentos del año son los más interesantes?",
+    ],
+    closing: "Este es tu sitio.",
+    note: "Mínimo 1M€ gastado al año.",
   },
   {
-    title: "Vs. fractional CFO",
-    body: "Empiezan en 4.000 €/mes y no tocan atribución de marketing.",
-  },
-  {
-    title: "Vs. tu agencia",
-    body: "Optimiza ROAS sin saber si hay stock ni caja. Yo no vendo ads: soy independiente.",
+    key: "momentum",
+    name: "Momentum",
+    kicker: "Para el día a día.",
+    items: [
+      "Distingue entre tus ventas y las que te traen los canales.",
+      "El antiscam de las plataformas.",
+      "Optimiza por medio/campaña/anuncio para maximizar tu KPI.",
+      "Se conecta directamente a tus canales y se actualiza de manera diaria.",
+      "Capacidad de optimización automática.",
+    ],
   },
 ];
-
-const steps = [
-  {
-    number: "01",
-    title: "Conexión.",
-    body: "Shopify, Meta, Google, tu inventario y tu banco. Una semana, sin trabajo de tu parte.",
-  },
-  {
-    number: "02",
-    title: "Modelo.",
-    body: "Cruzo demanda esperada por canal con cobertura de stock y posición de caja.",
-  },
-  {
-    number: "03",
-    title: "Decisión.",
-    body: "Reunión quincenal de 45 minutos. Sales con qué hacer, cuándo y con qué dinero.",
-  },
-];
-
-const paraTi = ["Marca de 500K–5M €", "Shopify", "12+ meses de historial de ads", "Sin equipo de datos"];
-const noParaTi = ["Buscas otro dashboard", "Acabas de lanzar", "Quieres delegar la ejecución de ads"];
 
 const DS_NAMESPACE = "VeldDesignSystem_c12abb";
-const CTA_LINK = "#lead-form";
+const CTA_LINK = "#cta";
 const CONTACT_EMAIL = "miguel@velz.io";
 const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
 const LEGAL_LINK = "/aviso-legal";
@@ -67,8 +55,9 @@ const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
 const revealViewport = { once: true, amount: 0.2 };
 const HOME_LINK = "/";
 
+const DEFAULT_META_TITLE = "velz — Tus datos de marketing, en respuestas claras";
 const DEFAULT_META_DESCRIPTION =
-  "Conecto tus ads, tu inventario y tu caja en una decisión operativa quincenal. Para ecommerce de 500K–5M €.";
+  "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza.";
 
 const legalSections = [
   {
@@ -83,7 +72,7 @@ const legalSections = [
   {
     title: "Objeto",
     paragraphs: [
-      "La finalidad de este sitio es informar sobre los servicios de análisis y diagnóstico operativo ofrecidos por Velz para marcas ecommerce.",
+      "La finalidad de este sitio es informar sobre los servicios de medición y análisis de marketing ofrecidos por Velz.",
       "El acceso al sitio atribuye la condición de usuario e implica la aceptación de este aviso legal y del resto de textos legales publicados aquí.",
     ],
   },
@@ -133,14 +122,14 @@ const privacySections = [
   {
     title: "Qué datos se recogen",
     paragraphs: [
-      "A través del formulario de esta web se recogen únicamente los datos que el usuario facilita de forma directa: nombre, email y URL de la tienda.",
+      "A través del formulario de esta web se recogen únicamente los datos que el usuario facilita de forma directa: nombre, email, web de la empresa y, opcionalmente, un mensaje.",
       "No se solicitan categorías especiales de datos personales.",
     ],
   },
   {
     title: "Finalidad",
     paragraphs: [
-      "Los datos se utilizan exclusivamente para revisar la solicitud, preparar el diagnóstico externo de 24 horas y responder por email al usuario interesado.",
+      "Los datos se utilizan exclusivamente para revisar la solicitud, agendar una llamada y responder por email al usuario interesado.",
       "No se usarán para listas de difusión, newsletters ni comunicaciones comerciales no solicitadas.",
     ],
   },
@@ -238,16 +227,32 @@ function getPageConfig(pathname) {
 
   return {
     key: "landing",
-    title: "velz — Tu negocio, visto desde arriba",
+    title: DEFAULT_META_TITLE,
     description: DEFAULT_META_DESCRIPTION,
     canonical: "https://velz.io/",
   };
 }
 
+// Transparent header at the top of the page; gains a light backdrop once content scrolls under it.
+function useNavScrolled() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return scrolled;
+}
+
 function LegalLayout({ eyebrow, title, intro, sections }) {
+  const navScrolled = useNavScrolled();
+
   return (
     <>
-      <nav>
+      <nav className={navScrolled ? "is-scrolled" : undefined}>
         <a href={HOME_LINK} className="wm nav-home">
           velz
         </a>
@@ -303,6 +308,7 @@ function LegalLayout({ eyebrow, title, intro, sections }) {
 
 export default function App() {
   const [dsReady, setDsReady] = useState(false);
+  const navScrolled = useNavScrolled();
   const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
   const reduceMotion = useReducedMotion();
   const disableMotion =
@@ -348,7 +354,6 @@ export default function App() {
     return window[DS_NAMESPACE] || {};
   }, [dsReady]);
 
-  const DsCard = ds.Card;
   const DsLogo = ds.Logo;
 
   const cardTransition = (index) => ({
@@ -416,7 +421,7 @@ export default function App() {
       <LegalLayout
         eyebrow="Privacidad"
         title="Cómo trato los datos que me envías"
-        intro="Aquí se explica qué datos recoge esta web, para qué se usan y qué derechos tienes sobre ellos cuando solicitas un diagnóstico a Velz."
+        intro="Aquí se explica qué datos recoge esta web, para qué se usan y qué derechos tienes sobre ellos cuando te pones en contacto con Velz."
         sections={privacySections}
       />
     );
@@ -424,14 +429,17 @@ export default function App() {
 
   return (
     <>
-      <nav>
-        <span className="wm">velz</span>
-        <a href="#cta" className="nav-a">
-          Solicitar diagnóstico →
+      <nav className={navScrolled ? "is-scrolled" : undefined}>
+        <span className="nav-brand">
+          <BrandSymbol className="nav-sym" width={30} />
+          <span className="wm">velz</span>
+        </span>
+        <a href={CTA_LINK} className="nav-a">
+          Agenda una llamada →
         </a>
       </nav>
 
-      <div className="dark">
+      <div>
         <AuroraBackground className="h-auto" id="hero">
           <motion.div
             className="relative z-10 hero-shell"
@@ -439,264 +447,191 @@ export default function App() {
             animate={disableMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandSymbol className="h-sym" width={76} />
-            <h1>
-              Tu negocio,
-              <br />
-              visto desde arriba.
+            <h1 className="hero-title">
+              Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza
             </h1>
             <p className="hero-sub">
-              Tus ads, tu inventario y tu caja ya generan datos.
-              <br />
-              Nadie los conecta en una decisión. Eso es lo que hago.
+              Aumenta tus presupuestos y optimiza tus campañas de marketing de nuestra mano en días, no meses, gracias a nuestra
+              infraestructura AI‑native.
             </p>
             <motion.a
               href={CTA_LINK}
+             
               className="btn"
-                whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
-                whileTap={disableMotion ? {} : { scale: 0.99 }}
+              whileHover={disableMotion ? {} : { y: -1.5, scale: 1.01 }}
+              whileTap={disableMotion ? {} : { scale: 0.99 }}
               transition={{ duration: 0.18 }}
             >
-              Diagnóstico externo de 24h
+              Agenda una llamada
             </motion.a>
-            <p className="micro hero-micro">Entregable concreto. Sin llamada de venta previa.</p>
           </motion.div>
         </AuroraBackground>
       </div>
 
+      <section className="sec paper" id="medir">
+        <Reveal className="wrap">
+          <figure className="kelvin">
+            <blockquote className="big-q">“Lo que no se mide no se puede mejorar”</blockquote>
+            <figcaption className="q-close">— Lord Kelvin</figcaption>
+          </figure>
+        </Reveal>
+      </section>
+
       <section className="sec" id="problema">
+        <Reveal className="wrap prose">
+          {pasIntro.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+
+          <p className="prose-lead">Lo que no se mide no se puede mejorar... pero tampoco se puede respaldar.</p>
+          <p>
+            Puedes tener éxito. Tu campaña puede haber ido muy bien, o no. Pero... ¿cómo lo demuestras? ¿Cómo
+            argumentas la importancia de hacer publicidad de branding? ¿O cómo rebates los recortes en presupuestos
+            cuando intuyes que eso puede ser un error?
+          </p>
+
+          <div className="prose-turn">
+            <p>
+              Todo eso cambia cuando comprendes el verdadero impacto de tus medios. No solo tienes éxito, lo
+              demuestras. Tus presupuestos no se presentan, se aprueban. Descubres oportunidades invisibles que
+              consiguen obtener el máximo retorno por tu dinero. Así se gana el respaldo del resto de departamentos.
+              Así es como podemos ser competitivos en nuestro sector.
+            </p>
+          </div>
+
+          <p className="prose-close">
+            Puede ser con nosotros, o con otros, pero es crucial medir. Si te interesa,{" "}
+            <a href={CTA_LINK}>
+              agenda una llamada aquí
+            </a>
+            .
+          </p>
+        </Reveal>
+      </section>
+
+      <section className="sec paper" id="servicios">
         <Reveal className="wrap">
-          <span className="ey">El problema</span>
+          <p className="svc-intro">
+            Si estás planteándote hacerlo con nosotros, a continuación tienes los dos servicios base que ofrecemos.
+          </p>
         </Reveal>
         <Reveal className="grid-wrap">
-          <div className="cards">
-            {cardsProblema.map((card, index) => (
-              <motion.div
-                className="card-shell"
-                key={card.title}
+          <div className="svc-grid">
+            {services.map((service, index) => (
+              <motion.article
+                className={`svc svc-${service.key}`}
+                key={service.key}
                 initial={disableMotion ? false : { opacity: 0.6, y: 16 }}
                 animate={disableMotion ? {} : { opacity: 1, y: 0 }}
                 whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={revealViewport}
                 transition={cardTransition(index)}
               >
-                {DsCard ? (
-                  <DsCard className="card ds-card" padding="28px 22px" elevated>
-                    <p className="ct">{card.title}</p>
-                    <p className="cb">{card.body}</p>
-                  </DsCard>
-                ) : (
-                  <div className="card">
-                    <p className="ct">{card.title}</p>
-                    <p className="cb">{card.body}</p>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </Reveal>
-        <Reveal className="wrap">
-          <p className="sec-close">
-            No son tres problemas. Es uno: nadie conecta los tres datos antes de que tomes la decisión.
-          </p>
-        </Reveal>
-      </section>
-
-      <section className="sec paper" id="decision">
-        <Reveal className="wrap">
-          <span className="ey">Lo que recibes cada dos semanas</span>
-          <p className="big-q">
-            "Escala Meta un 30% esta semana, pide 500 unidades del SKU-3 el jueves, y tienes caja para hacerlo si retrasas el pago al proveedor B quince días."
-          </p>
-          <p className="q-close">Una decisión operativa, no un dashboard más.</p>
-        </Reveal>
-      </section>
-
-      <section className="sec" id="vs">
-        <Reveal className="wrap">
-          <span className="ey">Por qué no es lo que ya tienes</span>
-        </Reveal>
-        <Reveal className="grid-wrap">
-          <div className="cards">
-            {cardsVs.map((card, index) => (
-              <motion.div
-                className="card-shell"
-                key={card.title}
-                initial={disableMotion ? false : { opacity: 0.6, y: 16 }}
-                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
-                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={revealViewport}
-                transition={cardTransition(index)}
-              >
-                {DsCard ? (
-                  <DsCard className="card ds-card" padding="28px 22px" elevated>
-                    <p className="ct">{card.title}</p>
-                    <p className="cb">{card.body}</p>
-                  </DsCard>
-                ) : (
-                  <div className="card">
-                    <p className="ct">{card.title}</p>
-                    <p className="cb">{card.body}</p>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </Reveal>
-      </section>
-
-      <section className="sec" id="como">
-        <Reveal className="wrap">
-          <span className="ey">Cómo funciona</span>
-          <div className="steps">
-            {steps.map((step, index) => (
-              <motion.div
-                className="step"
-                key={step.number}
-                initial={disableMotion ? false : { opacity: 0.6, y: 18 }}
-                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
-                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
-                viewport={revealViewport}
-                transition={cardTransition(index)}
-              >
-                <span className="sn">{step.number}</span>
-                <div>
-                  <p className="st">{step.title}</p>
-                  <p className="sb">{step.body}</p>
+                <header className="svc-head">
+                  <span className="svc-num">0{index + 1}</span>
+                  <h3 className="svc-name">{service.name}</h3>
+                  <p className="svc-kicker">{service.kicker}</p>
+                </header>
+                <div className="svc-body">
+                  {service.lead ? <p className="svc-lead">{service.lead}</p> : null}
+                  <ul className="svc-list">
+                    {service.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                  {service.more ? (
+                    <ul className="svc-list svc-list-more">
+                      {service.more.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </div>
-              </motion.div>
+                {service.closing || service.note ? (
+                  <div className="svc-foot">
+                    {service.closing ? <p className="svc-closing">{service.closing}</p> : null}
+                    {service.note ? <span className="svc-note">{service.note}</span> : null}
+                  </div>
+                ) : null}
+              </motion.article>
             ))}
           </div>
-        </Reveal>
-      </section>
-
-      <section className="sec" id="para-quien">
-        <Reveal className="wrap">
-          <span className="ey">Para quién</span>
-          <div className="fw">
-            <div>
-              <span className="clbl clbl-y">Es para ti si</span>
-              <ul className="crl crl-y">
-                {paraTi.map((item, index) => (
-                  <motion.li
-                    key={item}
-                    initial={disableMotion ? false : { opacity: 0.7, x: -12 }}
-                    animate={disableMotion ? {} : { opacity: 1, x: 0 }}
-                    whileInView={disableMotion ? {} : { opacity: 1, x: 0 }}
-                    viewport={revealViewport}
-                    transition={cardTransition(index)}
-                  >
-                    {item}
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <span className="clbl clbl-n">No es para ti si</span>
-              <ul className="crl crl-n">
-                {noParaTi.map((item, index) => (
-                  <motion.li
-                    key={item}
-                    initial={disableMotion ? false : { opacity: 0.7, x: 12 }}
-                    animate={disableMotion ? {} : { opacity: 1, x: 0 }}
-                    whileInView={disableMotion ? {} : { opacity: 1, x: 0 }}
-                    viewport={revealViewport}
-                    transition={cardTransition(index)}
-                  >
-                    {item}
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
+          <div className="svc-cta">
+            <a href={CTA_LINK} className="btn">
+              Agenda una llamada
+            </a>
           </div>
         </Reveal>
       </section>
 
-      <section className="sec paper" id="quien">
-        <Reveal className="wrap">
-          <span className="ey">Quién está detrás</span>
-          <div className="carta">
-            <p>
-              Durante casi cuatro años construí en Dentsu —el cuarto grupo de marketing más grande del mundo— los modelos bayesianos que optimizaban los presupuestos de marcas como Vodafone o Gillette: cuánto invertir en cada canal para maximizar ventas.
-            </p>
-            <p>
-              Para optimizar un presupuesto, primero hay que predecir cuánto vas a vender. Y esa predicción es la misma que un ecommerce necesita para sus tres preguntas: cuánto venderé, cuánto stock pido y si mi caja lo aguanta. Las multinacionales pagan equipos enteros por esa respuesta. Yo hablo cada semana con founders que tienen las mismas preguntas — y nadie que las conecte.
-            </p>
-            <p>
-              Velz existe para eso. No vendo ads, no vendo software, no cobro comisión de nadie. Mi único incentivo es que tu próxima decisión sea mejor que la anterior.
-            </p>
-          </div>
-          <div className="firma">
-            <img className="fph" src={miguelHeadshot} alt="Miguel Carmona" width="68" height="68" loading="lazy" decoding="async" />
-            <div>
-              <p className="fnm">Miguel Carmona</p>
-              <p className="frl">Fundador, Velz · Ex–Senior Data Scientist, Dentsu (2022–2025)</p>
-              <a
-                className="flink"
-                href="https://www.linkedin.com/in/miguel-carmona-rodriguez/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                LinkedIn →
-              </a>
+      <section className="sec" id="nosotros">
+        <Reveal className="about">
+          <span className="ey">Sobre nosotros</span>
+          <div className="about-grid">
+            <div className="about-photo">
+              <img
+                src={miguelHeadshot}
+                alt="Miguel Carmona"
+                width="440"
+                height="440"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
-          </div>
-          <div className="brands-block">
-            <p className="brands-eyebrow">TRAYECTORIA</p>
-            <div className="brands-row">
-              <div className="brand-box">
-                <img
-                  className="brand-logo"
-                  src="/og/vodafone.png"
-                  alt="Vodafone"
-                  width="246"
-                  height="121"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="brand-box">
-                <img
-                  className="brand-logo"
-                  src="/og/gillete.png"
-                  alt="Gillette"
-                  width="246"
-                  height="121"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="brand-box">
-                <img
-                  className="brand-logo"
-                  src="/og/adevinta.png"
-                  alt="Adevinta"
-                  width="246"
-                  height="121"
-                  loading="lazy"
-                  decoding="async"
-                />
+            <div className="carta">
+              <p>
+                No era un gran estudiante, hablaba mucho con mis compañeros y me costaba estar sentado 6 horas en
+                esos fríos pupitres verdes. Aun así... arrasaba en mates. Así que eso fue lo que estudié. Después de
+                varios años de trabajo en una agencia de medios me di cuenta de que la empresa es muy distinta al
+                instituto. Ser social. Ser (pro)activo. Ser enérgico. Ser colaborador. Es positivo. Muy positivo.
+                Estoy seguro de que existe algún estudio estadístico que confirma la mejora en el rendimiento de los
+                equipos cuando existe esta camaradería. No lo he visto, pero estoy seguro. Hay estudios de
+                absolutamente todo. ¿Por qué no de esto?
+              </p>
+              <p>
+                Cierto día, después de presentar un análisis para cierta empresa de telefonía cuyo logo es rojo, me
+                detuve. Paré en el arcén a mirar el mapa que tenía preparado, inocentemente, para mi vida. Las paradas
+                que quería hacer y que, por supuesto, estaban siendo olvidadas en un oscuro altillo de un desván a la
+                penumbra con alguna repugnante araña ocasional como única compañía. Ese día las rescaté. Les quité las
+                telarañas y observé que había una de esas paradas que estaba solamente a un desvío. Un desvío que, si
+                no cogía pronto, me habría saltado la salida. No lo dudé durante mucho tiempo. Porque no decidir es
+                una decisión en sí misma.
+              </p>
+              <p>Así que dejé mi vida y me fui a vivir al extranjero.</p>
+              <p className="carta-beats">
+                <span>Pasé por dos etapas.</span>
+                <span>Dos experiencias.</span>
+                <span>Dos países.</span>
+                <span>Australia e Indonesia.</span>
+              </p>
+              <p>Ambas igual de enriquecedoras.</p>
+              <p>
+                Especialmente, cuando me encontraba en la exótica Indonesia, entre coco y coco, entablé amistades con
+                fundadores de grandes empresas que me inspiraron enormemente. A mejorar. A crecer. A atreverte a dar
+                pasos que pueden tener cierto riesgo, pero donde detrás se esconde un gran beneficio.
+              </p>
+              <p className="carta-close">
+                Y ese es mi trabajo, que sepas dónde merece la pena dar el próximo paso.
+              </p>
+              <div className="firma">
+                <div>
+                  <p className="fnm">Miguel Carmona</p>
+                  <p className="frl">Fundador, Velz</p>
+                </div>
               </div>
             </div>
-            <p className="brands-disclaimer">
-              Marcas para las que desarrollé modelos durante mi etapa en Dentsu. No son clientes de Velz.
-            </p>
           </div>
         </Reveal>
       </section>
 
       <section id="cta">
         <Reveal className="cta-shell">
-          <BrandSymbol className="cta-sym" width={76} />
-          <h2>
-            Empieza por ver tu negocio
-            <br />
-            desde arriba.
-          </h2>
-          <span className="cta-mc">
-            5 plazas al mes. En 24h recibes un vídeo de 10 minutos con 3 hipótesis cuantificadas sobre tu
-            marca, te quedes o no.
-          </span>
+          <p className="cta-copy">
+            Dado que queremos dar un trato especializado, solo aceptamos un máximo de 6 clientes por trimestre,
+            dependiendo del tamaño de la cuenta. Si estás interesado, solo tienes que rellenar el siguiente
+            formulario. Si hay algún punto que te preocupa en particular, te invito a que nos lo compartas en el
+            mensaje.
+          </p>
           <form id="lead-form" className="lead-form" onSubmit={handleFormspreeSubmit}>
             <label className="lead-field">
               Nombre
@@ -704,25 +639,30 @@ export default function App() {
               <ValidationError className="lead-error" field="name" errors={formState.errors} />
             </label>
             <label className="lead-field">
-              Email
+              Email (corporativo)
               <input type="email" name="email" autoComplete="email" required />
               <ValidationError className="lead-error" field="email" errors={formState.errors} />
             </label>
             <label className="lead-field">
-              URL de la tienda
-              <input type="url" name="storeUrl" placeholder="https://tu-tienda.com" required />
-              <ValidationError className="lead-error" field="storeUrl" errors={formState.errors} />
+              Web de tu empresa
+              <input type="url" name="website" placeholder="https://tu-empresa.com" required />
+              <ValidationError className="lead-error" field="website" errors={formState.errors} />
+            </label>
+            <label className="lead-field">
+              Mensaje (opcional)
+              <textarea name="message" rows={4} />
+              <ValidationError className="lead-error" field="message" errors={formState.errors} />
             </label>
             <button type="submit" className="lead-submit" disabled={formState.submitting}>
-              {formState.submitting ? "Enviando..." : "Enviar solicitud"}
+              {formState.submitting ? "Enviando..." : "Agenda una llamada"}
             </button>
             <p className="lead-gdpr">
-              Solo usaré estos datos para enviarte el diagnóstico. Sin listas, sin spam. Consulta la{" "}
+              Solo usaré estos datos para responderte y agendar la llamada. Sin listas, sin spam. Consulta la{" "}
               <a href={PRIVACY_LINK}>política de privacidad</a>.
             </p>
             <ValidationError className="lead-error" errors={formState.errors} />
             {formState.succeeded ? (
-              <p className="lead-status success">Solicitud enviada. Te responderé por email en menos de 24h.</p>
+              <p className="lead-status success">Solicitud enviada. Te escribiré por email para agendar la llamada.</p>
             ) : null}
           </form>
         </Reveal>
