@@ -1404,7 +1404,20 @@ export default function App() {
     if (canonicalTag) {
       canonicalTag.setAttribute("href", page.canonical);
     }
-  }, [page.canonical, page.description, page.title]);
+
+    // Token-scoped diagnostics are private links; keep them out of search indexes.
+    let robotsTag = document.querySelector('meta[name="robots"]');
+    if (page.key === "lead-magnet") {
+      if (!robotsTag) {
+        robotsTag = document.createElement("meta");
+        robotsTag.setAttribute("name", "robots");
+        document.head.appendChild(robotsTag);
+      }
+      robotsTag.setAttribute("content", "noindex, nofollow");
+    } else if (robotsTag) {
+      robotsTag.remove();
+    }
+  }, [page.canonical, page.description, page.key, page.title]);
 
   if (page.key === "legal") {
     return (
