@@ -1,0 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Hanken+Grotesk:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap");
+@import "../tokens/colors.css";
+@import "../tokens/typography.css";
+@import "../tokens/spacing.css";
+@import "../tokens/elevation.css";
+
+/* Separate document entry: none of these rules load on the protected landing. */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--white); color: var(--ink-700); }
+a { color: inherit; text-underline-offset: .2em; }
+a:hover { color: var(--green-600); }
+a:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--green-500); outline-offset: 5px; }
+.skip-link { position: absolute; left: 1rem; top: -5rem; padding: 1rem; background: var(--white); z-index: 1; }
+.skip-link:focus { top: 1rem; }
+.guide-header { background: var(--ink-900); color: var(--white); }
+.guide-nav { max-width: 1200px; margin: auto; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--ink-700); }
+.guide-nav a { display: inline-flex; align-items: center; min-height: 44px; }
+.guide-logo { gap: 14px; font-size: 24px; font-weight: var(--weight-light); letter-spacing: var(--tracking-wordmark); text-decoration: none; }
+.guide-nav a:hover { color: var(--green-400); }
+.guide-hero { max-width: 960px; padding: 64px 32px 72px; margin: auto; }
+.guide-eyebrow { font-family: var(--mono); font-size: var(--text-caption); letter-spacing: .06em; }
+.guide-hero .guide-eyebrow { display: inline-block; color: var(--ink-300); margin: 0 0 28px; }
+h1, h2, h3 { font-family: var(--serif); font-weight: var(--weight-regular); color: var(--ink-900); text-wrap: balance; }
+h1 { margin: 0; font-size: clamp(2.5rem, 5.5vw, 4.5rem); line-height: 1.08; letter-spacing: var(--tracking-tight); color: var(--white); }
+.guide-prose { max-width: 800px; padding: 48px 32px 64px; margin: auto; font-size: var(--text-body-l); line-height: 1.7; overflow-wrap: anywhere; }
+h2 { margin: 64px 0 24px; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.18; }
+h3 { margin: 36px 0 16px; font-size: 1.6rem; line-height: 1.25; }
+.guide-prose h2:first-child { margin-top: 0; }
+p { margin: 0 0 24px; }
+strong, th { font-weight: var(--weight-medium); }
+ul, ol { padding-left: 1.4em; }
+li { padding-left: .3em; margin-bottom: 16px; }
+.source-ref { white-space: nowrap; font-size: .85em; }
+[id^="fuente-"] { scroll-margin-top: 24px; }
+/* Keep tables semantic while allowing contained horizontal scrolling on phones. */
+table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 32px 0; font-size: 1rem; }
+th, td { padding: 16px; border: 1px solid var(--border-hairline); text-align: left; vertical-align: top; min-width: 160px; }
+th { color: var(--ink-900); background: var(--ink-50); }
+.guide-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border-radius: var(--radius-sm); background: var(--green-500); color: var(--white); text-decoration: none; font-weight: var(--weight-medium); }
+.guide-cta:hover { background: var(--green-600); color: var(--white); }
+.guide-listing { padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid var(--border-hairline); }
+.guide-listing h2 { margin-top: 16px; }
+.guide-footer { display: flex; gap: 32px; justify-content: space-between; max-width: 1200px; margin: auto; padding: 32px; border-top: 1px solid var(--border-hairline); font-size: var(--text-body-s); }
+.guide-footer a { min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 600px) {
+  .guide-nav { padding: 12px 24px; }
+  .guide-hero { padding: 40px 24px 48px; }
+  .guide-prose { padding: 36px 24px 48px; }
+  h2 { margin-top: 48px; }
+  th, td { padding: 12px; }
+  .guide-footer { padding: 24px; }
+}
