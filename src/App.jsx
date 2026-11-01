@@ -1318,6 +1318,13 @@ export default function App() {
   const page = getPageConfig(pathname);
 
   useEffect(() => {
+    // Native fragment navigation can finish before React commits the CTA.
+    if (pathname === HOME_LINK && window.location.hash === CTA_LINK) {
+      document.getElementById("cta")?.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     let mounted = true;
 
     const loadBundle = async () => {

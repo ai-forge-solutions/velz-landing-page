@@ -26,6 +26,16 @@
   to = "/guias/datos-marketing-mix-modeling/index.html"
   status = 200
 
+[[redirects]]
+  from = "/guias/atribucion-mmm-experimentos"
+  to = "/guias/atribucion-mmm-experimentos/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/guias/interpretar-resultados-mmm"
+  to = "/guias/interpretar-resultados-mmm/index.html"
+  status = 200
+
 # Existing static guide files shadow this rule; unknown guide paths are real 404s.
 [[redirects]]
   from = "/guias/*"
