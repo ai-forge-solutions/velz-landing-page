@@ -6,7 +6,13 @@ Qué hace el código y qué hay que configurar a mano en GA4, Search Console y B
 
 - GA4: cuenta **velz** (`414264483`), propiedad **velz.io** (`561805505`), flujo web **velz.io web**, ID de medición `G-K8Y6LZEYXN`. Creada con la cuenta de Google de Miguel en `ai-forges.com`. Para dar acceso a más personas: *Admin → Account access management → +*.
 - Netlify: `VITE_GA_MEASUREMENT_ID` existe solo en el contexto *Production*. Las Deploy Previews y los branch deploys no miden.
-- Ya configurado en GA4: zona horaria Europe/Madrid, EUR, retención de 14 meses y medición mejorada sin interacciones de formulario (puntos 1, 2 y 6 de abajo).
+- Ya configurado en GA4 (1 nov 2026):
+  - Zona horaria Europe/Madrid y EUR.
+  - Retención de 14 meses.
+  - Medición mejorada sin interacciones de formulario.
+  - Dimensiones personalizadas `cta_location`, `cta_text`, `ai_source` y `ai_referrer`.
+  - Grupo de canales **velz channels** como grupo principal. Es una copia del predeterminado, con «AI Assistant» antes de Referral y ampliado con la regex de fuentes de IA.
+- Pendiente: marcar `generate_lead` como key event con la estrella en *Admin → Events* cuando llegue el primer lead. Esta versión de GA4 no permite crearlo antes por nombre. Los key events `purchase`, `qualify_lead` y `close_convert_lead` los creó GA4 automáticamente por el objetivo «Generar leads»; se pueden ignorar.
 
 ## Lo que ya hace el código (`src/analytics.js`)
 
@@ -38,7 +44,7 @@ Añade `VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX` en *Site configuration → Environm
 2. **Enhanced measurement**: mantén activados las páginas vistas, el scroll, los clics salientes y las descargas de archivos. Desactiva las interacciones con formularios: el envío real ya se mide con `generate_lead`.
 3. **Key events**: marca `generate_lead`, y opcionalmente `cta_click` y `contact_email_click` como microconversiones.
 4. **Dimensiones personalizadas** (ámbito evento): `cta_location`, `cta_text`, `ai_source`, `ai_referrer`.
-5. **Grupo de canales personalizado «AI assistants»**: créalo antes del canal Referral y ponlo por encima de él. Condición: *Session source* coincide con la regex
+5. **Canal de asistentes de IA**: GA4 ya trae el canal «AI Assistant» en el grupo predeterminado, pero lo evalúa después de Referral. En **velz channels** va antes de Referral y también recoge cualquier *Source* que coincida parcialmente con la regex
    `chatgpt\.com|chat\.openai\.com|openai|perplexity|gemini\.google\.com|bard\.google\.com|copilot\.microsoft\.com|copilot\.cloud\.microsoft|claude\.ai|deepseek|meta\.ai|grok\.com|chat\.mistral\.ai|you\.com|poe\.com`
 6. **Retención de datos**: 14 meses. Así se pueden comparar periodos de un año con otro.
 7. **Filtro de tráfico interno**: define tu IP en *Data streams → Configure tag settings → Define internal traffic* y activa el filtro.
