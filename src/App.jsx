@@ -2,6 +2,7 @@ import * as ReactRuntime from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useForm, ValidationError } from "@formspree/react";
+import { track } from "./analytics";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 import miguelHeadshot from "../assets/miguel-headshot.webp";
@@ -163,7 +164,9 @@ const privacySections = [
   {
     title: "Cookies y analítica",
     paragraphs: [
-      "Esta página no publica aquí una política de cookies independiente. Si se incorporan herramientas de analítica, medición o cookies no técnicas, deberá añadirse el correspondiente aviso y gestión de consentimiento antes de publicarlo.",
+      "Esta web usa Google Analytics 4 (Google Ireland Limited) para medir de forma agregada qué páginas y guías se visitan, desde qué fuentes se llega y si se usa el formulario de contacto. Solo se activa si lo aceptas en el aviso de cookies; si lo rechazas o no eliges, no se carga.",
+      "Si aceptas, Google Analytics instala las cookies _ga y _ga_<ID>, que distinguen visitas de forma seudónima y caducan a los 13 meses. Los enlaces privados de diagnóstico se envían sin su identificador. Google puede tratar estos datos fuera del Espacio Económico Europeo con las garantías previstas en sus condiciones de tratamiento de datos.",
+      "Tu elección se guarda en el almacenamiento local del navegador para no volver a preguntarte. Puedes cambiarla en cualquier momento desde el enlace «Cookies» del pie de página.",
     ],
   },
 ];
@@ -400,6 +403,9 @@ function LegalLayout({ eyebrow, title, intro, sections }) {
           </a>
           <a href={PRIVACY_LINK} className="fl">
             Privacidad
+          </a>
+          <a href={PRIVACY_LINK} className="fl" data-cookie-settings>
+            Cookies
           </a>
         </div>
       </footer>
@@ -1318,6 +1324,12 @@ export default function App() {
   const page = getPageConfig(pathname);
 
   useEffect(() => {
+    if (formState.succeeded) {
+      track("generate_lead", { form_id: "lead-form", cta_location: "cta" });
+    }
+  }, [formState.succeeded]);
+
+  useEffect(() => {
     // Native fragment navigation can finish before React commits the CTA.
     if (pathname === HOME_LINK && window.location.hash === CTA_LINK) {
       document.getElementById("cta")?.scrollIntoView({ behavior: "instant", block: "start" });
@@ -1712,6 +1724,9 @@ export default function App() {
           </a>
           <a href={PRIVACY_LINK} className="fl">
             Privacidad
+          </a>
+          <a href={PRIVACY_LINK} className="fl" data-cookie-settings>
+            Cookies
           </a>
         </div>
       </footer>

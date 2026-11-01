@@ -33,6 +33,31 @@
       rel="stylesheet"
     />
     <link rel="canonical" href="https://velz.io/" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://velz.io/#organization",
+            "name": "velz",
+            "url": "https://velz.io/",
+            "logo": "https://velz.io/og/velz-symbol-1200x630.png",
+            "email": "miguel@velz.io",
+            "founder": { "@type": "Person", "name": "Miguel Carmona" },
+            "knowsAbout": ["Marketing Mix Modeling", "Medición de marketing", "Atribución", "Presupuesto de medios"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://velz.io/#website",
+            "url": "https://velz.io/",
+            "name": "velz",
+            "inLanguage": "es",
+            "publisher": { "@id": "https://velz.io/#organization" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -7,14 +7,17 @@ const slug = 'datos-marketing-mix-modeling';
 const slugs = [slug, 'atribucion-mmm-experimentos', 'interpretar-resultados-mmm'];
 const routes = ['guias', ...slugs.map(slug => `guias/${slug}`)];
 
-test('build emits four standalone guide documents, with scoped CSS and no JavaScript', () => {
+test('build emits four standalone guide documents, with scoped CSS and only the analytics script', () => {
   for (const route of routes) {
     const file = `dist/${route}/index.html`;
     assert.ok(existsSync(file), `missing built page ${file}; run npm run build first`);
     const html = read(file);
     assert.ok(html.includes(`rel="canonical" href="https://velz.io/${route}"`));
     assert.match(html, /<h1>/);
-    assert.doesNotMatch(html, /<script|<div id="root"><\/div>/);
+    assert.doesNotMatch(html, /<div id="root"><\/div>/);
+    const scripts = html.match(/<script\b[^>]*>/g) || [];
+    assert.equal(scripts.length, 1, 'guides load only the analytics module');
+    assert.match(scripts[0], /type="module"[^>]*src="\/assets\/[^"]+\.js"/);
     const css = html.match(/href="(\/assets\/[^\"]+\.css)"/);
     assert.ok(css, 'missing built stylesheet');
     assert.ok(existsSync(`dist${css[1]}`));
