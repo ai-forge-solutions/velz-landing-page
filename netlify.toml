@@ -15,6 +15,33 @@
   status = 200
   force = true
 
+# Exact document routes precede the scoped unknown-guide fallback.
+[[redirects]]
+  from = "/guias"
+  to = "/guias/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/guias/datos-marketing-mix-modeling"
+  to = "/guias/datos-marketing-mix-modeling/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/guias/atribucion-mmm-experimentos"
+  to = "/guias/atribucion-mmm-experimentos/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/guias/interpretar-resultados-mmm"
+  to = "/guias/interpretar-resultados-mmm/index.html"
+  status = 200
+
+# Existing static guide files shadow this rule; unknown guide paths are real 404s.
+[[redirects]]
+  from = "/guias/*"
+  to = "/guias/404.html"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

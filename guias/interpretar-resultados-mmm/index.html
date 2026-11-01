@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cómo interpretar resultados MMM para decidir inversión | velz</title>
+  <meta name="description" content="Lee un informe MMM sin confundir ajuste con causalidad, ingresos con beneficio ni retorno histórico con oportunidad futura. Guía para marketing y finanzas." />
+  <link rel="canonical" href="https://velz.io/guias/interpretar-resultados-mmm" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/guias/guides.css" />
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <header class="guide-header">
+    <nav class="guide-nav" aria-label="Navegación principal">
+      <a class="guide-logo" href="/" aria-label="velz, inicio"><img src="/assets/velz-symbol-white.svg" width="32" height="32" alt="" />velz</a>
+      <a href="/#cta">Hablemos</a>
+    </nav>
+    <div class="guide-hero">
+      <a class="guide-eyebrow" href="/guias">Guías / Marketing Mix Modeling</a>
+      <h1>Cómo interpretar resultados de un MMM antes de aprobar inversión</h1>
+    </div>
+  </header>
+  <main id="contenido" class="guide-prose"><article>
+<p>Un informe de Marketing Mix Modeling puede mostrar una curva casi idéntica a las ventas observadas y, aun así, no justificar el reparto de presupuesto que propone. <strong>Reproducir el resultado total y estimar qué habría cambiado sin una inversión son problemas distintos.</strong></p>
+<p>Para dirección y finanzas, la lectura útil separa cuatro capas: ajuste del modelo, efecto incremental estimado, traducción económica y decisión futura. Saltar directamente de «el gráfico encaja» a «aprobemos el escenario» mezcla evidencias que no dicen lo mismo.</p>
+<p>La documentación de Meridian lo expresa con claridad: el objetivo del MMM es estimar efectos causales; minimizar el error de predicción no debe ser el criterio principal para elegirlo. Las métricas predictivas son útiles, pero no certifican el retorno de cada canal. <a class="source-ref" href="#fuente-1" aria-label="Fuente 1">[1]</a></p>
+<h2>La curva de ventas dice cómo ajusta el conjunto, no quién causó cada parte</h2>
+<p>En el primer gráfico suelen aparecer el resultado observado y el estimado por el modelo. Un R² resume cuánto de la variación del resultado reproduce el ajuste; métricas como MAPE resumen errores de predicción. Su lectura depende de cómo y sobre qué muestra se calcularon.</p>
+<p>Si el gráfico se calcula sobre los datos usados para estimar el modelo, habla de ajuste en muestra. Si se evalúa sobre observaciones reservadas, aporta información predictiva fuera de muestra. Esa separación es útil para detectar problemas, pero <strong>reservar datos no convierte la evaluación en un experimento causal</strong>. <a class="source-ref" href="#fuente-1" aria-label="Fuente 1">[1]</a></p>
+<p>Imagina que radio y vídeo se activaron siempre en las mismas semanas. Distintos repartos de contribución entre ambos podrían producir totales parecidos. Que la suma encaje no resuelve por sí solo cómo separarlos. Del mismo modo, un patrón estacional bien reproducido puede coincidir con una inversión que también aumenta en esas fechas.</p>
+<p><strong>Ejemplo conceptual sintético, no resultado de velz ni modelo ejecutado:</strong> dos especificaciones ajustan de forma parecida las altas totales; una asigna más efecto a radio y otra a vídeo. No procede elegir la recomendación presupuestaria solo por una pequeña mejora en el error total. Hace falta evaluar por qué cada especificación permitiría identificar esos efectos y qué evidencia los contrasta.</p>
+<p>El extremo contrario tampoco es válido: un ajuste deficiente no es una virtud porque «lo importante es la causalidad». Es una señal que el equipo analítico debe investigar. La lectura correcta es que el ajuste aporta una comprobación, no la prueba completa.</p>
+<h2>La contribución es una comparación con un escenario no observado</h2>
+<p>Cuando un informe atribuye a un canal una parte del resultado, no ha localizado necesariamente ventas individuales causadas por ese canal. Está estimando una diferencia entre escenarios.</p>
+<p>En la definición habitual de medios de Meridian, el resultado incremental compara la actividad histórica con una alternativa en la que ese medio se fija a cero y se mantiene el resto según la definición del análisis. Esa alternativa puede no haberse observado nunca. Si el canal estuvo siempre activo, estimar su ausencia exige extrapolar con los supuestos del modelo. <a class="source-ref" href="#fuente-4" aria-label="Fuente 4">[4]</a></p>
+<p>Por eso un gráfico de barras de contribución debe leerse como una estimación condicionada, no como el reparto administrativo de facturas. La parte base del modelo tampoco equivale automáticamente a «lo que venderemos seguro si apagamos toda la publicidad»: depende de la especificación y del contrafactual utilizado.</p>
+<p>La interpretación causal exige, entre otras condiciones, tratar adecuadamente los factores que afectan tanto a la decisión de invertir como al resultado. Meridian advierte que haber medido todos esos confusores es un supuesto que no se puede certificar con un test en los mismos datos. También distingue confusores de mediadores: controlar una variable que forma parte del camino por el que actúa la publicidad puede cambiar o bloquear el efecto que se quería medir. <a class="source-ref" href="#fuente-2" aria-label="Fuente 2">[2]</a></p>
+<p>La consecuencia para el comité no es memorizar un diagrama estadístico. Es conservar el lenguaje correcto: «el modelo estima este efecto bajo estos supuestos», en lugar de «hemos demostrado que estas ventas pertenecen a este canal».</p>
+<h2>Un intervalo no incluye automáticamente todas las formas de equivocarse</h2>
+<p>Un único valor de retorno por canal parece fácil de comparar, pero oculta información. Un informe bayesiano puede presentar una estimación central y un intervalo creíble. La distribución posterior expresa incertidumbre <strong>dentro del modelo</strong>, dados los datos, la especificación y las distribuciones previas utilizadas. <a class="source-ref" href="#fuente-1" aria-label="Fuente 1">[1]</a><a class="source-ref" href="#fuente-3" aria-label="Fuente 3">[3]</a></p>
+<p>No cubre automáticamente todos los sesgos posibles por una variable omitida, un contrafactual mal definido o una estructura causal equivocada. Una banda estrecha puede convivir con una estimación sesgada si los supuestos son inadecuados.</p>
+<p>Además, el solapamiento entre intervalos de dos canales no proporciona, por sí solo, una regla completa para decidir cuál conviene ampliar. Importan la distribución de la diferencia relevante y las consecuencias de equivocarse, no solo dos barras separadas en una diapositiva.</p>
+<p>En dirección conviene conservar dos incertidumbres distintas: la que cuantifica el modelo y la que aparece al cambiar supuestos razonables. Si la recomendación de gasto se invierte al modificar una decisión de modelado defendible, esa inestabilidad debe acompañar la propuesta, aunque el gráfico principal sea limpio.</p>
+<p>La calibración experimental puede aportar información, pero tampoco elimina todos los límites. Meridian señala que trasladar un experimento al MMM exige considerar diferencias de periodo, población, gasto y efecto medido. Y si esa evidencia se usó para construir el modelo, la coincidencia posterior con ella no es un contraste independiente. <a class="source-ref" href="#fuente-3" aria-label="Fuente 3">[3]</a></p>
+<h2>El «ROI» del informe puede medir ingresos, no beneficio</h2>
+<p>Antes de presentar una cifra al área financiera hay que traducir su definición, no solo su sigla.</p>
+<p>En Meridian, el ROI relaciona el resultado incremental con el gasto del canal. Cuando ese resultado son ingresos, expresa ingresos incrementales por unidad de gasto: no descuenta automáticamente el coste de prestar el servicio, las devoluciones, las comisiones o todos los costes comerciales. La guía de Robyn también describe ROI como ingresos incrementales divididos por inversión. <a class="source-ref" href="#fuente-4" aria-label="Fuente 4">[4]</a><a class="source-ref" href="#fuente-6" aria-label="Fuente 6">[6]</a></p>
+<p>Por tanto, <strong>un retorno de ingresos superior a uno no demuestra rentabilidad</strong>. Y si el resultado son leads o altas sin valoración monetaria, no puede leerse directamente como euros o pesos recuperados.</p>
+<h3>Un puente financiero sencillo</h3>
+<p><strong>Ejemplo numérico sintético, no resultado real, previsión ni caso de velz.</strong> Las cifras son supuestos didácticos; se utiliza EUR solo como unidad ilustrativa.</p>
+<p>Supongamos que un escenario estima <strong>30.000 € de ingresos incrementales</strong> asociados a <strong>10.000 € de inversión en medios</strong>. El ratio de ingresos incrementales sobre gasto es <strong>3</strong>.</p>
+<p>Ahora supongamos un margen de contribución del <strong>40 %</strong>, antes de descontar esa inversión publicitaria, aplicable a esos ingresos. La contribución antes de medios sería <strong>12.000 €</strong>. Tras descontar los <strong>10.000 €</strong> de medios quedarían <strong>2.000 €</strong>, antes de otros costes que no estén recogidos en ese margen.</p>
+<p>El cálculo ilustra una traducción contable bajo supuestos; no valida que el modelo haya identificado los ingresos incrementales. Tampoco demuestra que el siguiente tramo de gasto vaya a mantener ese retorno.</p>
+<p>En un negocio B2B, el puente podría requerir probabilidades de cierre, valor y margen de los contratos. No basta con multiplicar todos los formularios por un ticket medio si difieren la calidad o el ciclo de venta. Y un retorno de ingresos no resuelve por sí solo cuándo entra el efectivo: caja, resultado y contribución son lecturas relacionadas, pero diferentes.</p>
+<h2>El retorno histórico no decide dónde invertir el siguiente euro o peso</h2>
+<p>El ROI medio resume el rendimiento de un nivel de inversión. El retorno marginal —mROI en Meridian— aproxima el resultado adicional de un pequeño aumento de gasto en el punto analizado. Las curvas de respuesta muestran cómo cambia el resultado incremental al variar la inversión. <a class="source-ref" href="#fuente-4" aria-label="Fuente 4">[4]</a></p>
+<p>Un canal puede haber sido eficiente en promedio y estar cerca de saturarse. Otro puede mostrar una oportunidad marginal mayor, aunque su retorno histórico medio sea menor. No hay contradicción: responden a movimientos distintos.</p>
+<table>
+<thead>
+<tr>
+<th>Salida del informe</th>
+<th>Lectura útil para dirección</th>
+<th>Salto que no permite dar por sí sola</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ajuste y error predictivo</td>
+<td>Comprueban cómo reproduce o predice el resultado</td>
+<td>Certificar el efecto causal por canal.</td>
+</tr>
+<tr>
+<td>Contribución incremental</td>
+<td>Estima una diferencia frente a un contrafactual definido</td>
+<td>Identificar ventas individuales o garantizar la base futura.</td>
+</tr>
+<tr>
+<td>ROI medio</td>
+<td>Resume resultado incremental por gasto en el ámbito analizado</td>
+<td>Afirmar beneficio neto o retorno del siguiente tramo.</td>
+</tr>
+<tr>
+<td>mROI y curva de respuesta</td>
+<td>Informan sobre pequeños cambios y saturación bajo supuestos</td>
+<td>Justificar cualquier aumento grande de inversión.</td>
+</tr>
+<tr>
+<td>Asignación optimizada</td>
+<td>Compara opciones dentro de objetivo, restricciones y modelo</td>
+<td>Prometer el resultado o sustituir la previsión financiera total.</td>
+</tr>
+</tbody>
+</table>
+<p>Si el movimiento presupuestario es grande, la decisión requiere comparar escenarios para ese movimiento; no multiplicar una cifra marginal local como si fuera constante. Y cuanto más lejos esté el escenario de la inversión observada, más depende de extrapolación. Meridian también advierte de ese riesgo al estimar gasto cero, no solo al escalar. <a class="source-ref" href="#fuente-4" aria-label="Fuente 4">[4]</a></p>
+<h2>Un escenario optimizado es condicional, no un compromiso de ventas</h2>
+<p>Una asignación «óptima» es óptima para un modelo, un objetivo y unas restricciones. Si el objetivo es maximizar altas, no equivale necesariamente a maximizar margen o caja. Si no se incorpora una restricción comercial, el resultado no va a respetarla por intuición.</p>
+<p>Al trasladar el histórico al futuro, también pueden cambiar el coste de los medios, el valor del resultado o la distribución de la actividad entre semanas y territorios. Meridian permite modificar supuestos de escenario y explica que su optimización futura estima la parte incremental, no el resultado total futuro del negocio. Robyn advierte expresamente que su asignador no garantiza satisfacer las expectativas de respuesta y recomienda validar los resultados antes de implementarlos. <a class="source-ref" href="#fuente-5" aria-label="Fuente 5">[5]</a><a class="source-ref" href="#fuente-6" aria-label="Fuente 6">[6]</a></p>
+<p>Esta distinción evita un error frecuente en la conversación presupuestaria: convertir una mejora estimada entre escenarios de medios en una previsión completa de facturación. Finanzas todavía necesita su lectura de demanda, operaciones, reconocimiento de ingresos y caja.</p>
+<h2>Cómo podría quedar una decisión defendible</h2>
+<p><strong>Ejemplo narrativo sintético; no representa una recomendación real ni una metodología contratada de velz.</strong></p>
+<p>Una empresa de servicios recibe un informe cuyo ajuste total es razonable. El escenario central favorece ampliar vídeo, pero la ventaja se reduce al asumir un mayor coste de medios. La estimación de búsqueda es importante en el histórico, aunque su retorno marginal no justifica ampliar de la misma forma.</p>
+<p>El comité no resume el resultado como «vídeo gana». El acta recoge una conclusión más útil:</p>
+<blockquote>
+<p>Se considera una reasignación limitada hacia vídeo dentro de los rangos estudiados. La justificación no es el ajuste global, sino la comparación de escenarios y su traducción a contribución. La ventaja depende del coste de medios y de los supuestos de efecto estimado. No se aprueba extrapolar al escenario de mayor gasto. Marketing y finanzas acuerdan qué resultado observarán, cuándo podrá leerse con los retrasos relevantes y qué evidencia motivaría revisar la decisión.</p>
+</blockquote>
+<p>No se fija aquí un porcentaje universal de cambio ni un plazo estándar: tendrían que responder al negocio y a la evidencia. La diferencia está en que la aprobación conserva sus condiciones, en lugar de perderlas al pasar del informe al presupuesto.</p>
+<p>Un MMM no elimina la responsabilidad de decidir. Puede ayudar a hacerla explícita: qué efecto se estima, cómo se convierte en valor económico y qué riesgo se acepta al actuar.</p>
+<p>Si todavía estás reuniendo información, empieza por la <a href="/guias/datos-marketing-mix-modeling">guía de preparación para MMM</a>. Si tu problema es escoger qué papel dar a cada método, consulta la <a href="/guias/atribucion-mmm-experimentos">guía de atribución, MMM y experimentos</a>.</p>
+<p><a class="guide-cta" href="/#cta">Explica a velz qué decisión de inversión necesitas sostener</a>. El enlace abre la sección del formulario de contacto, no una reserva automática de calendario. Describe el problema sin enviar credenciales ni datos personales de clientes.</p>
+<h2>Fuentes</h2>
+<p>Consulta: <strong>1 de noviembre de 2026</strong>. Fuentes técnicas originales; no prueba de herramientas internas, casos o prestaciones de velz.</p>
+<ol>
+<li id="fuente-1">Google Meridian. <a href="https://developers.google.com/meridian/docs/post-modeling/model-fit">Assess the model fit and the results</a>. Objetivo causal, límites de métricas predictivas, evaluación fuera de muestra y distribuciones posteriores.</li>
+<li id="fuente-2">Google Meridian. <a href="https://developers.google.com/meridian/docs/causal-inference/required-assumptions">Required assumptions</a> y <a href="https://developers.google.com/meridian/docs/causal-inference/causal-graph">Causal graph</a>. Supuestos, confusores y mediadores.</li>
+<li id="fuente-3">Google Meridian. <a href="https://developers.google.com/meridian/docs/advanced-modeling/roi-priors-and-calibration">Calibrate treatment priors</a>. Evidencia previa, incertidumbre de transferencia y relación entre distribuciones previas y posteriores.</li>
+<li id="fuente-4">Google Meridian. <a href="https://developers.google.com/meridian/docs/post-modeling/roi-mroi-response-curves">Incremental Outcome, ROI, mROI &amp; Response Curves</a>. Definiciones, contrafactuales, efectos retardados y riesgos de extrapolación.</li>
+<li id="fuente-5">Google Meridian. <a href="https://developers.google.com/meridian/docs/post-modeling/scenario-planning-and-future-budget-optimization">Scenario planning and future budget optimization</a>. Supuestos futuros y diferencia entre resultado incremental y previsión total.</li>
+<li id="fuente-6">Meta Robyn. <a href="https://facebookexperimental.github.io/Robyn/docs/analysts-guide-to-MMM/">An Analyst’s Guide to MMM</a>, apartados Interpret Marketing Mix Model Outputs y Budget Allocator. Definición de ROI y límites del asignador.</li>
+<li id="fuente-7"><a href="https://velz.io/">velz.io</a>. Encaje público de MMM y contacto comprobados en página renderizada.</li>
+</ol>
+</article></main>
+  <footer class="guide-footer"><a href="/guias">Todas las guías</a><a href="/">velz</a></footer>
+</body>
+</html>
