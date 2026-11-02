@@ -20,26 +20,32 @@
   status = 200
   force = true
 
-# Exact document routes precede the scoped unknown-guide fallback.
+# Exact document routes precede the scoped unknown-guide fallback. force = true
+# stops Netlify from 301-redirecting the folder to a trailing slash, which would
+# contradict the slash-less canonicals.
 [[redirects]]
   from = "/guias"
   to = "/guias/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/guias/datos-marketing-mix-modeling"
   to = "/guias/datos-marketing-mix-modeling/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/guias/atribucion-mmm-experimentos"
   to = "/guias/atribucion-mmm-experimentos/index.html"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/guias/interpretar-resultados-mmm"
   to = "/guias/interpretar-resultados-mmm/index.html"
   status = 200
+  force = true
 
 # Existing static guide files shadow this rule; unknown guide paths are real 404s.
 [[redirects]]
