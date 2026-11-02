@@ -88,3 +88,24 @@ test('crawler logger never stores private tokens and ignores humans', async () =
     delete globalThis.Netlify;
   }
 });
+
+test('IndexNow plugin loads as ESM and only pings from production', async () => {
+  const plugin = await import('../netlify/plugins/indexnow/index.js');
+  assert.equal(typeof plugin.onSuccess, 'function');
+  const realFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init) => { calls.push({ url, body: JSON.parse(init.body) }); return new Response(null, { status: 200 }); };
+  const previous = process.env.CONTEXT;
+  try {
+    process.env.CONTEXT = 'deploy-preview';
+    await plugin.onSuccess({ constants: { PUBLISH_DIR: 'public' } });
+    assert.equal(calls.length, 0);
+    process.env.CONTEXT = 'production';
+    await plugin.onSuccess({ constants: { PUBLISH_DIR: 'public' } });
+    assert.equal(calls[0].url, 'https://api.indexnow.org/indexnow');
+    assert.ok(calls[0].body.urlList.includes('https://velz.io/guias/datos-marketing-mix-modeling'));
+  } finally {
+    globalThis.fetch = realFetch;
+    if (previous === undefined) delete process.env.CONTEXT; else process.env.CONTEXT = previous;
+  }
+});
