@@ -3,29 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>velz — Tus datos de marketing, en respuestas claras</title>
+    <title>Marketing Mix Modeling y medición de medios | velz</title>
     <meta
       name="description"
-      content="Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza."
+      content="Mide el impacto de tus medios online y offline, separa tus ventas de las que traen los canales y decide dónde invertir con escenarios de presupuesto."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="velz" />
+    <meta property="og:locale" content="es_ES" />
     <meta property="og:url" content="https://velz.io/" />
-    <meta property="og:title" content="velz — Tus datos de marketing, en respuestas claras" />
+    <meta property="og:title" content="Marketing Mix Modeling y medición de medios | velz" />
     <meta
       property="og:description"
-      content="Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza."
+      content="Mide el impacto de tus medios online y offline, separa tus ventas de las que traen los canales y decide dónde invertir con escenarios de presupuesto."
     />
     <meta property="og:image" content="https://velz.io/og/velz-symbol-1200x630.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Símbolo de Velz sobre fondo blanco" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="velz — Tus datos de marketing, en respuestas claras" />
+    <meta name="twitter:title" content="Marketing Mix Modeling y medición de medios | velz" />
     <meta
       name="twitter:description"
-      content="Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza."
+      content="Mide el impacto de tus medios online y offline, separa tus ventas de las que traen los canales y decide dónde invertir con escenarios de presupuesto."
     />
     <meta name="twitter:image" content="https://velz.io/og/velz-symbol-1200x630.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#0f0f0f" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -38,14 +45,53 @@
         "@context": "https://schema.org",
         "@graph": [
           {
-            "@type": "Organization",
+            "@type": ["Organization", "ProfessionalService"],
             "@id": "https://velz.io/#organization",
             "name": "velz",
             "url": "https://velz.io/",
-            "logo": "https://velz.io/og/velz-symbol-1200x630.png",
+            "logo": "https://velz.io/icon-512.png",
+            "image": "https://velz.io/og/velz-symbol-1200x630.png",
+            "description": "Servicios de medición y análisis de marketing: Marketing Mix Modeling para entender el impacto de los medios online y offline, y Momentum para optimizar el día a día por medio, campaña y anuncio.",
             "email": "miguel@velz.io",
-            "founder": { "@type": "Person", "name": "Miguel Carmona" },
-            "knowsAbout": ["Marketing Mix Modeling", "Medición de marketing", "Atribución", "Presupuesto de medios"]
+            "knowsLanguage": "es",
+            "founder": { "@id": "https://velz.io/#miguel-carmona" },
+            "knowsAbout": ["Marketing Mix Modeling", "Medición de marketing", "Atribución", "Presupuesto de medios", "Incrementalidad"],
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "Servicios de velz",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "@id": "https://velz.io/#mmm",
+                    "name": "Marketing Mix Modeling (MMM)",
+                    "serviceType": "Marketing Mix Modeling",
+                    "description": "Estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y prepara presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios.",
+                    "provider": { "@id": "https://velz.io/#organization" }
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "@id": "https://velz.io/#momentum",
+                    "name": "Momentum",
+                    "serviceType": "Optimización de medios",
+                    "description": "Distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales.",
+                    "provider": { "@id": "https://velz.io/#organization" }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://velz.io/#miguel-carmona",
+            "name": "Miguel Carmona",
+            "jobTitle": "Fundador",
+            "worksFor": { "@id": "https://velz.io/#organization" },
+            "url": "https://velz.io/"
           },
           {
             "@type": "WebSite",
@@ -54,6 +100,15 @@
             "name": "velz",
             "inLanguage": "es",
             "publisher": { "@id": "https://velz.io/#organization" }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://velz.io/#webpage",
+            "url": "https://velz.io/",
+            "name": "Marketing Mix Modeling y medición de medios | velz",
+            "inLanguage": "es",
+            "isPartOf": { "@id": "https://velz.io/#website" },
+            "about": { "@id": "https://velz.io/#organization" }
           }
         ]
       }

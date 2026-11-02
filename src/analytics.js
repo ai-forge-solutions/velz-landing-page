@@ -130,6 +130,57 @@ function loadGtag() {
       // Best effort.
     }
   }
+  startWebVitals();
+  startGuideReadingDepth();
+}
+
+// Field Core Web Vitals; web-vitals reads buffered entries, so loading it after
+// consent still captures the page load.
+function startWebVitals() {
+  import("web-vitals")
+    .then(({ onCLS, onINP, onLCP }) => {
+      const send = (metric) =>
+        track(metric.name, {
+          value: Math.round(metric.name === "CLS" ? metric.value * 1000 : metric.value),
+          metric_id: metric.id,
+          metric_value: metric.value,
+          metric_delta: metric.delta,
+          metric_rating: metric.rating,
+          non_interaction: true,
+        });
+      onCLS(send);
+      onINP(send);
+      onLCP(send);
+    })
+    .catch(() => {
+      // Best effort.
+    });
+}
+
+// Reading depth through the guide body, not the whole page (footer, references).
+function startGuideReadingDepth() {
+  const article = document.querySelector("main article");
+  if (contentGroup() !== "guide" || !article) return;
+
+  const milestones = [25, 50, 75, 100];
+  let ticking = false;
+  const check = () => {
+    ticking = false;
+    const rect = article.getBoundingClientRect();
+    const read = ((window.innerHeight - rect.top) / rect.height) * 100;
+    while (milestones.length && read >= milestones[0]) {
+      track("guide_read_progress", { percent_read: milestones.shift() });
+    }
+    if (!milestones.length) window.removeEventListener("scroll", onScroll);
+  };
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(check);
+    }
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  check();
 }
 
 function clearGaCookies() {

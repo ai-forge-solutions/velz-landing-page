@@ -15,7 +15,7 @@ test('build emits four standalone guide documents, with scoped CSS and only the 
     assert.ok(html.includes(`rel="canonical" href="https://velz.io/${route}"`));
     assert.match(html, /<h1>/);
     assert.doesNotMatch(html, /<div id="root"><\/div>/);
-    const scripts = html.match(/<script\b[^>]*>/g) || [];
+    const scripts = (html.match(/<script\b[^>]*>/g) || []).filter(tag => !tag.includes('application/ld+json'));
     assert.equal(scripts.length, 1, 'guides load only the analytics module');
     assert.match(scripts[0], /type="module"[^>]*src="\/assets\/[^"]+\.js"/);
     const css = html.match(/href="(\/assets\/[^\"]+\.css)"/);

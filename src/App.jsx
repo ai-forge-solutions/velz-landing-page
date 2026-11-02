@@ -52,13 +52,14 @@ const CONTACT_EMAIL = "miguel@velz.io";
 const EMAIL_LINK = `mailto:${CONTACT_EMAIL}`;
 const LEGAL_LINK = "/aviso-legal";
 const PRIVACY_LINK = "/privacidad";
+const GUIDES_LINK = "/guias";
 const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
 const revealViewport = { once: true, amount: 0.2 };
 const HOME_LINK = "/";
 
-const DEFAULT_META_TITLE = "velz — Tus datos de marketing, en respuestas claras";
+const DEFAULT_META_TITLE = "Marketing Mix Modeling y medición de medios | velz";
 const DEFAULT_META_DESCRIPTION =
-  "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza.";
+  "Mide el impacto de tus medios online y offline, separa tus ventas de las que traen los canales y decide dónde invertir con escenarios de presupuesto.";
 
 const legalSections = [
   {
@@ -397,6 +398,9 @@ function LegalLayout({ eyebrow, title, intro, sections }) {
         <div className="fr">
           <a href={EMAIL_LINK} className="fe">
             {CONTACT_EMAIL}
+          </a>
+          <a href={GUIDES_LINK} className="fl">
+            Guías
           </a>
           <a href={LEGAL_LINK} className="fl">
             Aviso legal
@@ -1718,6 +1722,9 @@ export default function App() {
         <div className="fr">
           <a href={EMAIL_LINK} className="fe">
             {CONTACT_EMAIL}
+          </a>
+          <a href={GUIDES_LINK} className="fl">
+            Guías
           </a>
           <a href={LEGAL_LINK} className="fl">
             Aviso legal
