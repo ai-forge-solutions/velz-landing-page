@@ -1,0 +1,26 @@
+# velz
+
+> velz ofrece servicios de medición y análisis de marketing, en español: Marketing Mix Modeling (MMM) para estimar el impacto de los medios online y offline y preparar presupuestos con escenarios, y Momentum para optimizar el día a día por medio, campaña y anuncio.
+
+velz está fundada por Miguel Carmona. Contacto: miguel@velz.io. Las guías explican métodos y límites de medición; citan sus fuentes y no presentan casos ni resultados de clientes.
+
+## Servicios
+
+- [Marketing Mix Modeling (MMM)](https://velz.io/#servicios): estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y ayuda a preparar presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios.
+- [Momentum](https://velz.io/#servicios): distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales.
+
+## Guías
+
+- [¿Está tu empresa preparada para un Marketing Mix Modeling?](https://velz.io/guias/datos-marketing-mix-modeling): qué datos revisar antes de un MMM, qué preguntas puede responder y cuándo conviene esperar.
+- [Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto](https://velz.io/guias/atribucion-mmm-experimentos): qué aporta cada método de medición, cómo resolver resultados distintos y qué alcance contratar.
+- [Cómo interpretar resultados de un MMM antes de aprobar inversión](https://velz.io/guias/interpretar-resultados-mmm): cómo leer un informe MMM sin confundir ajuste con causalidad, ingresos con beneficio ni retorno histórico con oportunidad futura.
+
+## Contacto
+
+- [Formulario de contacto](https://velz.io/#cta): para explicar la decisión de presupuesto que se necesita tomar.
+
+## Optional
+
+- [Índice de guías](https://velz.io/guias)
+- [Aviso legal](https://velz.io/aviso-legal)
+- [Privacidad](https://velz.io/privacidad)

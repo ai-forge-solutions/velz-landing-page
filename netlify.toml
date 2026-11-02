@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
+
+# Pings IndexNow (Bing, Yandex, Seznam…) with the sitemap after production deploys.
+[[plugins]]
+  package = "/netlify/plugins/indexnow"
 
 [[redirects]]
   from = "/api/lead-magnets/:token/events"
@@ -15,12 +20,67 @@
   status = 200
   force = true
 
+# Exact document routes precede the scoped unknown-guide fallback. force = true
+# stops Netlify from 301-redirecting the folder to a trailing slash, which would
+# contradict the slash-less canonicals.
+[[redirects]]
+  from = "/guias"
+  to = "/guias/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/datos-marketing-mix-modeling"
+  to = "/guias/datos-marketing-mix-modeling/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/atribucion-mmm-experimentos"
+  to = "/guias/atribucion-mmm-experimentos/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/interpretar-resultados-mmm"
+  to = "/guias/interpretar-resultados-mmm/index.html"
+  status = 200
+  force = true
+
+# Existing static guide files shadow this rule; unknown guide paths are real 404s.
+[[redirects]]
+  from = "/guias/*"
+  to = "/guias/404.html"
+  status = 404
+
+# Known SPA routes render the app; any other path is a real 404 (no soft 404s).
+[[redirects]]
+  from = "/aviso-legal"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacidad"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/tools/*"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 404
 
 [[headers]]
   for = "/api/*"
   [headers.values]
     X-Robots-Tag = "noindex"
+
+# Vite emits content-hashed file names, so they can be cached forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
