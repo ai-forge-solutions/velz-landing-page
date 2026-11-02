@@ -48,6 +48,7 @@ function mountApp({ pathname = '/', hash = '#cta', reducedMotion = false, strict
       if (specifier === 'framer-motion') return { motion: new Proxy({}, { get: (_, tag) => tag }), useReducedMotion: () => reducedMotion };
       if (specifier === '@formspree/react') return { useForm: () => [{}, () => {}], ValidationError: () => null };
       if (specifier.includes('aurora-background')) return { AuroraBackground: () => null };
+      if (specifier === './analytics') return { track: () => {} };
       if (specifier.includes('.svg?raw')) return '<svg />';
       if (specifier.endsWith('.webp')) return 'headshot.webp';
       throw new Error(`Unexpected App dependency: ${specifier}`);

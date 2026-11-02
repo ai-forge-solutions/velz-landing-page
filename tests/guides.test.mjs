@@ -3,6 +3,25 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+// Guides stay static documents; the only script allowed is the consent-gated analytics module.
+const assertOnlyAnalyticsScript = html => {
+  const scripts = (html.match(/<script\b[^>]*>/g) || []).filter(tag => !tag.includes('application/ld+json'));
+  assert.deepEqual(scripts, ['<script type="module" src="/src/analytics.js">']);
+};
+// Articles carry author, dates and breadcrumbs as valid JSON-LD (E-E-A-T, freshness).
+const assertArticleSchema = (html, slug) => {
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  assert.equal(blocks.length, 1, 'one JSON-LD block per guide');
+  const graph = JSON.parse(blocks[0][1])['@graph'];
+  const article = graph.find(node => node['@type'] === 'Article');
+  assert.equal(article.mainEntityOfPage['@id'], `https://velz.io/guias/${slug}`);
+  assert.equal(article.author.name, 'Miguel Carmona');
+  assert.match(article.datePublished, /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(article.dateModified, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(html.includes(`<time datetime="${article.datePublished}">`), 'visible date matches schema');
+  const crumbs = graph.find(node => node['@type'] === 'BreadcrumbList').itemListElement;
+  assert.equal(crumbs.at(-1).item, `https://velz.io/guias/${slug}`);
+};
 const articlePath = 'guias/datos-marketing-mix-modeling/index.html';
 const title = '¿Está tu empresa preparada para un Marketing Mix Modeling?';
 
@@ -19,7 +38,9 @@ test('article is real, indexable Spanish HTML with its own metadata and approved
   assert.match(html, /No confundas un cero con un dato perdido/);
   assert.match(html, /1 M€ gastado al año/);
   assert.match(html, /href="\/#cta"[^>]*>Agenda una llamada con velz/);
-  assert.doesNotMatch(html, /#contacto|datePublished|dateModified|name="author"|noindex|<script/);
+  assert.doesNotMatch(html, /#contacto|noindex/);
+  assertOnlyAnalyticsScript(html);
+  assertArticleSchema(html, 'datos-marketing-mix-modeling');
   assert.doesNotMatch(html, /Ficha editorial|Control previo a publicación|Justificación SEO\/AEO/);
   for (const url of [
     'https://developers.google.com/meridian/docs/pre-modeling/collect-data',
@@ -41,7 +62,8 @@ test('guide index links to the article and homepage CTA, not a catch-all article
   assert.match(html, /<title>Guías de marketing y datos \| velz<\/title>/);
   assert.match(html, /href="\/guias\/datos-marketing-mix-modeling"/);
   assert.match(html, /href="\/#cta"/);
-  assert.doesNotMatch(html, /<script|<article[^>]*>[\s\S]*<table>/);
+  assert.doesNotMatch(html, /<article[^>]*>[\s\S]*<table>/);
+  assertOnlyAnalyticsScript(html);
 });
 
 test('homepage source does not load guide-specific code or styles', () => {
@@ -87,12 +109,14 @@ for (const approved of approvedArticles) {
     assert.ok(html.includes(`name="description" content="${approved.description}"`));
     assert.ok(html.includes(`rel="canonical" href="https://velz.io/guias/${approved.slug}"`));
     for (const url of approved.approvedLinks) assert.ok(html.includes(`href="${url.replaceAll('&', '&amp;')}"`), `missing approved link ${url}`);
+    assertOnlyAnalyticsScript(html);
+    assertArticleSchema(html, approved.slug);
     assert.equal((html.match(/<h1>/g) || []).length, 1);
     assert.match(html, /<html lang="es">/);
     assert.match(html, /<table>/);
     assert.match(html, /href="\/#cta"/);
     assert.match(html, /href="\/guias\/datos-marketing-mix-modeling"/);
-    assert.doesNotMatch(html, /\.md(?:["#?])|Ficha editorial|Control editorial|DRAFT|NO PUBLICADO|<script|datePublished|dateModified|name="author"|noindex|https:\/\/velz.io\/#cta/);
+    assert.doesNotMatch(html, /\.md(?:["#?])|Ficha editorial|Control editorial|DRAFT|NO PUBLICADO|noindex|https:\/\/velz.io\/#cta/);
     for (let n = 1; n <= 7; n++) {
       assert.ok(html.includes(`id="fuente-${n}"`), `missing reference ${n}`);
     }
