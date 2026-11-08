@@ -1,0 +1,74 @@
+{
+  "article": "03-proveedor-mmm-coste-v1.md",
+  "review_date": "2026-11-08",
+  "status": "draft_pending_approval_not_published",
+  "method": "Lectura primaria en vivo por HTTP directo de documentación oficial y repositorios. Separación entre hechos documentales y recomendaciones editoriales de compra. No se consultaron cotizaciones privadas ni se publican precios sin alcance defendible.",
+  "sources": [
+    {
+      "id": "C1",
+      "url": "https://facebookexperimental.github.io/Robyn/docs/analysts-guide-to-MMM/",
+      "accessed_on": "2026-11-08",
+      "claims_supported": ["Empezar por preguntas de negocio antes de elegir método", "MMM no es respuesta a toda pregunta", "Preparación y revisión de datos son trabajos reales", "El usuario conserva responsabilidad en selección"],
+      "excerpts": ["MMM more broadly might not be the best solution to answer every question - it might actually be an incrementality study", "Once collated, the right measurement solution can then be mapped to each question.", "Collecting accurate and quality data is critical", "have enabled users to make the final decision in the spirit of transparency"],
+      "scope_limit": "Guía de un fabricante, no estudio neutral de tarifas. Sus plazos orientativos no se convierten en plazos universales ni se reproducen en el artículo."
+    },
+    {
+      "id": "C2",
+      "url": "https://developers.google.com/meridian/docs/basics/about-the-project",
+      "accessed_on": "2026-11-08",
+      "claims_supported": ["Un marco abierto contiene etapas de preparación, modelado y post-modelado", "La existencia de librería no equivale a contrato de servicio gestionado", "Salidas para escenarios y presupuesto"],
+      "excerpts": ["Meridian provides a structured, end-to-end workflow.", "Pre-modeling", "collecting, organizing, and cleaning your data.", "Modeling", "Post-modeling", "Meridian provides a budget optimization report that recommends how to allocate your budget"],
+      "scope_limit": "Se usa para explicar tareas, no para inferir condiciones de proveedores externos ni precios de Velz."
+    },
+    {
+      "id": "C3",
+      "url": "https://raw.githubusercontent.com/pymc-labs/pymc-marketing/main/README.md",
+      "accessed_on": "2026-11-08",
+      "claims_supported": ["Herramienta abierta y servicios de consultoría/formación son conceptos distintos", "PyMC Labs describe servicios adicionales al proyecto"],
+      "excerpts": ["This open-source marketing analytics tool", "offers expert consulting and training.", "PyMC-Marketing is and will always be free for commercial use, licensed under [Apache 2.0](LICENSE)."],
+      "scope_limit": "Declaración del mantenedor, no precio de servicio ni recomendación comercial. No se extrapolan funciones contratadas de ningún proveedor."
+    },
+    {
+      "id": "C4",
+      "url": "https://developers.google.com/meridian/docs/advanced-modeling/set-custom-priors-past-experiments",
+      "accessed_on": "2026-11-08",
+      "claims_supported": ["Experimento y MMM difieren en alcance, momento y duración", "Compatibilizar experimentos exige tratamiento explícito"],
+      "excerpts": ["MMMs and experiments differ in important ways: specifically in their scope, timing and duration.", "CalibrationBuilder resolves these differences by automatically applying adjustments to the experiment results"],
+      "scope_limit": "La recomendación de incluir trabajo de compatibilidad en una oferta es editorial; no una tarifa ni obligación universal."
+    },
+    {
+      "id": "C5",
+      "url": "https://developers.google.com/meridian/docs/causal-inference/required-assumptions",
+      "accessed_on": "2026-11-08",
+      "claims_supported": ["Inferencia causal requiere supuestos", "Una sola métrica predictiva no demuestra cobertura de factores de confusión", "No prometer causalidad garantizada"],
+      "excerpts": ["under the key assumptions of conditional exchangeability and consistency", "This assumption holds if all confounding variables are measured and included in the control array", "there is no statistical test to determine this from your data"],
+      "scope_limit": "Fundamento metodológico, no exigencia de usar un paquete concreto ni auditoría de proveedores."
+    }
+  ],
+  "business_context": {
+    "origin": "Mandato explícito del usuario y lectura de weekly/2026-W45/report.md, líneas 37-47",
+    "claim": "Velz ofrece MMM y Momentum; esta pieza solo aborda compra de MMM.",
+    "limit": "No se infiere implementación de herramientas concretas. La portada https://velz.io/ leída por HTTP mostró solo el título Marketing Mix Modeling y medición de medios | velz; no se usa ese HTML escaso como prueba de funciones."
+  },
+  "editorial_recommendations_not_external_market_facts": [
+    "Tabla de modelos de provisión como distribución propuesta de responsabilidades",
+    "Desglose presupuestario y fórmula conceptual de coste total",
+    "Solicitud de moneda, impuestos, renovación y exclusiones",
+    "Siete criterios, doce preguntas y matriz de aceptación",
+    "Criterios de piloto, salida y control de conflictos",
+    "Tratamiento de divisas, inflación cuando sea relevante y datos offline como asuntos que debe resolver el alcance, no características atribuidas a todos los compradores"
+  ],
+  "pricing_policy": {
+    "published_prices_used": false,
+    "reason": "El brief recoge cifras de vendedores sin alcance comparativo defendible; se ha optado por no trasladarlas ni convertirlas en un rango de mercado. No se afirma haber auditado toda oferta pública.",
+    "no_invented": ["Precios de Velz", "Rangos España/LATAM", "Conversión USD/EUR", "Plazos estándar", "Benchmarks de retorno", "Umbral de gasto universal"]
+  },
+  "limitations": [
+    "Criterios y matriz son propuestas para negociar, no asesoramiento jurídico ni compromisos contractuales de Velz",
+    "No se compraron datos, solicitaron propuestas ni contactaron proveedores",
+    "Sin lectura de cotizaciones reales no se establece un precio",
+    "web_extract sin backend configurado; HTTP directo permitió leer fuentes primarias",
+    "Enlaces internos limitados a destinos autorizados por el encargo; artículo #2 queda como propuesta editorial sin enlace activo",
+    "No se atribuye autoría o revisión a Miguel ni se inventan casos o acreditaciones"
+  ]
+}

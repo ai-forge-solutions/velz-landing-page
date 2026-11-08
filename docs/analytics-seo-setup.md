@@ -12,7 +12,7 @@ Qué hace el código y qué hay que configurar a mano en GA4, Search Console y B
   - Medición mejorada sin interacciones de formulario.
   - Dimensiones personalizadas `cta_location`, `cta_text`, `ai_source` y `ai_referrer`.
   - Grupo de canales **velz channels** como grupo principal. Es una copia del predeterminado, con «AI Assistant» antes de Referral y ampliado con la regex de fuentes de IA.
-- Ya configurado en Search Console (2 nov 2026): propiedad de dominio `velz.io` (propietaria verificada: Gmail de Miguel), sitemap reenviado y `miguel.carmona@ai-forges.com` con permiso *Full*.
+- Ya configurado en Search Console (2 nov 2026): propiedad de dominio `velz.io` con dos propietarios verificados por DNS (TXT en Netlify DNS): el Gmail de Miguel y `miguel.carmona@ai-forges.com`. No borres ninguno de los dos registros TXT `google-site-verification`. Sitemap reenviado. GA4 vinculado con Search Console desde ai-forges.
 - Pendiente: marcar `generate_lead` como key event con la estrella en *Admin → Events* cuando llegue el primer lead. Esta versión de GA4 no permite crearlo antes por nombre. Los key events `purchase`, `qualify_lead` y `close_convert_lead` los creó GA4 automáticamente por el objetivo «Generar leads»; se pueden ignorar.
 
 ## Lo que ya hace el código (`src/analytics.js`)
@@ -60,9 +60,7 @@ Qué hace el código y qué hay que configurar a mano en GA4, Search Console y B
    `chatgpt\.com|chat\.openai\.com|openai|perplexity|gemini\.google\.com|bard\.google\.com|copilot\.microsoft\.com|copilot\.cloud\.microsoft|claude\.ai|deepseek|meta\.ai|grok\.com|chat\.mistral\.ai|you\.com|poe\.com`
 6. **Retención de datos**: 14 meses. Así se pueden comparar periodos de un año con otro.
 7. **Filtro de tráfico interno**: define tu IP en *Data streams → Configure tag settings → Define internal traffic* y activa el filtro.
-8. **Vincula Search Console** (*Product links → Search Console links*) para ver en GA las consultas orgánicas junto a las landing pages. Solo puede hacerlo una cuenta que sea propietaria verificada en Search Console (el Gmail de Miguel) y administradora en GA4:
-   1. Con `miguel.carmona@ai-forges.com`, en *Admin → Account access management → + → Add users*, añade `miguelcarmonar@gmail.com` como **Administrator**.
-   2. Con el Gmail, en *Admin → Product links → Search Console links → Link*, elige `sc-domain:velz.io` y el flujo «velz.io web».
+8. **Search Console vinculado** (*Product links → Search Console links*): hecho desde ai-forges, que es propietaria verificada. Las consultas orgánicas aparecen en GA4 en *Reports → Search Console* (puede que haya que publicar la colección en *Library*).
 
 ## 3. Google Search Console
 
@@ -73,7 +71,7 @@ Qué hace el código y qué hay que configurar a mano en GA4, Search Console y B
 ## 4. Bing Webmaster Tools (importante para GEO)
 
 ChatGPT Search y Copilot se apoyan en el índice de Bing. Pasos:
-1. Entra en [bing.com/webmasters](https://www.bing.com/webmasters) con el Gmail (el que es propietario en Search Console).
+1. Entra en [bing.com/webmasters](https://www.bing.com/webmasters) con `miguel.carmona@ai-forges.com`, que es propietaria verificada en Search Console.
 2. Elige *Import from Google Search Console* y selecciona `velz.io`. Importa la verificación y el sitemap.
 3. Revisa el informe *AI Performance*, que muestra las citas de velz en las respuestas de Copilot.
 

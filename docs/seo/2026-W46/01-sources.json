@@ -1,0 +1,157 @@
+{
+  "artifact": "/home/hermes/seo-engine/weekly/2026-W46/drafts/01-test-incrementalidad-v1.md",
+  "status": "borrador_completo_pendiente_revision_no_publicado",
+  "brief_original": "/home/hermes/seo-engine/weekly/2026-W46/plugin/velz/2026-W46/native/work/briefs/01-test-incrementalidad-geo-lift-holdout.md",
+  "review_date": "2026-11-08",
+  "date_verified_utc": "2026-11-08T10:01:17Z",
+  "sources": [
+    {
+      "id": "google-research-2011",
+      "url": "https://research.google/pubs/measuring-ad-effectiveness-using-geo-experiments/",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; ficha y resumen originales leídos mediante urllib y BeautifulSoup",
+      "supported_claim": "En el diseño descrito por Vaver y Koehler, regiones no solapadas se asignan aleatoriamente a tratamiento o control y la condición se implementa mediante publicidad geosegmentada.",
+      "excerpt": "In these experiments, non-overlapping geographic regions are randomly assigned to a control or treatment condition, and each region realizes its assigned condition through the use of geo-targeted advertising.",
+      "scope_limit": "Se leyó ficha y abstract, no el PDF completo. No se atribuyen a este resumen fórmulas, reglas financieras o plazos."
+    },
+    {
+      "id": "google-research-design-explanation",
+      "url": "https://googleresearch.blogspot.com/2011/12/measuring-ad-effectiveness-using-geo.html",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; texto original completo leído mediante urllib y BeautifulSoup",
+      "supported_claim": "La intervención puede aumentar o disminuir gasto; la aleatorización protege frente a sesgos ocultos entre grupos.",
+      "excerpt": "In these experiments, we first assign geographic regions to test or control conditions and employ AdWords’ geo-targeted advertising capabilities to increase or decrease the regional advertising spend accordingly. The use of randomized assignments guards against potential hidden test/control biases that could impact the measurements.",
+      "scope_limit": "Publicación de 2011. No prueba prestaciones actuales de Google Ads ni capacidades de Velz."
+    },
+    {
+      "id": "meta-geolift-walkthrough",
+      "url": "https://facebookincubator.github.io/GeoLift/docs/GettingStarted/Walkthrough/",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; cuerpo completo leído, incluyendo datos, Power Analysis, inferencia y mejora del modelo",
+      "supported_claim": "GeoLift documenta selección de mercados por simulación, potencia, duración, efecto mínimo detectable, controles sintéticos y diagnóstico del ajuste previo. La duración depende de producto y vertical.",
+      "excerpt": "Assessing the power and selecting the test markets for a GeoLift test can be accomplished through the GeoLiftMarketSelection() function. Through a series of simulations, this algorithm will find which are the best combinations of test and control locations for the experiment.",
+      "additional_excerpts": [
+        "Every GeoLift experiment should contain at least these three variables that reflect when, where, and how much of the KPI was measured.",
+        "The ideal test length heavily depends on the product and vertical we are working with.",
+        "To show an end-to-end implementation of GeoLift we will use simulated data of 40 US cities across 90 days",
+        "The main metric of model fit used in GeoLift is the L2 Imbalance which represents how far our synthetic control was from the actual observed values in the pre-treatment period."
+      ],
+      "scope_limit": "Documentación de una biblioteca externa, no evidencia de que Velz la use. No se ejecutó R, GeoLift ni análisis de potencia geográfico real. Sus ejemplos simulados no se convierten en clientes o resultados propios."
+    },
+    {
+      "id": "google-meridian-calibration",
+      "url": "https://developers.google.com/meridian/docs/advanced-modeling/roi-priors-and-calibration",
+      "read_date": "2026-11-08",
+      "source_last_updated": "2026-09-24 UTC, según página",
+      "access": "HTTP 200; texto completo leído mediante urllib y BeautifulSoup; título actual Calibrate treatment priors",
+      "supported_claim": "Los experimentos pueden informar priors de MMM; la transferencia requiere incertidumbre adicional y considerar periodo, población, granularidad y diferencia de contrafactual.",
+      "excerpt": "Although experiments provide highly relevant information, remember that translating them into an MMM prior involves an additional layer of uncertainty beyond just the experiment's standard error.",
+      "additional_excerpts": [
+        "Calibration is the process of using experiment results and other domain knowledge to set channel-specific priors.",
+        "Estimand differences: The MMM counterfactual is zero spend, whereas some experiments might define ROI against a different baseline, such as reduced spend (a non-zero counterfactual). Experiments measuring marginal lift introduce an estimand mismatch with the MMM's zero-spend counterfactual."
+      ],
+      "scope_limit": "No implica que Velz utilice Meridian o sus herramientas. La dependencia entre calibración y validación se explica como límite lógico, no como ensayo ejecutado."
+    },
+    {
+      "id": "velz-offer-rendered",
+      "url": "https://velz.io/",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; HTML inicial insuficiente; contenido renderizado leído en browser_snapshot y anclas verificadas con browser_console",
+      "supported_claim": "La oferta presenta servicios distintos MMM y Momentum. El CTA existente apunta a #cta y existe #servicios. No se confirma un servicio concreto de geo-experimentos ni una biblioteca interna.",
+      "excerpt": "Si estás planteándote hacerlo con nosotros, a continuación tienes los dos servicios base que ofrecemos.",
+      "additional_excerpts": [
+        "MMM",
+        "MARKETING MIX MODELING",
+        "Mínimo 1M€ gastado al año.",
+        "Momentum",
+        "PARA EL DÍA A DÍA.",
+        "Distingue entre tus ventas y las que te traen los canales."
+      ],
+      "scope_limit": "El mínimo aparece en la tarjeta MMM, no en Momentum; el artículo no lo generaliza ni propone un umbral universal. No se enviaron formularios."
+    },
+    {
+      "id": "velz-guide-index",
+      "url": "https://velz.io/guias",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; texto y href leídos mediante urllib y BeautifulSoup",
+      "supported_claim": "Existen el índice y las tres guías históricas; las rutas de atribución y lectura de resultados se usan como enlaces internos reales, no planificados.",
+      "excerpt": "Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto",
+      "verified_paths": [
+        "/guias/datos-marketing-mix-modeling",
+        "/guias/atribucion-mmm-experimentos",
+        "/guias/interpretar-resultados-mmm"
+      ],
+      "scope_limit": "Existencia observada, no métricas de posicionamiento, indexación o resultados comerciales."
+    },
+    {
+      "id": "velz-guide-measurement",
+      "url": "https://velz.io/guias/atribucion-mmm-experimentos",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; texto completo leído mediante urllib y BeautifulSoup",
+      "supported_claim": "La guía histórica compara el papel de métodos. La pieza nueva desarrolla la operación del test y evita duplicar aquella intención.",
+      "excerpt": "Los experimentos de incrementalidad contrastan el efecto de una intervención concreta frente a una alternativa.",
+      "additional_excerpts": [
+        "Si incluye experimentos, tiene que especificar la intervención estudiada y su papel posterior: contraste, calibración o ambos, con sus límites.",
+        "Esto no permite deducir qué librerías utiliza ni que ofrezca todos los estudios descritos aquí."
+      ],
+      "scope_limit": "Fuente de continuidad editorial, no evidencia primaria externa de efectividad."
+    },
+    {
+      "id": "velz-guide-finance",
+      "url": "https://velz.io/guias/interpretar-resultados-mmm",
+      "read_date": "2026-11-08",
+      "access": "HTTP 200; texto completo leído mediante urllib y BeautifulSoup",
+      "supported_claim": "Continuidad con el puente entre ingresos incrementales, gasto y contribución; un retorno de ingresos mayor que uno no basta para afirmar rentabilidad.",
+      "excerpt": "Por tanto, un retorno de ingresos superior a uno no demuestra rentabilidad.",
+      "additional_excerpts": [
+        "En un negocio B2B, el puente podría requerir probabilidades de cierre, valor y margen de los contratos."
+      ],
+      "scope_limit": "Se enlaza como explicación complementaria, no como validación de números propios; el ejemplo nuevo es enteramente sintético."
+    }
+  ],
+  "editorial_recommendations_not_external_facts": [
+    "Plantilla de pre-registro interno con cinco bloques y distribución de responsabilidades: recomendación operativa del artículo, no obligación normativa ni servicio confirmado.",
+    "Checklist territorial España/LATAM: criterios prácticos, sin estadísticas poblacionales ni equivalencia automática de divisiones administrativas con segmentación publicitaria.",
+    "Regla financiera a concretar antes de lanzar: no se inventa un umbral universal de significación, presupuesto, rentabilidad o duración."
+  ],
+  "synthetic_calculations": {
+    "tool": "functions.terminal con python3, math.ceil y operaciones aritméticas; ejecutado 2026-11-08",
+    "power_illustration": {
+      "not_real_geo_power_analysis": true,
+      "assumptions": "Serie única de diferencias relativas semanales independientes y normales; desviación conocida; contraste bilateral de significación 0.05 y potencia 0.80; efecto 0.05. Ignora autocorrelación, ajuste del control y estructura por zonas.",
+      "formula_executed": "ceil(((1.95996398454 + 0.84162123357) * sigma / 0.05) ** 2)",
+      "outputs": [
+        {"sigma": 0.04, "weeks": 6},
+        {"sigma": 0.08, "weeks": 21}
+      ],
+      "limit": "No utilizar para recomendar duración; el diseño real requiere simulación con su histórico."
+    },
+    "financial_illustration": {
+      "currency": "EUR, exclusivamente didáctica",
+      "observed_revenue": 120000,
+      "counterfactual_revenue": 100000,
+      "incremental_revenue": 20000,
+      "relative_lift": 0.2,
+      "additional_media_spend": 8000,
+      "iroas": 2.5,
+      "contribution_margin_before_advertising": 0.5,
+      "contribution_before_media": 10000,
+      "contribution_after_additional_media": 2000,
+      "break_even_iroas_before_other_costs": 2.0,
+      "limit": "No se estimó contrafactual ni intervalo estadístico; supuestos contables sintéticos, no datos de negocio ni previsión."
+    }
+  },
+  "access_issues": [
+    "web_extract no disponible: backend DuckDuckGo configurado solo para búsqueda. Se usó lectura HTTP real con urllib/BeautifulSoup y navegador para contenido renderizado.",
+    "La ruta inicial https://developers.google.com/meridian/docs/advanced-modeling/calibration devolvió HTTP 404. Se buscó y leyó la ruta oficial vigente roi-priors-and-calibration.",
+    "La portada GeoLift devolvía solo la cabecera en extracción estática. Se localizó y leyó el tutorial oficial completo.",
+    "Se descargaron bytes del PDF original https://services.google.com/fh/files/blogs/geo_experiments_final_version.pdf pero no pudo extraerse su texto: no estaban instalados pymupdf, pdftotext, pypdf, PyPDF2 ni pdfminer. No se instaló software y no se registra ese PDF como fuente leída. Se usaron el resumen y la explicación original de Google."
+  ],
+  "verification_limits": [
+    "Pendiente de revisión técnica, editorial, comercial y aprobación de autoría.",
+    "No se ejecutaron experimentos ni se analizaron datos de clientes.",
+    "No se afirman volúmenes de búsqueda, rankings, exclusividad en el mercado ni resultados comerciales.",
+    "Se leyeron instrucciones locales y el brief original; no se ejecutó native_runner ni se modificaron plugin, colas o manifiestos.",
+    "Solo archivos editoriales locales autorizados; sin publicación, Drive, correo, formularios, instalaciones ni cambios de portada."
+  ]
+}

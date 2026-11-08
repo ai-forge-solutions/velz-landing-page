@@ -4,23 +4,34 @@
 
 velz está fundada por Miguel Carmona. Contacto: miguel@velz.io. Las guías explican métodos y límites de medición; citan sus fuentes y no presentan casos ni resultados de clientes.
 
-## Servicios
-
-- [Marketing Mix Modeling (MMM)](https://velz.io/#servicios): estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y ayuda a preparar presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios.
-- [Momentum](https://velz.io/#servicios): distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales.
-
 ## Guías
 
+- [Índice de guías](https://velz.io/guias)
 - [¿Está tu empresa preparada para un Marketing Mix Modeling?](https://velz.io/guias/datos-marketing-mix-modeling): qué datos revisar antes de un MMM, qué preguntas puede responder y cuándo conviene esperar.
 - [Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto](https://velz.io/guias/atribucion-mmm-experimentos): qué aporta cada método de medición, cómo resolver resultados distintos y qué alcance contratar.
 - [Cómo interpretar resultados de un MMM antes de aprobar inversión](https://velz.io/guias/interpretar-resultados-mmm): cómo leer un informe MMM sin confundir ajuste con causalidad, ingresos con beneficio ni retorno histórico con oportunidad futura.
 
+- [Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar](https://velz.io/guias/test-incrementalidad-geo-lift-holdout): Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen.
+- [Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir](https://velz.io/guias/meridian-vs-robyn-vs-pymc-marketing): Compara Meridian, Robyn y PyMC-Marketing por datos, calibración, validación y mantenimiento. Decide qué encaja con tu equipo antes de construir.
+- [Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta](https://velz.io/guias/proveedor-marketing-mix-modeling-precio): Evalúa un proveedor de MMM por coste total, datos, validación y entregables. Preguntas y matriz de aceptación para comparar propuestas antes de firmar.
+- [Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio](https://velz.io/guias/rentabilidad-promociones-descuentos-ecommerce): Calcula cuánto debe crecer el volumen para compensar un descuento y mide la contribución incremental con costes, devoluciones y periodo posterior.
+
+## Servicios
+
+La oferta comercial se detalla en las dos páginas de servicio enlazadas. Las guías aportan contexto editorial: no son casos de clientes ni acreditan servicios adicionales o herramientas concretas.
+
+- [Marketing Mix Modeling (MMM)](https://velz.io/servicios/marketing-mix-modeling): estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y ayuda a preparar presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios. [Guía de preparación y contexto de MMM](https://velz.io/guias/datos-marketing-mix-modeling).
+- [Momentum](https://velz.io/servicios/momentum): distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales. [Guía de contexto sobre métodos de medición y decisiones de presupuesto](https://velz.io/guias/atribucion-mmm-experimentos): lectura editorial para distinguir el trabajo del día a día de las preguntas estratégicas; no es documentación técnica de Momentum.
+
+## Quién está detrás
+
+- [Miguel Carmona, fundador de velz](https://velz.io/#nosotros): sección biográfica existente en la portada, disponible en el HTML inicial. No se presentan casos ni testimonios de clientes.
+
 ## Contacto
 
-- [Formulario de contacto](https://velz.io/#cta): para explicar la decisión de presupuesto que se necesita tomar.
+Contacto: miguel@velz.io, para explicar la decisión de presupuesto que se necesita tomar.
 
 ## Optional
 
-- [Índice de guías](https://velz.io/guias)
 - [Aviso legal](https://velz.io/aviso-legal)
 - [Privacidad](https://velz.io/privacidad)

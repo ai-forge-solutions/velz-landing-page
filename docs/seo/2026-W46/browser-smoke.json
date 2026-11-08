@@ -1,0 +1,90 @@
+[
+  {
+    "width": 390,
+    "slug": "test-incrementalidad-geo-lift-holdout",
+    "status": 200,
+    "title": "Test de incrementalidad geo-lift: cómo diseñarlo | velz",
+    "h1": "Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar",
+    "overflow": false,
+    "cta": true,
+    "tables": 3,
+    "htmlBytes": 21948
+  },
+  {
+    "width": 390,
+    "slug": "meridian-vs-robyn-vs-pymc-marketing",
+    "status": 200,
+    "title": "Meridian vs Robyn vs PyMC-Marketing: cuál elegir | velz",
+    "h1": "Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir",
+    "overflow": false,
+    "cta": true,
+    "tables": 2,
+    "htmlBytes": 20820
+  },
+  {
+    "width": 390,
+    "slug": "proveedor-marketing-mix-modeling-precio",
+    "status": 200,
+    "title": "Proveedor de MMM: cómo elegirlo y cuánto cuesta | velz",
+    "h1": "Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta",
+    "overflow": false,
+    "cta": true,
+    "tables": 3,
+    "htmlBytes": 21706
+  },
+  {
+    "width": 390,
+    "slug": "rentabilidad-promociones-descuentos-ecommerce",
+    "status": 200,
+    "title": "Rentabilidad de una promoción: cómo medirla bien | velz",
+    "h1": "Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio",
+    "overflow": false,
+    "cta": true,
+    "tables": 2,
+    "htmlBytes": 20309
+  },
+  {
+    "width": 1440,
+    "slug": "test-incrementalidad-geo-lift-holdout",
+    "status": 200,
+    "title": "Test de incrementalidad geo-lift: cómo diseñarlo | velz",
+    "h1": "Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar",
+    "overflow": false,
+    "cta": true,
+    "tables": 3,
+    "htmlBytes": 21948
+  },
+  {
+    "width": 1440,
+    "slug": "meridian-vs-robyn-vs-pymc-marketing",
+    "status": 200,
+    "title": "Meridian vs Robyn vs PyMC-Marketing: cuál elegir | velz",
+    "h1": "Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir",
+    "overflow": false,
+    "cta": true,
+    "tables": 2,
+    "htmlBytes": 20820
+  },
+  {
+    "width": 1440,
+    "slug": "proveedor-marketing-mix-modeling-precio",
+    "status": 200,
+    "title": "Proveedor de MMM: cómo elegirlo y cuánto cuesta | velz",
+    "h1": "Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta",
+    "overflow": false,
+    "cta": true,
+    "tables": 3,
+    "htmlBytes": 21706
+  },
+  {
+    "width": 1440,
+    "slug": "rentabilidad-promociones-descuentos-ecommerce",
+    "status": 200,
+    "title": "Rentabilidad de una promoción: cómo medirla bien | velz",
+    "h1": "Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio",
+    "overflow": false,
+    "cta": true,
+    "tables": 2,
+    "htmlBytes": 20309
+  }
+]

@@ -47,6 +47,30 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/guias/test-incrementalidad-geo-lift-holdout"
+  to = "/guias/test-incrementalidad-geo-lift-holdout/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/meridian-vs-robyn-vs-pymc-marketing"
+  to = "/guias/meridian-vs-robyn-vs-pymc-marketing/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/proveedor-marketing-mix-modeling-precio"
+  to = "/guias/proveedor-marketing-mix-modeling-precio/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/rentabilidad-promociones-descuentos-ecommerce"
+  to = "/guias/rentabilidad-promociones-descuentos-ecommerce/index.html"
+  status = 200
+  force = true
+
 # Existing static guide files shadow this rule; unknown guide paths are real 404s.
 [[redirects]]
   from = "/guias/*"
@@ -55,24 +79,84 @@
 
 # Known SPA routes render the app; any other path is a real 404 (no soft 404s).
 [[redirects]]
+  from = "/servicios/marketing-mix-modeling"
+  to = "/servicios/marketing-mix-modeling/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/servicios/momentum"
+  to = "/servicios/momentum/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/aviso-legal"
-  to = "/index.html"
+  to = "/aviso-legal.html"
   status = 200
 
 [[redirects]]
   from = "/privacidad"
-  to = "/index.html"
+  to = "/privacidad.html"
+  status = 200
+
+[[redirects]]
+  from = "/tools/stockout-leak-score"
+  to = "/tools/stockout-leak-score/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/discount-depth-analyzer"
+  to = "/tools/discount-depth-analyzer/index.html"
+  status = 200
+  force = true
+
+# Token routes share a generic noindex document, never the homepage metadata.
+[[redirects]]
+  from = "/tools/stockout-leak-score/:token"
+  to = "/diagnostico.html"
+  status = 200
+
+[[redirects]]
+  from = "/tools/discount-depth-analyzer/:token"
+  to = "/diagnostico.html"
   status = 200
 
 [[redirects]]
   from = "/tools/*"
-  to = "/index.html"
-  status = 200
+  to = "/404.html"
+  status = 404
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/404.html"
   status = 404
+
+# Low-risk protections. Blocking CSP is deliberately deferred until all external
+# form/analytics/preview integrations have a validated allowlist.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/tools/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, follow"
+
+[[headers]]
+  for = "/tools/*/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/diagnostico.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/api/*"

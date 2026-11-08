@@ -47,12 +47,22 @@ test('guides cross-link each other outside the frozen article body', () => {
 test('unknown paths are real 404s and hashed assets are cached immutably', () => {
   const config = read('netlify.toml');
   const catchAll = config.indexOf('from = "/*"');
-  assert.match(config.slice(catchAll, catchAll + 80), /to = "\/index.html"\s+status = 404/);
-  for (const route of ['/aviso-legal', '/privacidad', '/tools/*']) {
+  assert.match(config.slice(catchAll, catchAll + 80), /to = "\/404.html"\s+status = 404/);
+  for (const route of ['/aviso-legal', '/privacidad', '/tools/stockout-leak-score', '/tools/discount-depth-analyzer']) {
     const at = config.indexOf(`from = "${route}"`);
     assert.ok(at >= 0 && at < catchAll, `SPA route ${route} must precede the 404 catch-all`);
   }
   assert.match(config, /for = "\/assets\/\*"\s+\[headers\.values\]\s+Cache-Control = "public, max-age=31536000, immutable"/);
+});
+
+test('sitemap excludes CSR tools and private reports while retaining public documents', () => {
+  const sitemap = read('public/sitemap.xml');
+  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+  assert.ok(!urls.some(url => new URL(url).pathname.startsWith('/tools/')), 'CSR tool pages and token reports must not be submitted for indexing');
+  for (const route of ['/', '/aviso-legal', '/privacidad', '/guias', ...guidePages.slice(1).map(page => `/${page.replace('/index.html', '')}`)]) {
+    assert.ok(urls.includes(`https://velz.io${route}`), `missing public document ${route}`);
+  }
+  assert.equal(new Set(urls).size, urls.length);
 });
 
 test('llms.txt and IndexNow key are published and consistent', () => {
