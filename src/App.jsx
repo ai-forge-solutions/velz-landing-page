@@ -263,10 +263,16 @@ function BrandSymbol({ className, width = 72 }) {
   );
 }
 
+function isStaticDocument() {
+  return typeof window === "undefined" || Boolean(
+    typeof document !== "undefined" && document.getElementById("root")?.hasAttribute?.("data-prerendered"),
+  );
+}
+
 function Reveal({ children, className }) {
   const reduceMotion = useReducedMotion();
   const disableMotion =
-    reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
+    reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap") || isStaticDocument();
 
   if (disableMotion) {
     return <div className={className}>{children}</div>;
@@ -286,7 +292,9 @@ function Reveal({ children, className }) {
   );
 }
 
-function getPageConfig(pathname) {
+export function getPageConfig(pathname) {
+  // Direct static-document requests must hydrate the same legal tree as SSR.
+  pathname = pathname.replace(/^\/(privacidad|aviso-legal)\.html$/, "/$1");
   // Static tool documents are public homes, not private diagnostic tokens.
   pathname = pathname.replace(/^\/tools\/(stockout-leak-score|discount-depth-analyzer)\/index\.html$/, "/tools/$1");
   const leadMagnetRoute = parseLeadMagnetPath(pathname);
@@ -1320,14 +1328,15 @@ function LeadMagnetPage({ route }) {
   return <StockoutLeakReport payload={payload} apiState={apiState} route={route} />;
 }
 
-export default function App() {
+export default function App({ initialPathname } = {}) {
   const [dsReady, setDsReady] = useState(false);
   const navScrolled = useNavScrolled();
   const [formState, handleFormspreeSubmit] = useForm(FORMSPREE_FORM_ID);
   const reduceMotion = useReducedMotion();
   const disableMotion =
     reduceMotion || (typeof navigator !== "undefined" && navigator.userAgent === "ReactSnap");
-  const pathname = typeof window === "undefined" ? HOME_LINK : window.location.pathname;
+  const skipEntranceMotion = disableMotion || isStaticDocument();
+  const pathname = initialPathname ?? (typeof window === "undefined" ? HOME_LINK : window.location.pathname);
   const page = getPageConfig(pathname);
 
   useEffect(() => {
@@ -1491,8 +1500,8 @@ export default function App() {
         <AuroraBackground className="h-auto" id="hero">
           <motion.div
             className="relative z-10 hero-shell"
-            initial={disableMotion ? false : { opacity: 0, y: 18 }}
-            animate={disableMotion ? {} : { opacity: 1, y: 0 }}
+            initial={skipEntranceMotion ? false : { opacity: 0, y: 18 }}
+            animate={skipEntranceMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
             <h1 className="hero-title">
@@ -1569,9 +1578,9 @@ export default function App() {
               <motion.article
                 className={`svc svc-${service.key}`}
                 key={service.key}
-                initial={disableMotion ? false : { opacity: 0.6, y: 16 }}
-                animate={disableMotion ? {} : { opacity: 1, y: 0 }}
-                whileInView={disableMotion ? {} : { opacity: 1, y: 0 }}
+                initial={skipEntranceMotion ? false : { opacity: 0.6, y: 16 }}
+                animate={skipEntranceMotion ? {} : { opacity: 1, y: 0 }}
+                whileInView={skipEntranceMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={revealViewport}
                 transition={cardTransition(index)}
               >
@@ -1680,7 +1689,7 @@ export default function App() {
             formulario. Si hay algún punto que te preocupa en particular, te invito a que nos lo compartas en el
             mensaje.
           </p>
-          <form id="lead-form" className="lead-form" onSubmit={handleFormspreeSubmit}>
+          <form id="lead-form" className="lead-form" action={`https://formspree.io/f/${FORMSPREE_FORM_ID}`} method="POST" onSubmit={handleFormspreeSubmit}>
             <label className="lead-field">
               Nombre
               <input type="text" name="name" autoComplete="name" required />

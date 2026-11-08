@@ -11,9 +11,9 @@ const registry = source.match(/^const INVENTORY_TOOL_COPY = \{[\s\S]*?^\};/m)?.[
 assert.ok(registry, 'real tool registry must be present');
 const names = ['parseLeadMagnetPath', 'parseToolHomePath', 'getPageConfig'];
 const functions = names.map(name => {
-  const definition = source.match(new RegExp(`^function ${name}\\([^)]*\\) \\{[\\s\\S]*?^\\}`, 'm'))?.[0];
+  const definition = source.match(new RegExp(`^(?:export )?function ${name}\\([^)]*\\) \\{[\\s\\S]*?^\\}`, 'm'))?.[0];
   assert.ok(definition, `real ${name} must be present`);
-  return definition;
+  return definition.replace(/^export /, '');
 });
 const routes = vm.runInNewContext(`${registry}\n${functions.join('\n')}\n({ ${names.join(', ')} })`, {
   PUBLIC_TOOL_METADATA,
@@ -79,6 +79,7 @@ for (const slug of slugs) {
 
 for (const [pathname, expected] of [
   ['/', 'landing'], ['/aviso-legal', 'legal'], ['/privacidad', 'privacy'],
+  ['/aviso-legal.html', 'legal'], ['/privacidad.html', 'privacy'],
   ['/index.html', 'landing'], ['/tools/unknown', 'landing'],
   ['/tools/unknown/index.html', 'lead-magnet'],
   ['/tools/stockout-leak-score/nested/index.html', 'landing'],
