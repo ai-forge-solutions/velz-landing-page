@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useForm, ValidationError } from "@formspree/react";
 import { track } from "./analytics";
+import { PUBLIC_TOOL_METADATA } from "./tool-metadata";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import velzSymbolSvg from "../assets/velz-symbol.svg?raw";
 import miguelHeadshot from "../assets/miguel-headshot.webp";
@@ -286,6 +287,8 @@ function Reveal({ children, className }) {
 }
 
 function getPageConfig(pathname) {
+  // Static tool documents are public homes, not private diagnostic tokens.
+  pathname = pathname.replace(/^\/tools\/(stockout-leak-score|discount-depth-analyzer)\/index\.html$/, "/tools/$1");
   const leadMagnetRoute = parseLeadMagnetPath(pathname);
   const toolHomeRoute = parseToolHomePath(pathname);
 
@@ -302,11 +305,11 @@ function getPageConfig(pathname) {
   }
 
   if (toolHomeRoute) {
-    const tool = Object.values(INVENTORY_TOOL_COPY).find((item) => item.slug === toolHomeRoute.toolSlug);
+    const metadata = PUBLIC_TOOL_METADATA[toolHomeRoute.toolSlug];
     return {
       key: "tool-home",
-      title: `velz — ${tool?.slug || "tool"}`,
-      description: "Busca una URL con Shopify Signals para abrir su lead magnet público.",
+      title: metadata.title,
+      description: metadata.description,
       canonical: `https://velz.io/tools/${encodeURIComponent(toolHomeRoute.toolSlug)}`,
       toolHomeRoute,
     };
@@ -1428,15 +1431,15 @@ export default function App() {
       canonicalTag.setAttribute("href", page.canonical);
     }
 
-    // Token-scoped diagnostics are private links; keep them out of search indexes.
+    // Diagnostics stay private; tool homes also stay noindex until indexable content is ready.
     let robotsTag = document.querySelector('meta[name="robots"]');
-    if (page.key === "lead-magnet") {
+    if (page.key === "lead-magnet" || page.key === "tool-home") {
       if (!robotsTag) {
         robotsTag = document.createElement("meta");
         robotsTag.setAttribute("name", "robots");
         document.head.appendChild(robotsTag);
       }
-      robotsTag.setAttribute("content", "noindex, nofollow");
+      robotsTag.setAttribute("content", page.key === "lead-magnet" ? "noindex, nofollow" : "noindex, follow");
     } else if (robotsTag) {
       robotsTag.remove();
     }

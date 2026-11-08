@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import { transformSync } from 'esbuild';
 import * as React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
+import * as toolMetadata from '../src/tool-metadata.js';
 
 // Execute the real App, not a copied scroll helper. Hook/DOM doubles model
 // the failing seam: the document loads before React commits the CTA element.
@@ -49,6 +50,7 @@ function mountApp({ pathname = '/', hash = '#cta', reducedMotion = false, strict
       if (specifier === '@formspree/react') return { useForm: () => [{}, () => {}], ValidationError: () => null };
       if (specifier.includes('aurora-background')) return { AuroraBackground: () => null };
       if (specifier === './analytics') return { track: () => {} };
+      if (specifier === './tool-metadata') return toolMetadata;
       if (specifier.includes('.svg?raw')) return '<svg />';
       if (specifier.endsWith('.webp')) return 'headshot.webp';
       throw new Error(`Unexpected App dependency: ${specifier}`);

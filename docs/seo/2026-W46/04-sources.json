@@ -1,0 +1,159 @@
+{
+  "artifact": "/home/hermes/seo-engine/weekly/2026-W46/drafts/04-rentabilidad-promociones-v1.md",
+  "status": "complete_draft_pending_approval_not_published",
+  "review_date": "2026-11-08",
+  "author": "Pendiente de aprobación; sin atribución a Miguel Carmona",
+  "brief_path": "/home/hermes/seo-engine/weekly/2026-W46/plugin/velz/2026-W46/native/work/briefs/04-rentabilidad-promocion-ecommerce.md",
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/profit-reports.md",
+      "publisher": "Shopify Help Center",
+      "title": "Profit reports",
+      "read_date": "2026-11-08",
+      "access": "curl HTTPS; documento Markdown oficial leído completo",
+      "claims_supported": [
+        "Descuentos y reembolsos afectan ventas netas y margen.",
+        "El beneficio bruto por producto resta coste a ventas netas.",
+        "El informe por producto solo considera variantes con coste registrado en el momento de la venta."
+      ],
+      "excerpts": [
+        "Discounts and refunds affect your net sales and profit margin.",
+        "The total profit made on this product during this time period. It's calculated by subtracting the cost from net sales.",
+        "The report only takes into consideration the variants that have product cost information at the time of sale."
+      ],
+      "limitations": "Documentación de informes de Shopify, no prueba causal ni definición de una cuenta completa de contribución. No se generaliza una exclusión de costes a todos los informes de Shopify: se especifica el informe por producto."
+    },
+    {
+      "id": "S2",
+      "url": "https://help.shopify.com/en/manual/products/details/product-pricing/cost-per-item.md",
+      "publisher": "Shopify Help Center",
+      "title": "Adding cost per item to products",
+      "read_date": "2026-11-08",
+      "access": "curl HTTPS; documento Markdown oficial leído completo",
+      "claims_supported": [
+        "El coste por artículo registrado puede excluir transporte y otros costes.",
+        "Diferencia entre margen calculado sobre precio y margen de informes calculado sobre ventas netas."
+      ],
+      "excerpts": [
+        "For example, if you resell a product, then you can enter the price that you paid the manufacturer, excluding taxes, shipping, or other costs.",
+        "The Gross margin in your profit reports is calculated from net sales, so it can differ from the margin on the product details page if you sold discounted products or issued refunds."
+      ],
+      "limitations": "La cuenta de contribución propuesta es una plantilla editorial de decisión que amplía la contabilidad de producto con operación, marketing y ejecución; no se atribuye íntegramente a Shopify."
+    },
+    {
+      "id": "S3",
+      "url": "https://research.aston.ac.uk/en/publications/decomposing-the-sales-promotion-bump-accounting-for-cross-categor/",
+      "publisher": "Aston Research Explorer",
+      "title": "Decomposing the sales promotion bump accounting for cross-category effects",
+      "authors": ["Peter S.H. Leeflang", "Josefa Parreño Selva", "Albert van Dijk", "Dick R. Wittink"],
+      "publication_date": "2008-09",
+      "doi": "10.1016/j.ijresmar.2008.03.003",
+      "read_date": "2026-11-08",
+      "access": "curl HTTPS; ficha institucional de investigación original y resumen. No se leyó el texto completo del artículo. La salida truncó parte de líneas largas; los extractos siguientes sí se recibieron íntegros.",
+      "claims_supported": [
+        "La investigación original descompone el aumento promocional e investiga efectos entre productos/categorías y stockpiling.",
+        "Existen mecanismos de sustitución y complementariedad que justifican revisar el perímetro, no solo el SKU promocionado."
+      ],
+      "excerpts": [
+        "This article introduces a framework that accommodates specific cross-category effects.",
+        "We also find within-category complementary effects, which implies that competitive items within the category may benefit from a promotion.",
+        "citation_keywords: cross-category effects; decomposition; brand sales model; store-level scanner data; daily data"
+      ],
+      "limitations": "Datos de escáner de tiendas, no benchmark de ecommerce. Ningún porcentaje del estudio se incorpora al artículo o al cálculo sintético. Se usa para respaldar mecanismos, no su frecuencia ni magnitud en una tienda online."
+    },
+    {
+      "id": "S4",
+      "url": "https://research.google/pubs/inferring-causal-impact-using-bayesian-structural-time-series-models/",
+      "publisher": "Google Research",
+      "title": "Inferring causal impact using Bayesian structural time-series models",
+      "authors": ["Kay H. Brodersen", "Fabian Gallusser", "Jim Koehler", "Nicolas Remy", "Steven L. Scott"],
+      "publication_date": "2015",
+      "read_date": "2026-11-08",
+      "access": "curl HTTPS; ficha original y resumen leídos, no texto completo del artículo",
+      "claims_supported": [
+        "El enfoque estima una respuesta contrafactual que habría ocurrido sin intervención.",
+        "Modelar una serie no elimina los límites de atribución causal cuando no hay experimento aleatorio."
+      ],
+      "excerpts": [
+        "This paper proposes to infer causal impact on the basis of a diffusion-regression state-space model that predicts the counterfactual market response that would have occurred had no intervention taken place.",
+        "We discuss the strengths and limitations of state-space models in enabling causal attribution in those settings where a randomised experiment is unavailable."
+      ],
+      "limitations": "No se ejecutó ni ajustó CausalImpact, MMM o estimador causal alguno; el ejemplo no es salida del estudio ni de un modelo."
+    },
+    {
+      "id": "S5",
+      "url": "https://raw.githubusercontent.com/google/CausalImpact/master/README.md",
+      "publisher": "Google; repositorio original CausalImpact",
+      "title": "CausalImpact README",
+      "read_date": "2026-11-08",
+      "access": "curl HTTPS; README original leído completo",
+      "claims_supported": [
+        "El modelo requiere series de control no afectadas por la intervención.",
+        "Se asume estabilidad de la relación entre serie tratada y controles durante el periodo posterior.",
+        "Las conclusiones causales observacionales requieren supuestos fuertes que deben comprobarse."
+      ],
+      "excerpts": [
+        "As with all approaches to causal inference on non-experimental data, valid conclusions require strong assumptions.",
+        "The CausalImpact package, in particular, assumes that the outcome time series can be explained in terms of a set of control time series that were themselves not affected by the intervention.",
+        "Furthermore, the relation between treated series and control series is assumed to be stable during the post-intervention period."
+      ],
+      "limitations": "Rama master mutable; se registra fecha de lectura. No se instaló software ni se ejecutaron instrucciones del README."
+    }
+  ],
+  "calculations": {
+    "nature": "Ejemplos enteramente sintéticos, no empíricos. Identidades económicas y aritmética; no estimación causal ni fórmula de ajuste manual.",
+    "verification_tool": "functions.terminal; printf con expansión aritmética entera del shell",
+    "verification_date": "2026-11-08",
+    "break_even": {
+      "inputs": {"price": 100, "unit_variable_cost": 70, "discount_amount": 10, "baseline_units": 1000},
+      "definition": "m=(P-c)/P; d=descuento/P; Q1=Q0*m/(m-d); crecimiento=d/(m-d). Costes unitarios constantes y sin coste fijo adicional.",
+      "verified_expressions": {
+        "old_unit_contribution": "100-70=30",
+        "new_unit_contribution": "90-60-8-2=20 (equivale a 90-70)",
+        "required_units": "1000*30/(30-10)=1500",
+        "extra_units": "1500-1000=500",
+        "growth_percent": "10*100/(30-10)=50"
+      },
+      "limits": "Si m<=d no hay solución finita que mantenga contribución inicial positiva. El umbral no predice demanda ni rentabilidad causal."
+    },
+    "full_example": {
+      "currency": "EUR; sin impuestos recaudados por cuenta de terceros",
+      "population": "Cada unidad representa un pedido conservado; ingresos netos después de reembolsos y coste de producto ajustado por mercancía recuperada. Otros costes de devolución no repiten esos conceptos.",
+      "baseline_during": {"units": 1000, "price": 100, "revenue": 100000, "product_cost": 60000, "operations": 8000, "other_return_costs": 2000, "marketing": 2000, "execution": 0, "contribution": 28000},
+      "promotion_during": {"units": 1900, "price": 90, "revenue": 171000, "product_cost": 114000, "operations": 15200, "other_return_costs": 5700, "marketing": 4000, "execution": 500, "contribution": 31600},
+      "baseline_after": {"units": 1000, "price": 100, "revenue": 100000, "product_cost": 60000, "operations": 8000, "other_return_costs": 2000, "marketing": 2000, "execution": 0, "contribution": 28000},
+      "promotion_after": {"units": 800, "price": 100, "revenue": 80000, "product_cost": 48000, "operations": 6400, "other_return_costs": 1600, "marketing": 2000, "execution": 0, "contribution": 22000},
+      "verified_expressions": [
+        "1900*90=171000; 1900*60=114000; 1900*8=15200; 1900*3=5700",
+        "1900*(90-60-8-3)-4000-500=31600",
+        "800*(100-60-8-2)-2000=22000",
+        "2*(1000*30-2000)=56000",
+        "1900*19-4500+800*30-2000=53600",
+        "31600-28000=3600; 22000-28000=-6000; 53600-56000=-2400",
+        "(1900-1000)*100/1000=90",
+        "(171000-100000)*100/100000=71",
+        "1900+800-2000=700"
+      ],
+      "counterfactual_status": "Conocido por construcción para ilustrar contabilidad. No inferido de datos reales. El déficit posterior de 200 unidades no demuestra compras adelantadas. No se resta canibalización de nuevo porque podría duplicar efectos contenidos en el perímetro y el contrafactual.",
+      "verification_note": "Un tanteo inicial previo a redacción usó 1600 unidades y expresiones comparativas inconsistentes; se descartó. La versión final usa exclusivamente 1900 unidades y fue recalculada desde sus inputs."
+    }
+  },
+  "editorial_checks": {
+    "required_local_instructions_read": ["AGENTS.md", "WEEKLY.md", "PLUGIN.md", "brief original W46 #4"],
+    "w45_comparison": "Listado real de borradores W45 y lectura de ficha/inicio de 04-escalar-v2.md; no auditoría integral de todos los artículos W45.",
+    "word_count_whole_markdown": 1934,
+    "word_count_method": "wc -w; incluye ficha editorial y tablas; cuerpo dentro del objetivo aproximado tras excluir ficha",
+    "internal_links_used": ["https://velz.io/guias/atribucion-mmm-experimentos", "https://velz.io/#cta"],
+    "internal_link_verification": "Limitados a destinos existentes autorizados por el encargo; no se declara comprobación HTTP o renderizado independiente en esta tarea.",
+    "commercial_limits": "Sin resultados de clientes, garantía de rentabilidad, recomendación universal de descuento, herramientas no validadas o definición de Velz restringida al ecommerce.",
+    "scope": "Únicamente los dos archivos asignados. Sin runner, publicación, cambios técnicos, Drive, correo, manifiestos ni CLI editorial."
+  },
+  "retrieval_issues": [
+    "Fallo transitorio can't start new thread en lecturas iniciales; las lecturas posteriores funcionaron.",
+    "web_extract no disponible con backend ddgs; navegador agotó tiempo en Page.enable. Se leyeron fuentes mediante curl.",
+    "Dos rutas tentativas del blog Shopify devolvieron 404: /blog/contribution-margin y /blog/contribution-margin-ratio. No se citan como evidencia.",
+    "Comandos inline de Python y transformación curl|perl bloqueados por la política del entorno; no se ejecutaron. No se desactivaron controles ni se crearon scripts fuera del alcance."
+  ],
+  "publication_and_approval": "Pendientes; no se ha publicado ni atribuido autoría experta."
+}
