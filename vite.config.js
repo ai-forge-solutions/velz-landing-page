@@ -11,6 +11,10 @@ function guideDocuments(server, preview = false) {
     "/guias/datos-marketing-mix-modeling",
     "/guias/atribucion-mmm-experimentos",
     "/guias/interpretar-resultados-mmm",
+    "/guias/test-incrementalidad-geo-lift-holdout",
+    "/guias/meridian-vs-robyn-vs-pymc-marketing",
+    "/guias/proveedor-marketing-mix-modeling-precio",
+    "/guias/rentabilidad-promociones-descuentos-ecommerce",
   ]);
   const documents = new Set([...routes].map(route => `${route}/index.html`));
   server.middlewares.use((req, res, next) => {
@@ -45,6 +49,10 @@ export default defineConfig({
         mmmGuide: path.resolve(__dirname, "guias/datos-marketing-mix-modeling/index.html"),
         attributionGuide: path.resolve(__dirname, "guias/atribucion-mmm-experimentos/index.html"),
         resultsGuide: path.resolve(__dirname, "guias/interpretar-resultados-mmm/index.html"),
+        w46Guide0: path.resolve(__dirname, "guias/test-incrementalidad-geo-lift-holdout/index.html"),
+        w46Guide1: path.resolve(__dirname, "guias/meridian-vs-robyn-vs-pymc-marketing/index.html"),
+        w46Guide2: path.resolve(__dirname, "guias/proveedor-marketing-mix-modeling-precio/index.html"),
+        w46Guide3: path.resolve(__dirname, "guias/rentabilidad-promociones-descuentos-ecommerce/index.html"),
         guidesNotFound: path.resolve(__dirname, "guias/404.html"),
       },
     },

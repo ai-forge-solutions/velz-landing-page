@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<title>Test de incrementalidad geo-lift: cómo diseñarlo | velz</title>
+<meta content="Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen." name="description" />
+<link href="https://velz.io/guias/test-incrementalidad-geo-lift-holdout" rel="canonical" />
+<link href="https://fonts.googleapis.com" rel="preconnect" />
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+<link href="/favicon.ico" rel="icon" sizes="48x48" />
+<link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+<link href="/apple-touch-icon.png" rel="apple-touch-icon" />
+<meta content="#0f0f0f" name="theme-color" />
+<meta content="article" property="og:type" />
+<meta content="velz" property="og:site_name" />
+<meta content="es_ES" property="og:locale" />
+<meta content="https://velz.io/guias/test-incrementalidad-geo-lift-holdout" property="og:url" />
+<meta content="Test de incrementalidad geo-lift: cómo diseñarlo | velz" property="og:title" />
+<meta content="Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen." property="og:description" />
+<meta content="https://velz.io/og/velz-symbol-1200x630.png" property="og:image" />
+<meta content="1200" property="og:image:width" />
+<meta content="630" property="og:image:height" />
+<meta content="Símbolo de velz" property="og:image:alt" />
+<meta content="summary_large_image" name="twitter:card" />
+<meta content="Test de incrementalidad geo-lift: cómo diseñarlo | velz" name="twitter:title" />
+<meta content="Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen." name="twitter:description" />
+<meta content="https://velz.io/og/velz-symbol-1200x630.png" name="twitter:image" />
+<meta content="2026-11-08" property="article:published_time" />
+<meta content="2026-11-08" property="article:modified_time" />
+<meta content="velz" property="article:author" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://velz.io/guias/test-incrementalidad-geo-lift-holdout#article",
+      "headline": "Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar",
+      "name": "Test de incrementalidad geo-lift: cómo diseñarlo",
+      "description": "Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen.",
+      "inLanguage": "es",
+      "datePublished": "2026-11-08",
+      "dateModified": "2026-11-08",
+      "author": {
+        "@type": "Organization",
+        "@id": "https://velz.io/#organization",
+        "name": "velz",
+        "url": "https://velz.io/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://velz.io/#organization",
+        "name": "velz",
+        "url": "https://velz.io/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://velz.io/icon-512.png",
+          "width": 512,
+          "height": 512
+        }
+      },
+      "image": "https://velz.io/og/velz-symbol-1200x630.png",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://velz.io/guias/test-incrementalidad-geo-lift-holdout"
+      },
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://velz.io/#website",
+        "name": "velz",
+        "url": "https://velz.io/"
+      },
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Marketing Mix Modeling"
+        },
+        {
+          "@type": "Thing",
+          "name": "ROI de marketing"
+        },
+        {
+          "@type": "Thing",
+          "name": "Finanzas y marketing"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "velz",
+          "item": "https://velz.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guías",
+          "item": "https://velz.io/guias"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar",
+          "item": "https://velz.io/guias/test-incrementalidad-geo-lift-holdout"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<link href="/guias/guides.css" rel="stylesheet" />
+<script src="/src/analytics.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="guide-header">
+<nav aria-label="Navegación principal" class="guide-nav">
+<a aria-label="velz, inicio" class="guide-logo" href="/"><img alt="" height="32" src="/assets/velz-symbol-white.svg" width="32"/>velz</a>
+<a href="/#cta">Hablemos</a>
+</nav>
+<div class="guide-hero">
+<a class="guide-eyebrow" href="/guias">Guías / Marketing Mix Modeling</a>
+<h1>Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar</h1>
+<p class="guide-byline">velz · <time datetime="2026-11-08">8 de noviembre de 2026</time></p>
+</div>
+</header>
+<main class="guide-prose" id="contenido"><article><p>Un test de incrementalidad geo-lift cambia la inversión publicitaria en unas zonas y conserva una condición de referencia en otras. Estima qué resultado adicional produjo esa intervención, frente a lo que habría ocurrido sin ella. Merece la pena cuando puedes separar geografías, medir negocio por zona y detectar un efecto que cambiaría una decisión.</p>
+<p>El objetivo no es conseguir un porcentaje positivo. Es acordar de antemano qué evidencia permitiría ampliar, mantener o reducir inversión. Un resultado puede ser estadísticamente detectable y económicamente insuficiente; también puede ser demasiado impreciso para decidir.</p>
+<p>Esta guía usa <strong>geo-lift</strong> para experimentos geográficos, no «GEO» como optimización para buscadores generativos.</p>
+<h2>Cuándo un geo-lift es la pregunta correcta</h2>
+<p>Úsalo para una duda concreta: «¿Qué aporta mantener esta campaña frente a retirarla?» o «¿Qué cambia si aumentamos el gasto en determinadas regiones?». No son la misma pregunta: un aumento parcial mide ese tramo, no necesariamente el efecto del canal completo frente a cero inversión.</p>
+<p>Necesitas un resultado consistente por territorio, una intervención ejecutable y controles razonables. No hace falta vender exclusivamente online: pueden estudiarse contratos, altas o ventas presenciales si la medición y los plazos lo permiten.</p>
+<p>En B2B, pocos contratos y ciclos largos dificultan detectar cambios. Las oportunidades cualificadas pueden servir como resultado intermedio, pero no se convierten automáticamente en ingresos incrementales. Define también cuándo madurará la cohorte comercial.</p>
+<p>Si no puedes localizar las ventas de forma consistente, no las asignes arbitrariamente para completar el panel. Si la campaña no admite separación territorial o coincide con un cambio de precios exclusivo de las zonas tratadas, quizá debas posponer o rediseñar el estudio. Para situar este método sin repetir la comparación completa, consulta <a href="/guias/atribucion-mmm-experimentos">atribución, MMM y experimentos</a>.</p>
+<h2>Paso 1. Firma la pregunta y la regla antes de mirar resultados</h2>
+<p>El pre-registro es un protocolo fechado y versionado antes de intervenir. Para coordinar equipos puede empezar como un documento interno; no equivale necesariamente a registrarlo públicamente. Esta plantilla es una recomendación operativa, no una prestación contratada de velz.</p>
+<div aria-label="Tabla de comparación" class="guide-table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Bloque del protocolo</th>
+<th>Qué dejar escrito antes del lanzamiento</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pregunta e intervención</td>
+<td>Canal y campañas; zonas; condición de tratamiento y de control; gasto previsto en cada una. «Aumentar frente a mantener» no equivale a «activar frente a apagar».</td>
+</tr>
+<tr>
+<td>Resultado y datos</td>
+<td>Métrica primaria, unidad de recuento, fuente, criterio geográfico y fecha de asignación. Distinguir contratos de leads. Responsable de comprobar faltantes y cambios de definición.</td>
+</tr>
+<tr>
+<td>Diseño y calendario</td>
+<td>Asignación de zonas, estimador, pre-periodo, inicio y final, ventana de maduración, análisis de potencia, significación y exclusiones justificadas.</td>
+</tr>
+<tr>
+<td>Regla de decisión</td>
+<td>Umbral económico, incertidumbre aceptable y acción si el resultado es favorable, desfavorable o inconcluyente. Condiciones de suspensión por daño o fallo operativo.</td>
+</tr>
+<tr>
+<td>Responsables y firma</td>
+<td>Marketing valida la ejecución; analítica el diseño y análisis; finanzas la traducción a contribución. Identificar quién aprueba cambios y conserva versiones.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Una regla posible sería ampliar solo si la evidencia económica, incluida su incertidumbre, supera el umbral pactado y la ejecución fue válida. Hay que concretar qué intervalo o criterio se usará: «si sale bien» no es una regla. No existe un porcentaje universal que sustituya la tolerancia al riesgo de la empresa.</p>
+<h2>Paso 2. Elige zonas comparables y evita contaminación</h2>
+<p>Google describe experimentos con regiones no solapadas asignadas aleatoriamente a tratamiento o control. Su explicación destaca que la aleatorización protege frente a sesgos ocultos entre grupos. [1][2]</p>
+<p>Cuando sea viable, agrupa zonas comparables por comportamiento previo y aleatoriza dentro de esos grupos. No elijas para tratamiento las regiones que ya esperabas que crecieran más.</p>
+<p>Otro enfoque construye un <strong>control sintético</strong>: una combinación ponderada de zonas no intervenidas que reproduce el histórico de las tratadas. GeoLift documenta este procedimiento y su selección de mercados. No es lo mismo que una asignación aleatoria ni elimina por sí solo diferencias no observadas. [3]</p>
+<h3>Unidades en España y LATAM</h3>
+<ul>
+<li><strong>Provincias, comunidades autónomas, estados o departamentos:</strong> pueden encajar con operaciones comerciales, pero no siempre con la segmentación disponible. Comprueba qué límites reconoce cada plataforma.</li>
+<li><strong>Ciudades y áreas metropolitanas:</strong> permiten intervenciones locales; desplazamientos y exposición publicitaria fuera del municipio pueden contaminar el contraste.</li>
+<li><strong>Países:</strong> no son controles intercambiables. Moneda, calendario, competencia y operación comercial pueden evolucionar de forma distinta.</li>
+</ul>
+<p>No basta con igualar ventas medias. Revisa tendencia, estacionalidad, mezcla de productos y capacidad comercial. Acuerda cómo tratar medios nacionales no segmentables: si no cambian entre grupos, forman parte del contexto del test; si cambian de manera desigual, pueden comprometer la interpretación.</p>
+<h2>Paso 3. Comprueba el pre-periodo antes de intervenir</h2>
+<p>Prepara un panel con fecha, zona y resultado; añade gasto y variables justificadas para el diseño. GeoLift exige como mínimo cuándo, dónde y cuánto KPI se observó, y advierte sobre datos faltantes. [3]</p>
+<p>Representa el resultado tratado junto al control o contrafactual estimado. Busca divergencias persistentes, festivos locales, cierres y cambios de registro. Dos series correlacionadas pueden seguir teniendo una diferencia creciente que distorsione el análisis.</p>
+<p>Además de revisar el ajuste, reserva tramos históricos para ensayar el procedimiento como si el test hubiera empezado antes. Comprueba si aparecen efectos artificiales cuando no hubo intervención y si las conclusiones dependen demasiado de una zona. La documentación de GeoLift incluye simulaciones y diagnósticos de ajuste previo. [3]</p>
+<p>Un buen encaje histórico es una comprobación necesaria, no una prueba de que el control seguirá siendo válido. Congela el diseño antes del lanzamiento; no reconstruyas los controles después para obtener el resultado deseado.</p>
+<h2>Paso 4. Duración y potencia: ¿podrás detectar lo que importa?</h2>
+<p><strong>No hay una duración universal para un test geo-lift.</strong> Depende del efecto relevante, variación histórica, zonas disponibles, contraste de gasto y tiempo de respuesta. La documentación de GeoLift propone comparar duraciones mediante simulaciones y considerar el ciclo de compra, no trasladar los días de su ejemplo a cualquier negocio. [3]</p>
+<p>La potencia es la probabilidad de detectar un efecto de un tamaño concreto cuando realmente existe, bajo el diseño y sus supuestos. El efecto mínimo detectable expresa qué tamaño puede distinguirse con la potencia elegida. No es una previsión del resultado.</p>
+<p>Pide al equipo analítico que simule efectos plausibles sobre el histórico y compare configuraciones. El diseño debe distinguir un efecto relevante para finanzas, no únicamente uno tan grande que difícilmente ocurriría.</p>
+<h3>Por qué el ruido cambia el calendario</h3>
+<p><strong>Ilustración matemática sintética; no cálculo de potencia de un geo-experimento real.</strong> Supongamos una única serie de diferencias semanales relativas, independientes, normales y con desviación conocida. Para detectar un efecto de 5 %, con significación bilateral del 5 % y potencia del 80 %, la aproximación es <code>n = redondear hacia arriba[((1,96 + 0,842) × desviación / 0,05)²]</code>.</p>
+<div aria-label="Tabla de comparación" class="guide-table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Desviación semanal supuesta</th>
+<th>Efecto que se busca detectar</th>
+<th>Semanas en esa aproximación idealizada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4 puntos porcentuales</td>
+<td>5 %</td>
+<td>6</td>
+</tr>
+<tr>
+<td>8 puntos porcentuales</td>
+<td>5 %</td>
+<td>21</td>
+</tr>
+</tbody>
+</table></div>
+<p>Las cifras ilustran por qué más ruido exige más información. <strong>No son plazos recomendados</strong>: ignoran autocorrelación, estimación del control y estructura geográfica. La simulación del diseño real debe sustituirlas. En B2B, además, alargar la intervención y esperar a que maduren contratos son decisiones distintas; ambas deben figurar en el protocolo.</p>
+<h2>Paso 5. Del lift al iROAS y al margen</h2>
+<p>Para una intervención de aumento de inversión, compara el resultado observado con el contrafactual estimado para las mismas zonas y ventana:</p>
+<ul>
+<li><strong>Ingresos incrementales:</strong> ingresos observados menos ingresos contrafactuales.</li>
+<li><strong>Lift relativo:</strong> ingresos incrementales divididos entre ingresos contrafactuales.</li>
+<li><strong>iROAS de la intervención:</strong> ingresos incrementales divididos entre el gasto adicional frente a la condición de control.</li>
+<li><strong>Contribución incremental después de medios:</strong> ingresos incrementales por margen de contribución antes de publicidad, menos gasto adicional en medios y otros costes incrementales no incluidos en ese margen.</li>
+</ul>
+<p><strong>Ejemplo enteramente sintético: no es cliente, resultado ni previsión de velz.</strong> Supone un aumento frente a mantener inversión y un margen homogéneo aplicable a los ingresos adicionales.</p>
+<div aria-label="Tabla de comparación" class="guide-table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Supuesto o cálculo didáctico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ingresos observados / contrafactuales</td>
+<td>120.000 € / 100.000 €</td>
+</tr>
+<tr>
+<td>Ingresos incrementales</td>
+<td>20.000 €</td>
+</tr>
+<tr>
+<td>Lift relativo</td>
+<td>20 %</td>
+</tr>
+<tr>
+<td>Gasto adicional en medios</td>
+<td>8.000 €</td>
+</tr>
+<tr>
+<td>iROAS de ese aumento</td>
+<td>2,5</td>
+</tr>
+<tr>
+<td>Margen antes de publicidad supuesto</td>
+<td>50 %</td>
+</tr>
+<tr>
+<td>Contribución antes / después de medios adicionales</td>
+<td>10.000 € / 2.000 €</td>
+</tr>
+</tbody>
+</table></div>
+<p>Con estos supuestos, el equilibrio antes de otros costes exige un iROAS de 2. El valor central de 2,5 lo supera, pero no basta para aprobar: falta conocer su incertidumbre y comprobar que el margen sea pertinente. La tabla es contabilidad ilustrativa, no una inferencia estadística ejecutada.</p>
+<p>En un holdout de retirada cambia la orientación del contraste: explicita qué condición tiene más gasto y conserva signos coherentes. No dividas cualquier diferencia de ventas entre todo el presupuesto nacional.</p>
+<p>Si mides oportunidades, presenta primero coste por oportunidad incremental. Monetizarlas requiere supuestos explícitos de cierre y margen, o esperar resultados maduros. Amplía esta lectura en <a href="/guias/interpretar-resultados-mmm">cómo interpretar resultados de un MMM antes de aprobar inversión</a>.</p>
+<h2>Errores que pueden invalidar la lectura</h2>
+<ol>
+<li><strong>Contaminación:</strong> el grupo de control recibe la intervención o sus efectos por desplazamientos, cobertura nacional o ejecución incorrecta.</li>
+<li><strong>Cambios simultáneos:</strong> precios, promociones, stock o capacidad de ventas evolucionan de forma distinta entre grupos.</li>
+<li><strong>Paradas oportunistas:</strong> cerrar al aparecer significación, o alargar hasta conseguirla, sin un diseño secuencial previsto. Vigilar ejecución a diario no exige reinterpretar el efecto a diario.</li>
+<li><strong>Selección posterior:</strong> cambiar métrica primaria, zonas o ventana después de ver qué combinación favorece la campaña.</li>
+<li><strong>Confundir imprecisión con ausencia:</strong> «no significativo» no demuestra efecto cero. Si el intervalo admite pérdidas y ganancias relevantes, la conclusión es inconcluyente.</li>
+</ol>
+<p>Registra incidencias y su impacto. Un fallo grave puede dejar el test sin respuesta válida; no se arregla únicamente añadiendo una nota al gráfico.</p>
+<h2>Qué hacer con el resultado: decidir y calibrar</h2>
+<p>Aplica la regla firmada y entrega efecto, incertidumbre, ejecución y lectura económica juntos. Un resultado favorable puede apoyar un cambio limitado dentro del contexto estudiado, no cualquier escalado. Si es inconcluyente, revisa qué faltó antes de repetir: más duración no soluciona necesariamente un control contaminado.</p>
+<p>El test también puede informar un MMM. Meridian explica cómo usar evidencia experimental para calibrar distribuciones previas, pero advierte de diferencias de periodo, población, granularidad y contrafactual. Un experimento de gasto marginal no mide necesariamente el efecto frente a gasto cero. [4] Conserva esa incertidumbre; si el experimento se usa para calibrar, la coincidencia posterior no es una validación independiente.</p>
+<p>Repite cuando cambie una decisión relevante o el contexto haga dudosa la transferencia, no por una cadencia universal.</p>
+<h3>Un siguiente paso sin comprar una promesa</h3>
+<p>Velz presenta <a href="https://velz.io/#servicios">MMM y Momentum</a> como servicios distintos. Esta guía no acredita que utilice GeoLift ni que ofrezca ejecutar un geo-experimento específico. Si necesitas sostener una decisión de inversión, <a href="https://velz.io/#cta">describe el problema en el contacto de velz</a> para contrastar encaje y alcance. No envíes credenciales ni datos personales de clientes.</p>
+<h2>Fuentes y alcance</h2>
+<p>Consultadas el <strong>8 de noviembre de 2026</strong>. Las fuentes metodológicas no prueban herramientas ni prestaciones internas de velz.</p>
+<ol>
+<li>Google Research, Vaver y Koehler (2011), <a href="https://research.google/pubs/measuring-ad-effectiveness-using-geo-experiments/">Measuring Ad Effectiveness Using Geo Experiments</a>. Ficha y resumen original leídos; no se ha verificado el PDF completo.</li>
+<li>Google Research, Van Alstine y Vaver, <a href="https://googleresearch.blogspot.com/2011/12/measuring-ad-effectiveness-using-geo.html">explicación original del diseño geográfico aleatorizado</a>. Asignación, variación de gasto y sesgos.</li>
+<li>Meta, <a href="https://facebookincubator.github.io/GeoLift/docs/GettingStarted/Walkthrough/">GeoLift Walkthrough</a>. Documentación completa leída: datos, selección de mercados, simulaciones de potencia, ajuste previo e inferencia. Sus ejemplos también son simulados; no se presentan como casos propios.</li>
+<li>Google Meridian, <a href="https://developers.google.com/meridian/docs/advanced-modeling/roi-priors-and-calibration">Calibrate treatment priors</a>. Calibración y límites de transferencia entre experimentos y MMM.</li>
+<li><a href="https://velz.io/">Velz</a>, oferta renderizada y destinos de contacto comprobados; <a href="/guias">índice de guías</a> y las dos guías históricas enlazadas, leídos para evitar duplicación.</li>
+</ol></article>
+<nav aria-labelledby="mas-guias" class="guide-related">
+<h2 id="mas-guias">Más guías</h2>
+<ul>
+<li><a href="/guias/datos-marketing-mix-modeling">¿Está tu empresa preparada para un Marketing Mix Modeling?</a></li>
+<li><a href="/guias/atribucion-mmm-experimentos">Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto</a></li>
+</ul>
+</nav>
+</main>
+<footer class="guide-footer"><a href="/guias">Todas las guías</a><a href="/">velz</a><a data-cookie-settings="" href="/privacidad">Cookies</a></footer>
+</body>
+</html>
+

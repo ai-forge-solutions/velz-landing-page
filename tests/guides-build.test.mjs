@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 const read = path => readFileSync(path, 'utf8');
 const slug = 'datos-marketing-mix-modeling';
-const slugs = [slug, 'atribucion-mmm-experimentos', 'interpretar-resultados-mmm'];
+const slugs = [slug, 'atribucion-mmm-experimentos', 'interpretar-resultados-mmm', 'test-incrementalidad-geo-lift-holdout', 'meridian-vs-robyn-vs-pymc-marketing', 'proveedor-marketing-mix-modeling-precio', 'rentabilidad-promociones-descuentos-ecommerce'];
 const routes = ['guias', ...slugs.map(slug => `guias/${slug}`)];
 
 test('build emits four standalone guide documents, with scoped CSS and only the analytics script', () => {
@@ -12,7 +12,7 @@ test('build emits four standalone guide documents, with scoped CSS and only the 
     const file = `dist/${route}/index.html`;
     assert.ok(existsSync(file), `missing built page ${file}; run npm run build first`);
     const html = read(file);
-    assert.ok(html.includes(`rel="canonical" href="https://velz.io/${route}"`));
+    assert.ok(html.includes(`rel="canonical" href="https://velz.io/${route}"`) || html.includes(`href="https://velz.io/${route}" rel="canonical"`));
     assert.match(html, /<h1>/);
     assert.doesNotMatch(html, /<div id="root"><\/div>/);
     const scripts = (html.match(/<script\b[^>]*>/g) || []).filter(tag => !tag.includes('application/ld+json'));
@@ -53,7 +53,7 @@ test('preview serves all four guide documents and unknown paths never return the
       const response = await fetch(`${base}${route}`);
       assert.equal(response.status, 200);
       const html = await response.text();
-      assert.ok(html.includes(`rel="canonical" href="https://velz.io${route}"`));
+      assert.ok(html.includes(`rel="canonical" href="https://velz.io${route}"`) || html.includes(`href="https://velz.io${route}" rel="canonical"`));
       assert.ok(html.includes('href="/#cta"'));
       assert.equal(new URL('/#cta', `${base}${route}`).pathname, '/');
     }

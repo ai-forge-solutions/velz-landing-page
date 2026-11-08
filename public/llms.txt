@@ -24,3 +24,8 @@ velz está fundada por Miguel Carmona. Contacto: miguel@velz.io. Las guías expl
 - [Índice de guías](https://velz.io/guias)
 - [Aviso legal](https://velz.io/aviso-legal)
 - [Privacidad](https://velz.io/privacidad)
+
+- [Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar](https://velz.io/guias/test-incrementalidad-geo-lift-holdout): Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen.
+- [Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir](https://velz.io/guias/meridian-vs-robyn-vs-pymc-marketing): Compara Meridian, Robyn y PyMC-Marketing por datos, calibración, validación y mantenimiento. Decide qué encaja con tu equipo antes de construir.
+- [Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta](https://velz.io/guias/proveedor-marketing-mix-modeling-precio): Evalúa un proveedor de MMM por coste total, datos, validación y entregables. Preguntas y matriz de aceptación para comparar propuestas antes de firmar.
+- [Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio](https://velz.io/guias/rentabilidad-promociones-descuentos-ecommerce): Calcula cuánto debe crecer el volumen para compensar un descuento y mide la contribución incremental con costes, devoluciones y periodo posterior.

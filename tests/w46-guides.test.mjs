@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const read = p => readFileSync(new URL(`../${p}`, import.meta.url),'utf8');
+const slugs=['test-incrementalidad-geo-lift-holdout','meridian-vs-robyn-vs-pymc-marketing','proveedor-marketing-mix-modeling-precio','rentabilidad-promociones-descuentos-ecommerce'];
+for(const slug of slugs) test(`W46 ${slug}: complete static article and integrated discovery`,()=>{
+ const html=read(`guias/${slug}/index.html`),url=`https://velz.io/guias/${slug}`;
+ assert.match(html, /<html lang="es">/);
+ assert.ok(html.includes(`href="${url}" rel="canonical"`));
+ assert.equal((html.match(/<h1[ >]/g)||[]).length,1);
+ assert.ok(html.match(/<article>[\s\S]*?<\/article>/)[0].split(/\s+/).length>1000);
+ assert.ok(!/Ficha editorial|\/home\/hermes|TODO|\{\{TO_FILL\}\}/.test(html));
+ const graph=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+ const article=graph.find(x=>x['@type']==='Article');
+ assert.equal(article.author.name,'velz');
+ assert.equal(article.author['@type'],'Organization');
+ assert.ok(read('guias/index.html').includes(`/guias/${slug}`));
+ assert.ok(read('vite.config.js').includes(`guias/${slug}/index.html`));
+ assert.ok(read('netlify.toml').includes(`from = "/guias/${slug}"`));
+ assert.ok(read('public/sitemap.xml').includes(`<loc>${url}</loc>`));
+ assert.ok(read('public/llms.txt').includes(`(${url})`));
+});

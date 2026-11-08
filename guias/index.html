@@ -27,78 +27,102 @@
   <meta name="twitter:description" content="Guías prácticas para preparar decisiones de marketing y revisar los datos que necesitas." />
   <meta name="twitter:image" content="https://velz.io/og/velz-symbol-1200x630.png" />
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "CollectionPage",
-        "@id": "https://velz.io/guias#page",
-        "url": "https://velz.io/guias",
-        "name": "Guías de marketing y datos",
-        "description": "Guías prácticas para preparar decisiones de marketing y revisar los datos que necesitas.",
-        "inLanguage": "es",
-        "isPartOf": {
-          "@type": "WebSite",
-          "@id": "https://velz.io/#website",
-          "name": "velz",
-          "url": "https://velz.io/"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "@id": "https://velz.io/#organization",
-          "name": "velz",
-          "url": "https://velz.io/",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://velz.io/icon-512.png",
-            "width": 512,
-            "height": 512
-          }
-        },
-        "mainEntity": {
-          "@type": "ItemList",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "url": "https://velz.io/guias/datos-marketing-mix-modeling",
-              "name": "¿Está tu empresa preparada para un Marketing Mix Modeling?"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "url": "https://velz.io/guias/atribucion-mmm-experimentos",
-              "name": "Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "url": "https://velz.io/guias/interpretar-resultados-mmm",
-              "name": "Cómo interpretar resultados de un MMM antes de aprobar inversión"
-            }
-          ]
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": "https://velz.io/guias#page",
+      "url": "https://velz.io/guias",
+      "name": "Guías de marketing y datos",
+      "description": "Guías prácticas para preparar decisiones de marketing y revisar los datos que necesitas.",
+      "inLanguage": "es",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://velz.io/#website",
+        "name": "velz",
+        "url": "https://velz.io/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://velz.io/#organization",
+        "name": "velz",
+        "url": "https://velz.io/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://velz.io/icon-512.png",
+          "width": 512,
+          "height": 512
         }
       },
-      {
-        "@type": "BreadcrumbList",
+      "mainEntity": {
+        "@type": "ItemList",
         "itemListElement": [
           {
             "@type": "ListItem",
             "position": 1,
-            "name": "velz",
-            "item": "https://velz.io/"
+            "url": "https://velz.io/guias/datos-marketing-mix-modeling",
+            "name": "¿Está tu empresa preparada para un Marketing Mix Modeling?"
           },
           {
             "@type": "ListItem",
             "position": 2,
-            "name": "Guías",
-            "item": "https://velz.io/guias"
+            "url": "https://velz.io/guias/atribucion-mmm-experimentos",
+            "name": "Atribución, MMM y experimentos: qué aporta cada uno al decidir presupuesto"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "url": "https://velz.io/guias/interpretar-resultados-mmm",
+            "name": "Cómo interpretar resultados de un MMM antes de aprobar inversión"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "url": "https://velz.io/guias/test-incrementalidad-geo-lift-holdout",
+            "name": "Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "url": "https://velz.io/guias/meridian-vs-robyn-vs-pymc-marketing",
+            "name": "Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "url": "https://velz.io/guias/proveedor-marketing-mix-modeling-precio",
+            "name": "Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta"
+          },
+          {
+            "@type": "ListItem",
+            "position": 7,
+            "url": "https://velz.io/guias/rentabilidad-promociones-descuentos-ecommerce",
+            "name": "Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio"
           }
         ]
       }
-    ]
-  }
-  </script>
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "velz",
+          "item": "https://velz.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Guías",
+          "item": "https://velz.io/guias"
+        }
+      ]
+    }
+  ]
+}
+</script>
   <link rel="stylesheet" href="/guias/guides.css" />
   <script type="module" src="/src/analytics.js"></script>
 </head>
@@ -135,6 +159,10 @@
     </section>
     <p><a class="guide-cta" href="/#cta">Agenda una llamada con velz</a></p>
 
+<section class="guide-listing"><p class="guide-eyebrow">Medición y decisiones</p><h2><a href="/guias/test-incrementalidad-geo-lift-holdout">Cómo diseñar un test de incrementalidad geo-lift que finanzas pueda aceptar</a></h2><p>Diseña un test de incrementalidad geo-lift o holdout: protocolo con finanzas, zonas de control, potencia, duración y traducción del resultado a margen.</p><a href="/guias/test-incrementalidad-geo-lift-holdout">Leer la guía</a></section>
+<section class="guide-listing"><p class="guide-eyebrow">Medición y decisiones</p><h2><a href="/guias/meridian-vs-robyn-vs-pymc-marketing">Meridian vs Robyn vs PyMC-Marketing: qué librería de MMM elegir</a></h2><p>Compara Meridian, Robyn y PyMC-Marketing por datos, calibración, validación y mantenimiento. Decide qué encaja con tu equipo antes de construir.</p><a href="/guias/meridian-vs-robyn-vs-pymc-marketing">Leer la guía</a></section>
+<section class="guide-listing"><p class="guide-eyebrow">Medición y decisiones</p><h2><a href="/guias/proveedor-marketing-mix-modeling-precio">Cómo elegir proveedor de MMM: criterios, preguntas y cuánto cuesta</a></h2><p>Evalúa un proveedor de MMM por coste total, datos, validación y entregables. Preguntas y matriz de aceptación para comparar propuestas antes de firmar.</p><a href="/guias/proveedor-marketing-mix-modeling-precio">Leer la guía</a></section>
+<section class="guide-listing"><p class="guide-eyebrow">Medición y decisiones</p><h2><a href="/guias/rentabilidad-promociones-descuentos-ecommerce">Cómo medir la rentabilidad de una promoción sin confundir ventas con beneficio</a></h2><p>Calcula cuánto debe crecer el volumen para compensar un descuento y mide la contribución incremental con costes, devoluciones y periodo posterior.</p><a href="/guias/rentabilidad-promociones-descuentos-ecommerce">Leer la guía</a></section>
   </main>
   <footer class="guide-footer"><a href="/guias">Todas las guías</a><a href="/">velz</a><a href="/privacidad" data-cookie-settings>Cookies</a></footer>
 </body>

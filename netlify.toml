@@ -47,6 +47,30 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/guias/test-incrementalidad-geo-lift-holdout"
+  to = "/guias/test-incrementalidad-geo-lift-holdout/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/meridian-vs-robyn-vs-pymc-marketing"
+  to = "/guias/meridian-vs-robyn-vs-pymc-marketing/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/proveedor-marketing-mix-modeling-precio"
+  to = "/guias/proveedor-marketing-mix-modeling-precio/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/guias/rentabilidad-promociones-descuentos-ecommerce"
+  to = "/guias/rentabilidad-promociones-descuentos-ecommerce/index.html"
+  status = 200
+  force = true
+
 # Existing static guide files shadow this rule; unknown guide paths are real 404s.
 [[redirects]]
   from = "/guias/*"
