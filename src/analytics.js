@@ -26,6 +26,80 @@ const isPrerender = isBrowser && navigator.userAgent === "ReactSnap";
 const enabled = Boolean(MEASUREMENT_ID) && isBrowser && !isPrerender;
 
 let gtagLoaded = false;
+let analyticsGranted = false;
+const FUNNEL_SESSION_KEY = "velz_service_funnel_v1";
+const SERVICES = new Map([
+  ["/servicios/marketing-mix-modeling", "mmm"],
+  ["/servicios/momentum", "momentum"],
+]);
+let funnelAttribution = null;
+let serviceViewSent = false;
+let contactStarted = false;
+
+function serviceForPath(pathname) {
+  return SERVICES.get(pathname.replace(/\/$/, ""));
+}
+
+function sourceType(pathname = window.location.pathname) {
+  if (pathname === "/guias" || pathname.startsWith("/guias/")) return "guide";
+  if (serviceForPath(pathname)) return "service";
+  return "landing";
+}
+
+// Rebuild the object rather than spreading stored or URL-supplied data.
+function allowedAttribution(value) {
+  if (!value || !["mmm", "momentum"].includes(value.service) ||
+      !["guide", "service", "landing"].includes(value.source_type)) return null;
+  return { service: value.service, source_type: value.source_type };
+}
+
+function saveAttribution(value) {
+  if (!analyticsGranted) return;
+  funnelAttribution = allowedAttribution(value);
+  try {
+    if (funnelAttribution) window.sessionStorage.setItem(FUNNEL_SESSION_KEY, JSON.stringify(funnelAttribution));
+  } catch {
+    // Memory-only attribution remains available when storage is blocked.
+  }
+}
+
+function startServiceFunnel() {
+  if (!analyticsGranted) return;
+  let stored = null;
+  try {
+    stored = allowedAttribution(JSON.parse(window.sessionStorage.getItem(FUNNEL_SESSION_KEY)));
+  } catch {
+    // Missing, malformed or blocked session storage is harmless.
+  }
+  const pageService = serviceForPath(window.location.pathname);
+  const params = new URLSearchParams(window.location.search);
+  const queryService = window.location.pathname === "/" && params.getAll("servicio").length === 1 &&
+    ["mmm", "momentum"].includes(params.get("servicio")) ? params.get("servicio") : null;
+  let refSource = sourceType();
+  try {
+    const ref = new URL(document.referrer);
+    if (ref.origin === window.location.origin) refSource = sourceType(ref.pathname);
+  } catch { /* No usable internal referrer. */ }
+  const service = pageService || queryService;
+  if (service) {
+    saveAttribution(stored?.service === service ? stored : { service, source_type: refSource });
+  } else {
+    funnelAttribution = stored;
+  }
+  if (pageService && !serviceViewSent) {
+    serviceViewSent = true;
+    track("service_view");
+  }
+}
+
+function onContactStart(event) {
+  if (!analyticsGranted || contactStarted) return;
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target || !["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+      target.closest("form")?.id !== "lead-form") return;
+  contactStarted = true;
+  track("contact_form_start", { form_id: "lead-form" });
+}
 
 function readConsent() {
   try {
@@ -50,17 +124,17 @@ function gtag() {
   window.dataLayer.push(arguments);
 }
 
-// Private diagnostic tokens must never reach GA in page_location or page_referrer.
+// Private diagnostic tokens and arbitrary queries/fragments must never reach GA.
 function sanitizeUrl(url) {
-  const { origin, pathname, search } = url;
+  const { origin, pathname } = url;
   const path = pathname.replace(/^(\/tools\/[^/]+\/)[^/]+\/?$/, "$1[token]");
-  return `${origin}${path}${path === pathname ? search : ""}`;
+  return `${origin}${path}`;
 }
 
 function sanitizedReferrer() {
   try {
     const referrer = new URL(document.referrer);
-    return referrer.origin === window.location.origin ? sanitizeUrl(referrer) : document.referrer;
+    return sanitizeUrl(referrer);
   } catch {
     return undefined;
   }
@@ -70,6 +144,7 @@ function contentGroup(pathname = window.location.pathname) {
   if (pathname === "/") return "landing";
   if (pathname === "/guias" || pathname === "/guias/") return "guides_index";
   if (pathname.startsWith("/guias/")) return "guide";
+  if (serviceForPath(pathname)) return "service";
   if (/^\/tools\/[^/]+\/[^/]+\/?$/.test(pathname)) return "lead_magnet";
   if (pathname.startsWith("/tools/")) return "tool";
   if (pathname === "/aviso-legal" || pathname === "/privacidad") return "legal";
@@ -94,10 +169,12 @@ function detectAiSource() {
 }
 
 function loadGtag() {
+  analyticsGranted = true;
   gtag("consent", "update", { analytics_storage: "granted" });
   if (gtagLoaded) {
     // Re-accepting after a withdrawal on the same page.
     window[`ga-disable-${MEASUREMENT_ID}`] = false;
+    startServiceFunnel();
     return;
   }
   gtagLoaded = true;
@@ -132,6 +209,7 @@ function loadGtag() {
   }
   startWebVitals();
   startGuideReadingDepth();
+  startServiceFunnel();
 }
 
 // Field Core Web Vitals; web-vitals reads buffered entries, so loading it after
@@ -194,10 +272,33 @@ function clearGaCookies() {
   }
 }
 
+function withdrawConsent() {
+  const wasGranted = analyticsGranted;
+  analyticsGranted = false;
+  funnelAttribution = null;
+  contactStarted = false;
+  // Initial rejection does not touch analytics storage or cookies.
+  if (!wasGranted) return;
+  try {
+    window.sessionStorage.removeItem(FUNNEL_SESSION_KEY);
+    window.sessionStorage.removeItem(AI_SESSION_KEY);
+  } catch { /* Best effort; consent still blocks reads and sends. */ }
+  gtag("consent", "update", { analytics_storage: "denied" });
+  window[`ga-disable-${MEASUREMENT_ID}`] = true;
+  clearGaCookies();
+}
+
 /** Sends a GA4 event when analytics consent was granted; otherwise a no-op. */
 export function track(eventName, params = {}) {
-  if (!enabled || !gtagLoaded) return;
-  gtag("event", eventName, { content_group: contentGroup(), ...params });
+  if (!enabled || !gtagLoaded || !analyticsGranted) return;
+  const isFunnelEvent = ["service_view", "service_click", "contact_form_start", "generate_lead"].includes(eventName);
+  const safeParams = { ...params };
+  if (isFunnelEvent) {
+    // These two dimensions come only from validated, consented attribution.
+    delete safeParams.service;
+    delete safeParams.source_type;
+  }
+  gtag("event", eventName, { content_group: contentGroup(), ...safeParams, ...(isFunnelEvent ? funnelAttribution : null) });
 }
 
 const BANNER_ID = "velz-consent";
@@ -245,11 +346,8 @@ function showBanner() {
     closeBanner();
     if (choice === "granted") {
       loadGtag();
-    } else if (gtagLoaded) {
-      // Withdrawal: stop collection now and drop existing GA cookies.
-      gtag("consent", "update", { analytics_storage: "denied" });
-      window[`ga-disable-${MEASUREMENT_ID}`] = true;
-      clearGaCookies();
+    } else {
+      withdrawConsent();
     }
   });
   document.body.appendChild(banner);
@@ -274,7 +372,26 @@ function onDocumentClick(event) {
   const href = link.getAttribute("href");
   const text = link.textContent.trim().replace(/\s+/g, " ").slice(0, 100);
 
-  if (href === "#cta" || href === "/#cta") {
+  let contactService = null;
+  if (analyticsGranted) {
+    try {
+      const destination = new URL(href, window.location.href);
+      if (destination.origin === window.location.origin) {
+        const destinationService = serviceForPath(destination.pathname);
+        const serviceValues = destination.searchParams.getAll("servicio");
+        if (destination.pathname === "/" && destination.hash === "#cta" && serviceValues.length === 1 &&
+            ["mmm", "momentum"].includes(serviceValues[0])) contactService = serviceValues[0];
+        const service = destinationService || contactService;
+        if (service) {
+          const previous = funnelAttribution;
+          saveAttribution(previous?.service === service ? previous : { service, source_type: sourceType() });
+          track("service_click");
+        }
+      }
+    } catch { /* Non-URL links are handled by the existing events below. */ }
+  }
+
+  if (href === "#cta" || href === "/#cta" || contactService) {
     track("cta_click", { cta_text: text, cta_location: linkLocation(link) });
   } else if (href.startsWith("mailto:")) {
     track("contact_email_click", { cta_location: linkLocation(link) });
@@ -293,6 +410,13 @@ function init() {
   });
 
   document.addEventListener("click", onDocumentClick);
+  document.addEventListener("focusin", onContactStart);
+  document.addEventListener("input", onContactStart);
+  window.addEventListener("storage", (event) => {
+    if ((event.key === CONSENT_KEY || event.key === null) && event.newValue !== "granted") {
+      withdrawConsent();
+    }
+  });
 
   const consent = readConsent();
   if (consent === "granted") loadGtag();

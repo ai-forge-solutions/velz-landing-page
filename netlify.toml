@@ -79,13 +79,25 @@
 
 # Known SPA routes render the app; any other path is a real 404 (no soft 404s).
 [[redirects]]
+  from = "/servicios/marketing-mix-modeling"
+  to = "/servicios/marketing-mix-modeling/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/servicios/momentum"
+  to = "/servicios/momentum/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/aviso-legal"
-  to = "/index.html"
+  to = "/aviso-legal.html"
   status = 200
 
 [[redirects]]
   from = "/privacidad"
-  to = "/index.html"
+  to = "/privacidad.html"
   status = 200
 
 [[redirects]]

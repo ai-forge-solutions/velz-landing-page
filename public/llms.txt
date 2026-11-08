@@ -18,10 +18,14 @@ velz está fundada por Miguel Carmona. Contacto: miguel@velz.io. Las guías expl
 
 ## Servicios
 
-La oferta comercial se detalla en la landing de velz, que requiere JavaScript. Las guías enlazadas aportan contexto editorial: no son páginas comerciales ni acreditan servicios adicionales, herramientas concretas o resultados de clientes.
+La oferta comercial se detalla en las dos páginas de servicio enlazadas. Las guías aportan contexto editorial: no son casos de clientes ni acreditan servicios adicionales o herramientas concretas.
 
-- Marketing Mix Modeling (MMM): estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y ayuda a preparar presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios. [Guía de preparación y contexto de MMM](https://velz.io/guias/datos-marketing-mix-modeling).
-- Momentum: distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales. [Guía de contexto sobre métodos de medición y decisiones de presupuesto](https://velz.io/guias/atribucion-mmm-experimentos): lectura editorial para distinguir el trabajo del día a día de las preguntas estratégicas; no es documentación técnica de Momentum.
+- [Marketing Mix Modeling (MMM)](https://velz.io/servicios/marketing-mix-modeling): estima el impacto de los medios offline y online, del branding, de la competencia y del precio sobre las ventas, y ayuda a preparar presupuestos con escenarios. Pensado para empresas con al menos 1 M€ de inversión anual en medios. [Guía de preparación y contexto de MMM](https://velz.io/guias/datos-marketing-mix-modeling).
+- [Momentum](https://velz.io/servicios/momentum): distingue entre las ventas propias y las que traen los canales, optimiza por medio, campaña y anuncio, y se actualiza a diario conectado a los canales. [Guía de contexto sobre métodos de medición y decisiones de presupuesto](https://velz.io/guias/atribucion-mmm-experimentos): lectura editorial para distinguir el trabajo del día a día de las preguntas estratégicas; no es documentación técnica de Momentum.
+
+## Quién está detrás
+
+- [Miguel Carmona, fundador de velz](https://velz.io/#nosotros): sección biográfica existente en la portada, disponible en el HTML inicial. No se presentan casos ni testimonios de clientes.
 
 ## Contacto
 

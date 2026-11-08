@@ -8,6 +8,8 @@ import { readFileSync, existsSync, statSync } from "node:fs";
 function guideDocuments(server, preview = false) {
   const routes = new Set([
     "/guias",
+    "/servicios/marketing-mix-modeling",
+    "/servicios/momentum",
     "/guias/datos-marketing-mix-modeling",
     "/guias/atribucion-mmm-experimentos",
     "/guias/interpretar-resultados-mmm",
@@ -34,7 +36,8 @@ function guideDocuments(server, preview = false) {
       return;
     }
     const route = url.pathname.replace(/\/$/, "");
-    if (routes.has(route)) req.url = `${route}/index.html${url.search}`;
+    if (preview && ["/privacidad", "/aviso-legal"].includes(url.pathname)) req.url = `${url.pathname}.html${url.search}`;
+    else if (routes.has(route)) req.url = `${route}/index.html${url.search}`;
     else if (url.pathname.startsWith("/guias/") && !documents.has(url.pathname)
       && !["/guias/guides.css", "/guias/404.html"].includes(url.pathname)) {
       const root = preview ? path.resolve(server.config.root, server.config.build.outDir) : server.config.root;
@@ -77,6 +80,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
+        mmmService: path.resolve(__dirname, "servicios/marketing-mix-modeling/index.html"),
+        momentumService: path.resolve(__dirname, "servicios/momentum/index.html"),
         notFound: path.resolve(__dirname, "404.html"),
         stockoutTool: path.resolve(__dirname, "tools/stockout-leak-score/index.html"),
         discountTool: path.resolve(__dirname, "tools/discount-depth-analyzer/index.html"),

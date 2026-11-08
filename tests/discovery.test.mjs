@@ -8,17 +8,17 @@ const section = (text, heading) => text.split(`## ${heading}\n`)[1]?.split('\n##
 test('llms distinguishes the factual offer from static editorial service context', () => {
   const llms = read('public/llms.txt');
   const services = section(llms, 'Servicios');
-  assert.doesNotMatch(llms, /https:\/\/velz\.io\/(?:#|servicios|about|contacto|tools)/, 'do not invent routes or use JS anchors as primary documentation');
-  assert.match(services, /landing.*JavaScript/);
-  assert.match(services, /guías.*editorial.*no.*páginas comerciales/);
+  assert.doesNotMatch(llms, /https:\/\/velz\.io\/(?:#(?:servicios|cta)|about|contacto|tools)/, 'do not invent routes or use CSR anchors as primary service documentation');
+  assert.match(services, /oferta comercial.*páginas de servicio/);
+  assert.match(services, /guías.*editorial/);
   assert.match(services, /Marketing Mix Modeling \(MMM\).*1 M€.*inversión anual en medios/);
   assert.match(services, /Momentum.*medio, campaña y anuncio.*diario.*canales/);
   const links = [...services.matchAll(/\[([^\]]+)\]\((https:\/\/velz\.io[^)]+)\)/g)];
   assert.ok(links.length >= 2, 'both services need relevant editorial reading');
   for (const [, label, url] of links) {
-    assert.match(label, /[Gg]uía|[Cc]ontexto|[Ll]ectura/, 'guide links must not impersonate service pages');
-    assert.match(url, /^https:\/\/velz\.io\/guias\//);
-    assert.match(read(`${new URL(url).pathname.slice(1)}/index.html`), /<h1>/);
+    if (url.includes('/guias/')) assert.match(label, /[Gg]uía|[Cc]ontexto|[Ll]ectura/, 'guide links must not impersonate service pages');
+    else assert.match(url, /^https:\/\/velz\.io\/servicios\/(marketing-mix-modeling|momentum)$/);
+    assert.match(read(`${new URL(url).pathname.slice(1)}/index.html`), /<h1\b/);
   }
   assert.ok(services.includes('(https://velz.io/guias/datos-marketing-mix-modeling)'), 'MMM readiness and service context');
   assert.ok(services.includes('(https://velz.io/guias/atribucion-mmm-experimentos)'), 'daily optimization versus strategic measurement context');
