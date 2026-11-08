@@ -1,0 +1,266 @@
+{
+  "baselineRevision": "6e44950adb1b83d19e0a28d58fd47a8b8b47e2e4",
+  "baseBranch": "develop",
+  "pullRequest": 28,
+  "scope": "Local verification; public preview evidence is attached to the PR after push",
+  "hostingBuild": {
+    "command": "VITE_FORMSPREE_FORM_ID=local-smoke-only NETLIFY=true npm run build",
+    "exitCode": 0,
+    "reactSnap": "skipped per existing Netlify configuration",
+    "remoteEnvironmentChanged": false
+  },
+  "tests": {
+    "baseline": {
+      "passed": 37,
+      "failed": 0
+    },
+    "candidate": {
+      "passed": 105,
+      "failed": 0
+    },
+    "command": "node --test tests/*.test.mjs"
+  },
+  "browser": {
+    "base": "http://127.0.0.1:4190",
+    "label": "local",
+    "viewportWidths": [
+      390,
+      1440
+    ],
+    "rows": [
+      {
+        "width": 390,
+        "alias": "/tools/stockout-leak-score/index.html",
+        "toolHomeRendered": true,
+        "noTokenApiCall": true
+      },
+      {
+        "width": 390,
+        "slug": "stockout-leak-score",
+        "title": "Stockouts en el catálogo Shopify | velz",
+        "canonical": "https://velz.io/tools/stockout-leak-score",
+        "robots": "noindex, follow",
+        "overflow": false,
+        "h1": "Dónde tu catálogo visible está filtrando demanda por falta de disponibilidad."
+      },
+      {
+        "width": 390,
+        "alias": "/tools/discount-depth-analyzer/index.html",
+        "toolHomeRendered": true,
+        "noTokenApiCall": true
+      },
+      {
+        "width": 390,
+        "slug": "discount-depth-analyzer",
+        "title": "Descuentos en el catálogo Shopify | velz",
+        "canonical": "https://velz.io/tools/discount-depth-analyzer",
+        "robots": "noindex, follow",
+        "overflow": false,
+        "h1": "Cuánto stock rebajado sigue visible en tu catálogo."
+      },
+      {
+        "width": 390,
+        "ctaVisible": true,
+        "noPageErrors": true
+      },
+      {
+        "width": 1440,
+        "alias": "/tools/stockout-leak-score/index.html",
+        "toolHomeRendered": true,
+        "noTokenApiCall": true
+      },
+      {
+        "width": 1440,
+        "slug": "stockout-leak-score",
+        "title": "Stockouts en el catálogo Shopify | velz",
+        "canonical": "https://velz.io/tools/stockout-leak-score",
+        "robots": "noindex, follow",
+        "overflow": false,
+        "h1": "Dónde tu catálogo visible está filtrando demanda por falta de disponibilidad."
+      },
+      {
+        "width": 1440,
+        "alias": "/tools/discount-depth-analyzer/index.html",
+        "toolHomeRendered": true,
+        "noTokenApiCall": true
+      },
+      {
+        "width": 1440,
+        "slug": "discount-depth-analyzer",
+        "title": "Descuentos en el catálogo Shopify | velz",
+        "canonical": "https://velz.io/tools/discount-depth-analyzer",
+        "robots": "noindex, follow",
+        "overflow": false,
+        "h1": "Cuánto stock rebajado sigue visible en tu catálogo."
+      },
+      {
+        "width": 1440,
+        "ctaVisible": true,
+        "noPageErrors": true
+      }
+    ],
+    "mockedSubmits": 1,
+    "realFormSubmissions": 0
+  },
+  "schemaSourceBuildParity": 7,
+  "originalReportSha256": "fa4978444a64932133e78e599fe1671b91c375ccd4dae6c810c2c3f68bfbe3a1",
+  "performance": {
+    "method": "5 interleaved before/after pairs. Identical fake form ID, HTTP server, browser, viewport, throttling. No real forms or analytics enabled. Not Lighthouse or field CWV.",
+    "medians": {
+      "before": {
+        "fcp": 3072,
+        "lcp": 3160,
+        "cls": 0.008909796767795837,
+        "resourceBytes": 504192
+      },
+      "after": {
+        "fcp": 3048,
+        "lcp": 3144,
+        "cls": 0.008909796767795837,
+        "resourceBytes": 504685
+      }
+    },
+    "raw": {
+      "mode": "paired",
+      "revision": "uncommitted-quickwins",
+      "browser": "Chrome/158.0.8127.18",
+      "viewport": "390x844 DPR1",
+      "cpuSlowdown": 4,
+      "latencyMs": 150,
+      "downloadMbps": 1.6,
+      "cache": "disabled per page",
+      "runs": [
+        {
+          "mode": "before",
+          "fcp": 3100,
+          "lcp": 3160,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504798,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "after",
+          "fcp": 3032,
+          "lcp": 3484,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 505291,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "before",
+          "fcp": 3072,
+          "lcp": 3492,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504192,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "after",
+          "fcp": 3080,
+          "lcp": 3144,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504685,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "before",
+          "fcp": 3100,
+          "lcp": 3168,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504192,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "after",
+          "fcp": 3048,
+          "lcp": 3116,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504685,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "before",
+          "fcp": 3072,
+          "lcp": 3136,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504192,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "after",
+          "fcp": 3032,
+          "lcp": 3100,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504685,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "before",
+          "fcp": 3040,
+          "lcp": 3092,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504192,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        },
+        {
+          "mode": "after",
+          "fcp": 3052,
+          "lcp": 3488,
+          "cls": 0.008909796767795837,
+          "resourceBytes": 504685,
+          "h1": "Convierte tus datos en respuestas claras y prácticas para escalar tu negocio con confianza",
+          "overflow": false
+        }
+      ]
+    },
+    "interpretation": "Differences are small, no causal speed improvement claimed. LCP remains above 2.5s in this throttled local lab scenario. Initial invalid no-form-key run excluded.",
+    "homepageTextAndFormParity": true
+  },
+  "sourceFilesSha256": {
+    "404.html": "0c044d9b11b5bcac458a95ae8603e19774176094cafa630d0a6d40669710b20f",
+    "diagnostico.html": "19d7a29612c4b921ce3e4b220a8d07b9360083c901b89f4568b99d78c9d0c3bb",
+    "docs/seo/2026-W46/QUICK-WINS.md": "e1cc7d44fbfbda75f461b3f743ea3759262756388b1ca389377982f374fcf937",
+    "guias/atribucion-mmm-experimentos/index.html": "00a5b40c1a3f60321db551aadc2a527f7776e0c1e939e18708e195a3043b1c53",
+    "guias/datos-marketing-mix-modeling/index.html": "a499bbc6d534f7663b7606d9feb15b144c61c5bf37607327fdb50bd295362c2b",
+    "guias/interpretar-resultados-mmm/index.html": "86ce218f441a92557de7e36f03b614b869aef6bc2f530f666bedd2f6136875da",
+    "guias/meridian-vs-robyn-vs-pymc-marketing/index.html": "a7258a0bb074bdf936b349332f31f4e02426148e7b06d2e9764ae0d069cec1a7",
+    "guias/proveedor-marketing-mix-modeling-precio/index.html": "7c5faeab9eed61dd544a3dfa72dcd0be1115985b0e896fc61d007265f6c4a63a",
+    "guias/rentabilidad-promociones-descuentos-ecommerce/index.html": "937ec718de2e5e82af09191e167554cbd55382a7cb3735920abde359439b2db6",
+    "guias/test-incrementalidad-geo-lift-holdout/index.html": "eee3344b288fafacd88a3c76061514426bb407f8d8e4e04ef5ec4c79cbe893ec",
+    "netlify.toml": "b5d24a131863391bf66e14ce0ff474b1465d87c2b64c55e554c6c3f993d3df4b",
+    "netlify/functions/lead-magnets.js": "da2df2ffc1ad111f140a1e426ce786cfb6661cedf8ddcd1fc1d91d352300d9e3",
+    "public/llms.txt": "dc0bed2b405a5ff1a31ef3b5e076723721ed9345f1d70a80b6ca9e5eeded4876",
+    "public/sitemap.xml": "0bf7117072b36c3ae1a2837fcc98a3d58ea9bb9d8add022aec8bbe587935e873",
+    "src/App.jsx": "660a8f878cbd3417e5f6731c5bda77b0c9d4a567684c08a8691d856594ad9468",
+    "src/tool-metadata.js": "e42ebc220f0eb6290d5dc7ab7404e8a08e7b0bd143aee99a36c1a5f738da0a47",
+    "tests/api-indexing.test.mjs": "9bfc89eccf75a39fd7f3dcb64b3b0ebcb212f07247ca9c39bac0557b756c581c",
+    "tests/contact-fragment.test.mjs": "b5e11bf5bb0dbf65f18be6da1f28a8577d7f5eb9c296337827e2dbf8ed84e94b",
+    "tests/discovery.test.mjs": "baf139922d000daaa2d62a575f5f57ad8d00b27cf08e3a77cf3438e7c7986a63",
+    "tests/guide-schema.test.mjs": "3e30a820e438a3a59c460d0071df2ad960ebae10abc611578e712b36d856220e",
+    "tests/guides-build.test.mjs": "e843a77e6d81713100f28ee140641de0523ec72bdb8f641153a3ba6e925344e5",
+    "tests/guides.test.mjs": "10f9994756e99562a2bd76094a2c05958d78d1c44f8e0adb30fb0bcdab340a00",
+    "tests/quickwins.test.mjs": "aadd954d24035ca4ba8af9771852398a1b827367adf424d1938c85ea941f4844",
+    "tests/seo.test.mjs": "7d9e829f42f1180665b545077ca61014997ddf3ee1739ffdb40813e81b8589e9",
+    "tests/tool-document-alias.test.mjs": "eee41d791815a91028112d1eae2e58c641fcd8c161d287935ccf0780df9aec7d",
+    "tests/w46-guides.test.mjs": "a7ecaf2552041467dbcfe243f2c5cde48ead355e4963f9813b0a7a697560655a",
+    "tools/discount-depth-analyzer/index.html": "8da27f3fb76afbc3275936837042527a3398817c0dbf5fdda20dad455a4df65d",
+    "tools/stockout-leak-score/index.html": "dcd9269a45d0267d333462347b88bcc6cfd5c5c62d1c028c3e83904a5e523bd6",
+    "vite.config.js": "888e9b4a7b0f87e92d098ebf3d94789a77a87ba075cfd914302f23999fdd6fd7"
+  },
+  "independentReview": {
+    "passed": true,
+    "productAndTestHashesVerified": 28,
+    "securityConcerns": [],
+    "logicErrors": [],
+    "documentationSuggestion": "Addressed: clarified Article -> BlogPosting; authors/dates/entities already existed."
+  }
+}

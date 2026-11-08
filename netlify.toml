@@ -89,14 +89,62 @@
   status = 200
 
 [[redirects]]
-  from = "/tools/*"
-  to = "/index.html"
+  from = "/tools/stockout-leak-score"
+  to = "/tools/stockout-leak-score/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/discount-depth-analyzer"
+  to = "/tools/discount-depth-analyzer/index.html"
+  status = 200
+  force = true
+
+# Token routes share a generic noindex document, never the homepage metadata.
+[[redirects]]
+  from = "/tools/stockout-leak-score/:token"
+  to = "/diagnostico.html"
   status = 200
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/tools/discount-depth-analyzer/:token"
+  to = "/diagnostico.html"
+  status = 200
+
+[[redirects]]
+  from = "/tools/*"
+  to = "/404.html"
   status = 404
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+# Low-risk protections. Blocking CSP is deliberately deferred until all external
+# form/analytics/preview integrations have a validated allowlist.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/tools/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, follow"
+
+[[headers]]
+  for = "/tools/*/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/diagnostico.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/api/*"

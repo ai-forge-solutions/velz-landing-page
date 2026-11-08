@@ -11,7 +11,7 @@ for(const slug of slugs) test(`W46 ${slug}: complete static article and integrat
  assert.ok(html.match(/<article>[\s\S]*?<\/article>/)[0].split(/\s+/).length>1000);
  assert.ok(!/Ficha editorial|\/home\/hermes|TODO|\{\{TO_FILL\}\}/.test(html));
  const graph=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
- const article=graph.find(x=>x['@type']==='Article');
+ const article=graph.find(x=>x['@type']==='BlogPosting');
  assert.equal(article.author.name,'velz');
  assert.equal(article.author['@type'],'Organization');
  assert.ok(read('guias/index.html').includes(`/guias/${slug}`));

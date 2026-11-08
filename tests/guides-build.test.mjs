@@ -28,9 +28,9 @@ test('build emits four standalone guide documents, with scoped CSS and only the 
   assert.match(article, /href="\/#cta"/);
 });
 
-test('sitemap adds the four public guide URLs and preserves existing entries', () => {
+test('sitemap adds the four public guide URLs and preserves indexable existing entries', () => {
   const sitemap = read('dist/sitemap.xml');
-  for (const path of ['', 'tools/stockout-leak-score', 'tools/discount-depth-analyzer', 'aviso-legal', 'privacidad', ...routes]) {
+  for (const path of ['', 'aviso-legal', 'privacidad', ...routes]) {
     assert.ok(sitemap.includes(`<loc>https://velz.io/${path}</loc>`), `missing sitemap URL ${path}`);
   }
   assert.doesNotMatch(sitemap, /token|guias\/404/);
@@ -40,7 +40,12 @@ test('snapshot route allowlist never crawls tools, tokens or guides into the SPA
   const config = JSON.parse(read('package.json')).reactSnap;
   assert.equal(config.crawl, false, 'react-snap must not discover tokenized/tool routes');
   assert.deepEqual(config.include, ['/'], 'only preserve pre-existing homepage snapshot scope');
-  assert.equal(existsSync('dist/tools'), false);
+  assert.deepEqual(readdirSync('dist/tools').sort(), ['discount-depth-analyzer', 'stockout-leak-score']);
+  for (const tool of ['stockout-leak-score', 'discount-depth-analyzer']) {
+    const toolHtml = read(`dist/tools/${tool}/index.html`);
+    assert.match(toolHtml, /noindex, follow/);
+    assert.doesNotMatch(toolHtml, /Marketing Mix Modeling y medición de medios \| velz/);
+  }
   assert.doesNotMatch(read('dist/index.html'), /Está tu empresa preparada para un Marketing Mix Modeling/);
 });
 

@@ -13,7 +13,7 @@ const assertArticleSchema = (html, slug) => {
   const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   assert.equal(blocks.length, 1, 'one JSON-LD block per guide');
   const graph = JSON.parse(blocks[0][1])['@graph'];
-  const article = graph.find(node => node['@type'] === 'Article');
+  const article = graph.find(node => node['@type'] === 'BlogPosting');
   assert.equal(article.mainEntityOfPage['@id'], `https://velz.io/guias/${slug}`);
   assert.equal(article.author.name, 'Miguel Carmona');
   assert.match(article.datePublished, /^\d{4}-\d{2}-\d{2}$/);
